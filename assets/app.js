@@ -47,7 +47,7 @@
 
   // Business case lab
   const caseLab=document.getElementById('caseLab');
-  if(caseLab){const res=document.getElementById('caseResult');caseLab.querySelectorAll('[data-case]').forEach(b=>b.onclick=()=>{const k=b.dataset.case;res.innerHTML={vote:'<b>多数表决</b>优化的是速度与程序明确。7:3 很快有结果，但“离开原社区意味着什么”可能仍未被共同体真正消化。',consensus:'<b>Consensus</b>优化的是可接受度。大家会继续协商方案，但也可能把目标缩成“每个人都勉强能接受”。',sense:'<b>Sense of the Meeting</b>会把问题从“新址好不好”下沉到“我们的使命、邻里关系与可持续性中，什么方向最忠实？”结果可能是搬、也可能是不搬，甚至是暂缓决定。'}[k];});}
+  if(caseLab){const res=document.getElementById('caseResult');caseLab.querySelectorAll('[data-case]').forEach(b=>b.onclick=()=>{const k=b.dataset.case;res.innerHTML={vote:'<b>多数表决</b>优化的是速度与程序明确。7:3 很快有结果，但“离开原社区意味着什么”可能仍未被共同体真正消化。',consensus:'<b>共识（Consensus）</b>优化的是可接受度。大家会继续协商方案，但也可能把目标缩成“每个人都勉强能接受”。',sense:'<b>聚会的共同辨识（Sense of the Meeting）</b>会把问题从“新址好不好”下沉到“我们的使命、邻里关系与可持续性中，什么方向最忠实？”结果可能是搬、也可能是不搬，甚至是暂缓决定。'}[k];});}
 
   // Clearness question lab
   const qLab=document.getElementById('questionLab');

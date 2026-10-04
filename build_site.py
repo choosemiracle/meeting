@@ -3,12 +3,12 @@ import html, json, re
 
 ROOT = Path(__file__).resolve().parent
 
-SITE_NAME = '共同等候｜Quaker Meeting 研究与实践'
-TAGLINE = '研究贵格会 Meeting 如何通过静默、共同聆听与群体明辨，让尚未被任何个人完全拥有的真实，有机会出现。'
+SITE_NAME = '共同等候｜贵格会聚会研究与实践'
+TAGLINE = '研究贵格会聚会（Meeting）如何通过静默、共同聆听与群体明辨，让尚未被任何个人完全拥有的真实，有机会出现。'
 
 NAV = [
     ('index.html','首页'),
-    ('meeting.html','Meeting'),
+    ('meeting.html','聚会'),
     ('worship.html','静默敬拜'),
     ('practice.html','开始实践'),
     ('business.html','共同明辨'),
@@ -30,6 +30,503 @@ VISUAL_SOURCES = {
     'arch': 'https://commons.wikimedia.org/wiki/File:Arch_Street_Meetinghouse_from_front.jpg',
     'free_interior': 'https://commons.wikimedia.org/wiki/File:Free_Quaker_Meeting_House,_interior_(813d353d-1dd8-b71b-0b26-1682e0a20a30).jpg',
 }
+
+# 中文读者优先：页面中保留英文时，以“中文主称（English）”呈现。
+# 这里统一处理术语、作者、书名与编辑标签，避免不同页面各译各的。
+TEXT_REPLACEMENTS = {
+    'Quaker Meeting Lab': '贵格会聚会研究室（Quaker Meeting Lab）',
+    'Designed for slow reading, careful listening, and lived practice.': '为慢读、谨慎聆听与生活实践而设计。',
+    'Practice & Action': '实践与行动（Practice & Action）',
+    'MEETING FOR LEARNING': '共学会（MEETING FOR LEARNING）',
+    '90-MINUTE DESIGN': '90 分钟设计（90-MINUTE DESIGN）',
+    'METHOD': '研究方法（METHOD）',
+    'Group Mysticism': '群体神秘主义（Group Mysticism）',
+    'Clearness': '澄明（Clearness）',
+    'Brinton': '布林顿（Brinton）',
+    'Arch Street Friends': '拱街贵格会友（Arch Street Friends）',
+    'Authority': '权威（Authority）',
+    'Success': '成功标准（Success）',
+    'Boundary': '边界（Boundary）',
+    'Mindfulness': '正念（Mindfulness）',
+    'Coaching': '教练（Coaching）',
+    'Group Therapy': '团体治疗（Group Therapy）',
+    'Bohm Dialogue': '博姆对话（Bohm Dialogue）',
+    'Meditation group': '冥想小组（Meditation group）',
+    'Clearness ≠ Coaching': '澄心会 ≠ 教练（Clearness ≠ Coaching）',
+    'Inner Teacher / soul / wholeness': '内在导师／灵魂／完整性（Inner Teacher / soul / wholeness）',
+    'wholeness、integrity': '完整性、诚信（wholeness, integrity）',
+    'collective thought process': '集体思维过程（collective thought process）',
+    'That of God in everyone': '每个人里面“属神的那一份”（That of God in everyone）',
+    'From Meeting to Circle of Trust': '从聚会到信任圈（From Meeting to Circle of Trust）',
+    'Waiting upon the Lord': '等候主（Waiting upon the Lord）',
+    'House': '聚会所',
+    'house interior': '聚会所室内',
+    'House interior': '聚会所室内',
+    'PORTRAIT · 1677': '肖像 · 1677（PORTRAIT）',
+    'PORTRAIT · 1695': '肖像 · 1695（PORTRAIT）',
+    'PORTRAIT / MEMORY SKETCH': '肖像／记忆性速写（PORTRAIT / MEMORY SKETCH）',
+    'LATER IMPRESSION': '后世艺术印象（LATER IMPRESSION）',
+    'FIELD PHOTO · 2021': '现场照片 · 2021（FIELD PHOTO）',
+    'NPS DOCUMENTATION': '美国国家公园管理局记录（NPS DOCUMENTATION）',
+    'PLACE · 2005': '地点 · 2005（PLACE）',
+    'PLACE · 2013': '地点 · 2013（PLACE）',
+    'Public domain in U.S.': '在美国属公有领域（Public domain in U.S.）',
+    'Public domain (U.S.)': '美国公有领域（Public domain, U.S.）',
+    'Public domain': '公有领域（Public domain）',
+    'Probably Robert Smith III': '可能为罗伯特·史密斯三世（Probably Robert Smith III）',
+    'Robert Spence engraving': '罗伯特·斯彭斯蚀刻（Robert Spence engraving）',
+    'U.S. National Park Service': '美国国家公园管理局（U.S. National Park Service）',
+    # Core Quaker terms — specific phrases must win before generic words.
+    'Meeting for Worship for Business': '敬拜式议事（Meeting for Worship for Business）',
+    'Meeting for Worship': '静默敬拜（Meeting for Worship）',
+    'Meeting for Learning': '共学会（Meeting for Learning）',
+    'Sense of the Meeting': '聚会的共同辨识（Sense of the Meeting）',
+    'Clearness Committee': '澄心会（Clearness Committee）',
+    'Vocal Ministry': '受感分享（Vocal Ministry）',
+    'Gathered Meeting': '深度聚集的聚会（Gathered Meeting）',
+    'Meeting for Business': '议事会（Meeting for Business）',
+    'Meeting Community': '聚会共同体（Meeting Community）',
+    'Business Meeting': '议事会（Business Meeting）',
+    'Quaker Meeting': '贵格会聚会（Quaker Meeting）',
+    'Meeting House': '聚会所（Meeting House）',
+    'Inner Light': '内在之光（Inner Light）',
+    'Inward Light': '内在之光（Inward Light）',
+    'Third Thing': '第三物（Third Thing）',
+    'Circle of Trust': '信任圈（Circle of Trust）',
+    'Faith and Practice': '信仰与实践（Faith and Practice）',
+    'Advices & Queries': '劝勉与省察问题（Advices & Queries）',
+    'Standing Aside': '保留但不阻挡（Standing Aside）',
+    'Threshing Session': '预备性深谈（Threshing Session）',
+    'Right Ordering': '合宜秩序（Right Ordering）',
+    'Holding in the Light': '在光中守望（Holding in the Light）',
+    'Unprogrammed Worship': '非程序化敬拜（Unprogrammed Worship）',
+    'Programmed Worship': '程序化敬拜（Programmed Worship）',
+    'Quakerism': '贵格会传统（Quakerism）',
+    'group mysticism': '群体神秘主义（group mysticism）',
+    'Group mysticism': '群体神秘主义（Group mysticism）',
+    'corporate discernment': '群体明辨（corporate discernment）',
+    'community testing': '共同体检验（community testing）',
+    'spiritual discernment': '灵性明辨（spiritual discernment）',
+    'divine leading': '神圣引领（divine leading）',
+    'Divine Presence': '神圣临在（Divine Presence）',
+    'expectant waiting': '带着期待的等候（expectant waiting）',
+    'reverent waiting': '敬虔等候（reverent waiting）',
+    'spoken ministry': '口头受感分享（spoken ministry）',
+    'designated Friends': '指定会友（designated Friends）',
+    'routine business': '例行事务（routine business）',
+    'emerging sense': '正在形成的共同辨识（emerging sense）',
+    'draft minute': '决议纪要草案（draft minute）',
+    'open questions': '开放式问题（open questions）',
+    'focal person': '焦点人（focal person）',
+    'inward experience': '内在经验（inward experience）',
+    'inward guidance': '内在引导（inward guidance）',
+    'inward orientation': '内在取向（inward orientation）',
+    'inward attention': '内在注意（inward attention）',
+    'inward sanctuary': '内在圣所（inward sanctuary）',
+    'inward life': '内在生命（inward life）',
+    'outward action': '外在行动（outward action）',
+    'outward witness': '外在见证（outward witness）',
+    'workaday life': '日常生活（workaday life）',
+    'group worship': '群体敬拜（group worship）',
+    'group meditation': '群体冥想（group meditation）',
+    'meditation group': '冥想小组（meditation group）',
+    'teacher role': '教师角色（teacher role）',
+    'group trust': '群体信任（group trust）',
+    'corporate attention': '群体注意（corporate attention）',
+    'Corporate attention': '群体注意（Corporate attention）',
+    'problems to solve': '待解决的问题（problems to solve）',
+    'mysteries to ponder': '值得体会的奥秘（mysteries to ponder）',
+    'programmed / pastoral / unprogrammed': '程序化／牧师制／非程序化（programmed / pastoral / unprogrammed）',
+    'programmed / unprogrammed': '程序化／非程序化（programmed / unprogrammed）',
+    'evangelical / conservative / liberal': '福音派／保守派／自由派（evangelical / conservative / liberal）',
+    'liberal Friends': '自由派会友（liberal Friends）',
+    'Christian language': '基督教语言（Christian language）',
+    'Quaker life': '贵格会生活（Quaker life）',
+    'Quaker DNA': '贵格会传统基因（Quaker DNA）',
+    'Quaker tradition': '贵格会传统（Quaker tradition）',
+    'Quaker discipline': '贵格会实践纪律（Quaker discipline）',
+    'Quaker spirituality': '贵格会灵性传统（Quaker spirituality）',
+    'equality testimony': '平等见证（equality testimony）',
+    'Quaker movement': '贵格会运动（Quaker movement）',
+    'Quaker corporate life': '贵格会共同体生活（Quaker corporate life）',
+    'Quaker business method': '贵格会议事方法（Quaker business method）',
+    'The Source—the Quaker meeting for worship': '《源头——贵格会静默敬拜》（The Source—the Quaker meeting for worship）',
+    'the Quaker business method': '贵格会议事方法（the Quaker business method）',
+    'meeting for business': '议事会（meeting for business）',
+    'gathered meeting': '深度聚集的聚会（gathered meeting）',
+    'Gathered meeting': '深度聚集的聚会（Gathered meeting）',
+    'corporate listening': '群体聆听（corporate listening）',
+    'corporate life': '共同体生活（corporate life）',
+    'corporate guidance': '群体引导（corporate guidance）',
+    'collective silent worship': '集体静默敬拜（collective silent worship）',
+    'search for truth': '追寻真理（search for truth）',
+    'tests of leadings': '引领检验（tests of leadings）',
+    'clearness committees': '澄心会（clearness committees）',
+    'Meetings for Clearness': '澄心会（Meetings for Clearness）',
+    'unprogrammed tradition': '非程序化传统（unprogrammed tradition）',
+    'unprogrammed Meeting': '非程序化聚会（unprogrammed Meeting）',
+    'vocal ministry': '受感分享（vocal ministry）',
+    'Holy Spirit': '圣灵（Holy Spirit）',
+    'God reveals himself directly': '上帝直接启示自身（God reveals himself directly）',
+    'local / monthly': '地方／月会层级（local / monthly）',
+    'conflict transformation': '冲突转化（conflict transformation）',
+    'meditation technique': '冥想技巧（meditation technique）',
+    'right action': '合宜行动（right action）',
+    'rightness': '合宜性（rightness）',
+    'faithfulness': '忠实（faithfulness）',
+    'touchstones': '基石（touchstones）',
+    'inner light': '内在之光（inner light）',
+    'inward source': '内在源泉（inward source）',
+    'sense of the meeting': '聚会的共同辨识（sense of the meeting）',
+    'sense of Meeting': '聚会的共同辨识（sense of Meeting）',
+    'standing aside': '保留但不阻挡（standing aside）',
+    'prayerful attentiveness': '祷告式专注（prayerful attentiveness）',
+    'clearance': '资格审查（clearance）',
+    'Christological': '基督论式（Christological）',
+    'mystical': '神秘主义式（mystical）',
+    'humanist': '人文主义式（humanist）',
+    'universalist': '普世主义式（universalist）',
+
+    # Authors and historical figures.
+    'Howard H. Brinton': '霍华德·布林顿（Howard H. Brinton）',
+    'Howard Brinton': '霍华德·布林顿（Howard Brinton）',
+    'Thomas R. Kelly': '托马斯·凯利（Thomas R. Kelly）',
+    'Thomas Kelly': '托马斯·凯利（Thomas Kelly）',
+    'Parker J. Palmer': '帕克·J·帕尔默（Parker J. Palmer）',
+    'Parker Palmer': '帕克·帕尔默（Parker Palmer）',
+    'Patricia Loring': '帕特里夏·洛林（Patricia Loring）',
+    'Michael Marsh': '迈克尔·马什（Michael Marsh）',
+    'Jim Pym': '吉姆·皮姆（Jim Pym）',
+    'John Yungblut': '约翰·扬布拉特（John Yungblut）',
+    'George Fox': '乔治·福克斯（George Fox）',
+    'Margaret Fell': '玛格丽特·费尔（Margaret Fell）',
+    'William Penn': '威廉·佩恩（William Penn）',
+    'John Woolman': '约翰·伍尔曼（John Woolman）',
+    'Rufus Jones': '鲁弗斯·琼斯（Rufus Jones）',
+    'Palmer': '帕尔默（Palmer）',
+    'Loring': '洛林（Loring）',
+    'Pym': '皮姆（Pym）',
+    'Marsh': '马什（Marsh）',
+    'Kelly': '凯利（Kelly）',
+    'Woolman': '伍尔曼（Woolman）',
+    'Fox': '福克斯（Fox）',
+    'Penn': '佩恩（Penn）',
+    'Fell': '费尔（Fell）',
+    'Jung': '荣格（Jung）',
+    'Barclay': '巴克莱（Barclay）',
+    'Robert Spence': '罗伯特·斯彭斯（Robert Spence）',
+    'Francis Place': '弗朗西斯·普莱斯（Francis Place）',
+    'Robert Smith III': '罗伯特·史密斯三世（Robert Smith III）',
+    'Cumbria': '坎布里亚（Cumbria）',
+    'Wikimedia Commons': '维基共享资源（Wikimedia Commons）',
+    'Commons': '维基共享资源（Commons）',
+    'Supposed portrait': '“推定肖像”（Supposed portrait）',
+
+    # Books / source titles.
+    'Friends for 300 Years': '《三百年的贵格会友》（Friends for 300 Years）',
+    'Listening to the Light': '《聆听内在之光》（Listening to the Light）',
+    'Spiritual Discernment': '《灵性明辨》（Spiritual Discernment）',
+    'The Light Within': '《内在之光》（The Light Within）',
+    'Philosophy of the Inner Light': '《内在之光的哲学》（Philosophy of the Inner Light）',
+    'Seeking Light in the Darkness of the Unconscious': '《在无意识的黑暗中寻光》（Seeking Light in the Darkness of the Unconscious）',
+    'The Meeting Community': '《聚会共同体》（The Meeting Community）',
+    'The Meeting for Worship': '《静默敬拜》（The Meeting for Worship）',
+    'Reaching Decisions': '《达成决定》（Reaching Decisions）',
+    'A New Way of Working': '《一种新的工作方式》（A New Way of Working）',
+    'Friends Conference on Religion and Psychology': '贵格会宗教与心理学会议（Friends Conference on Religion and Psychology）',
+
+    # Institutions / historical group labels.
+    'Yearly Meeting': '年会（Yearly Meeting）',
+    'Local / Area Meeting': '地方／区域聚会（Local / Area Meeting）',
+    'Local worship': '地方敬拜（Local worship）',
+    'Seekers': '寻道者（Seekers）',
+    'Quietism': '静默主义（Quietism）',
+    'Pendle Hill': '彭德尔山学习中心（Pendle Hill）',
+    'Swarthmoor Hall': '斯沃斯莫庄园（Swarthmoor Hall）',
+    'Arch Street Friends Meeting House': '拱街贵格会聚会所（Arch Street Friends Meeting House）',
+    'Free Quaker Meeting House': '自由贵格会聚会所（Free Quaker Meeting House）',
+    'Pennsylvania': '宾夕法尼亚（Pennsylvania）',
+
+    # Diagram / interface terms kept bilingual for learning.
+    'Truth emerges in relation': '真理在关系中显现（Truth emerges in relation）',
+    'Speak / Remain Silent': '发言或保持静默（Speak / Remain Silent）',
+    'Arrive': '到场（Arrive）',
+    'Settle': '安顿（Settle）',
+    'Wait': '等候（Wait）',
+    'Listen': '聆听（Listen）',
+    'Return': '返回（Return）',
+    'Center': '共同中心（Center）',
+    'Inward': '向内（Inward）',
+    'Between': '关系之间（Between）',
+    'Corporate': '群体层面（Corporate）',
+    'Outward': '向外（Outward）',
+    'Person': '人（Person）',
+    'Voting': '表决（Voting）',
+    'Consensus': '共识（Consensus）',
+    'Chairperson': '主席（Chairperson）',
+    'Clerk': '书记（Clerk）',
+    'Minute': '决议纪要（Minute）',
+    'Seasoning': '酝酿（Seasoning）',
+    'Query': '省察问题（Query）',
+    'Queries': '省察问题（Queries）',
+    'Testimony': '生活见证（Testimony）',
+    'Elder': '敬拜照看者（Elder）',
+    'Hospitality': '接待与欢迎（Hospitality）',
+    'Pastoral care': '牧养与关怀（Pastoral care）',
+    'Conflict': '冲突处理（Conflict）',
+    'Children & learning': '儿童与学习（Children & learning）',
+    'Witness': '公共见证（Witness）',
+    'Unity': '合一（Unity）',
+    'Testing': '检验（Testing）',
+    'Discernment': '明辨（Discernment）',
+    'Leading?': '内在引领？（Leading?）',
+    'Settling': '安顿（Settling）',
+    'settling': '安顿',
+    'listening': '聆听',
+    'action': '行动',
+    'minute': '决议纪要',
+    'business': '议事',
+    'Business': '议事',
+    'silence': '静默',
+    'Silence': '静默',
+    'community': '共同体',
+    'Community': '共同体',
+    'decision': '决策',
+    'witness': '见证',
+    'inward': '向内',
+    'outward': '向外',
+    'peace': '和平',
+    'simplicity': '简朴',
+    'integrity': '诚信',
+    'consensus': '共识',
+    'discipline': '纪律',
+    'truth': '真理',
+    'together': '共同',
+    'intellectual agreement': '观念一致',
+    'Gatheredness': '深度聚集状态',
+    'gatheredness': '深度聚集状态',
+    'Presence': '临在',
+    'Divine': '神圣',
+    'Learning': '共学',
+    'elders': '敬拜照看者（elders）',
+    'proposal': '提案',
+    'chairman': '主席',
+    'clerk': '书记',
+    'tests': '检验',
+    'restraint': '克制',
+    'practice': '实践',
+    'programmed': '程序化',
+    'unprogrammed': '非程序化',
+    'pastoral': '牧师制',
+    'coach': '教练',
+    'vocal': '口头',
+    'micro-meeting': '微型聚会',
+    'Micro-Meeting': '微型聚会（Micro-Meeting）',
+    'min': '分钟',
+    'third thing': '第三物',
+    'person–person–third thing': '人—人—第三物',
+    'testimonies': '生活见证',
+    'pamphlet': '小册子',
+    'Pamphlet': '小册子',
+    'liberal Quaker': '自由派贵格会',
+    'evangelical Friends': '福音派会友',
+    'love': '爱',
+    'beauty': '美',
+    'group': '群体',
+    'Yearly Meetings': '各年会',
+    'Psychology': '心理学',
+    'agreement': '意见一致（agreement）',
+    'compromise': '妥协（compromise）',
+    'committee': '小组',
+    'clearness committee': '澄心会（clearness committee）',
+    'membership': '会籍（membership）',
+    'history': '历史',
+    'mysticism': '神秘主义',
+    'plainness': '朴素生活（plainness）',
+    'divine guidance': '神圣引导（divine guidance）',
+    'Zen': '禅（Zen）',
+    'advice': '建议（advice）',
+    'KPI': '关键绩效指标（KPI）',
+    'AI': '人工智能（AI）',
+    'App': '应用（App）',
+    'Immediate experience ↔ Tradition': '直接经验 ↔ 传统（Immediate experience ↔ Tradition）',
+    'Individual leading ↔ Corporate discernment': '个人引领 ↔ 群体明辨（Individual leading ↔ Corporate discernment）',
+    'Inward life ↔ Outward witness': '内在生命 ↔ 外在见证（Inward life ↔ Outward witness）',
+
+    # Common English concepts: translate to Chinese so prose remains light.
+    'waiting': '等候',
+    'Waiting': '等候',
+    'worship': '敬拜',
+    'Worship': '敬拜',
+    'ministry': '受感分享',
+    'Ministry': '受感分享',
+    'leading': '内在引领',
+    'Leading': '内在引领',
+    'concern': '内在关切',
+    'Concern': '内在关切',
+    'testimony': '生活见证',
+    'unity': '合一',
+    'clearness': '澄明',
+    'discernment': '明辨',
+    'Truth': '真理',
+    'Light': '光',
+    'Spirit': '灵',
+    'God': '上帝',
+    'Christ': '基督',
+    'Scripture': '《圣经》',
+    'Life': '生命',
+    'Love': '爱',
+    'method': '方法',
+    'experience': '经验',
+    'insight': '洞见',
+    'mystery': '奥秘',
+    'facilitation': '引导',
+    'facilitator': '带领者',
+    'sermon': '讲道',
+    'discussion': '讨论',
+    'Meeting': '聚会',
+    'meeting': '聚会',
+    'Friends': '会友',
+    'Quaker': '贵格会',
+
+    # Editorial / exhibition labels.
+    'Primary sources': '主要来源（Primary sources）',
+    'QUERY': '省察问题（QUERY）',
+    'QUAKER MEETING · 研究 × 实践': '贵格会聚会 · 研究 × 实践（QUAKER MEETING）',
+    'THE QUESTION': '核心问题（THE QUESTION）',
+    'VISUAL ESSAY · 01': '视觉短章 01（VISUAL ESSAY）',
+    'FIELD IMAGE · MEETING HOUSE': '现场图像 · 聚会所（FIELD IMAGE · MEETING HOUSE）',
+    'WHY IT MATTERS': '为什么重要（WHY IT MATTERS）',
+    'ONE MAP': '一张图理解（ONE MAP）',
+    'PEOPLE · PLACE · ARCHIVE': '人物 · 地点 · 史料（PEOPLE · PLACE · ARCHIVE）',
+    'MEETING FAMILY': '聚会形态（MEETING FAMILY）',
+    'TWO PATHS': '两条进入路径（TWO PATHS）',
+    'SOURCE-BASED · NOT QUOTE-MINING': '基于来源 · 不摘句拼贴（SOURCE-BASED · NOT QUOTE-MINING）',
+    'VISUAL SOURCES': '视觉史料（VISUAL SOURCES）',
+    'PRIMARY LIBRARY': '核心文献（PRIMARY LIBRARY）',
+    'RESEARCH DISCIPLINE': '研究纪律（RESEARCH DISCIPLINE）',
+    'SOURCE MAP': '来源地图（SOURCE MAP）',
+    'CONTESTED CONCEPTS': '争议概念（CONTESTED CONCEPTS）',
+    'RESEARCH ROADMAP': '研究路线图（RESEARCH ROADMAP）',
+    'READING PATHS': '阅读路径（READING PATHS）',
+    'PROVENANCE': '来源脉络（PROVENANCE）',
+    'CURATORIAL NOTE': '策展说明（CURATORIAL NOTE）',
+    'PROVENANCE · LICENSE · UNCERTAINTY': '来源 · 授权 · 不确定性（PROVENANCE · LICENSE · UNCERTAINTY）',
+    'FROM READING TO DOING': '从阅读到实践（FROM READING TO DOING）',
+    'FACILITATOR CARD': '带领者卡片（FACILITATOR CARD）',
+    'FAILURE MODES': '常见失误（FAILURE MODES）',
+    'DON’T COLLAPSE THE DIFFERENCES': '不要抹平差异（DON’T COLLAPSE THE DIFFERENCES）',
+    'HOW TO CHOOSE': '如何选择（HOW TO CHOOSE）',
+    'FALSE FRIENDS': '最易混淆之处（FALSE FRIENDS）',
+    'WORDS MATTER': '词语很重要（WORDS MATTER）',
+    'HOW TO READ': '如何阅读（HOW TO READ）',
+    'FROM SOLO TO CORPORATE': '从个人到群体（FROM SOLO TO CORPORATE）',
+    '12 MINUTES · BEGINNER PRACTICE': '12 分钟 · 初学者实践（BEGINNER PRACTICE）',
+    'AFTER': '练习之后（AFTER）',
+    'NEXT': '下一步（NEXT）',
+    'HISTORY': '历史（HISTORY）',
+    'RESEARCH': '研究（RESEARCH）',
+    'PRACTICE': '实践（PRACTICE）',
+    'COMPARE': '比较（COMPARE）',
+    'GLOSSARY': '术语（GLOSSARY）',
+    'TOOLKIT': '工具箱（TOOLKIT）',
+    'BRINTON’S LENS': '布林顿的视角（BRINTON’S LENS）',
+    'THREE THREADS': '三条主线（THREE THREADS）',
+    'FOUR LIVES · FOUR WINDOWS': '四个人 · 四扇窗（FOUR LIVES · FOUR WINDOWS）',
+    'FIELD IMAGE · WORSHIP SPACE': '现场图像 · 敬拜空间（FIELD IMAGE · WORSHIP SPACE）',
+    'HISTORIC INTERIOR · PHILADELPHIA': '历史室内 · 费城（HISTORIC INTERIOR · PHILADELPHIA）',
+    'SOURCE TYPE · PORTRAIT': '史料类型 · 肖像（SOURCE TYPE · PORTRAIT）',
+    'SOURCE TYPE · LATER IMPRESSION': '史料类型 · 后世艺术印象（SOURCE TYPE · LATER IMPRESSION）',
+    'THIRD THING · IMAGE': '第三物 · 图像（THIRD THING · IMAGE）',
+    'PLACE · COMMUNITY': '地点 · 共同体（PLACE · COMMUNITY）',
+    'PLACE · ORIGIN': '地点 · 源流（PLACE · ORIGIN）',
+    'PLACE · CUMBRIA': '地点 · 坎布里亚（PLACE · CUMBRIA）',
+    'PLACE · PHILADELPHIA': '地点 · 费城（PLACE · PHILADELPHIA）',
+
+    # Historical tags.
+    'authority crisis': '权威危机（authority crisis）',
+    'experience → movement': '经验 → 运动（experience → movement）',
+    'charisma → discipline': '感召 → 纪律（charisma → discipline）',
+    'liberty · governance · colony': '自由 · 治理 · 殖民（liberty · governance · colony）',
+    'consolidation': '整合与巩固（consolidation）',
+    'leading → witness': '引领 → 见证（leading → witness）',
+    'plural traditions': '多元传统（plural traditions）',
+    'retrieval & experiment': '传统重访与实验（retrieval & experiment）',
+    'method, not mere form': '方法，而非只有形式（method, not mere form）',
+    'tradition → translation': '传统 → 转译（tradition → translation）',
+    'context matters': '语境很重要（context matters）',
+    'Today': '当代（Today）',
+    '1640s → TODAY': '1640年代 → 当代（TODAY）',
+    'Mystical': '神秘主义（Mystical）',
+    'Evangelical': '福音派（Evangelical）',
+    'Rational': '理性主义（Rational）',
+    'Social Gospel': '社会福音（Social Gospel）',
+}
+
+SECTION_LABELS = {
+    'DEFINITION':'定义', 'METHOD':'方法', 'NOT JUST MEDITATION':'不只是冥想',
+    'FIVE LAYERS':'五个层次', 'INNER LIGHT':'内在之光', 'MISUNDERSTANDINGS':'常见误解',
+    'OBSERVE':'观察', 'SILENCE':'静默', 'THREE DEPTHS':'三重深度',
+    'THEOLOGICAL DIRECTION':'神学方向', 'HOW TO ENTER':'如何进入', 'DISTRACTION':'杂念',
+    'RETURN':'返回', 'EVERYDAY LIGHT':'日常之光', 'MINISTRY':'受感分享', 'TESTING':'检验',
+    'INTERACTIVE':'互动练习', 'AFTER WORDS':'话语之后', 'AUTHORITY':'权威', 'PITFALLS':'常见陷阱',
+    'GATHEREDNESS':'聚集状态', 'SIGNALS':'观察信号', 'WHY GROUP':'为什么是群体',
+    'GROUP MYSTICISM':'群体神秘主义', 'THIRD THING':'第三物', 'EPISTEMOLOGY':'认识论',
+    'DISCIPLINES':'实践纪律', '90-MINUTE DESIGN':'90 分钟设计', 'FACILITATOR':'带领者',
+    'EVIDENCE OF LEARNING':'学习发生的迹象', 'ORIGIN':'源流', 'THREE MODELS':'三种模式',
+    'MEETING FOR LEARNING':'共学会', 'SOLO':'个人练习', 'SMALL GROUP':'小组练习',
+    'CLERK':'书记角色', 'CASE LAB':'案例实验', 'WAITING':'等候', 'MINUTE':'决议纪要',
+    'PRACTICAL TEMPLATE':'实践模板', 'CLEARNESS':'澄心', 'STRUCTURE':'结构',
+    'DISCERNMENT':'明辨', 'QUESTION LAB':'提问实验', 'REWRITE':'改写练习',
+    'TEMPLATE':'模板', 'BOUNDARIES':'边界', 'COMMUNITY':'共同体', 'ORGANIZATION':'组织',
+    'CARE':'照顾', 'MATURITY':'成熟度', 'QUERIES':'省察问题', 'PRACTICE':'实践',
+}
+
+
+def _replace_terms(text):
+    """Replace visible English with Chinese-first wording without touching HTML attributes."""
+    if not re.search(r'[A-Za-z]', text):
+        return text
+    replacements = dict(TEXT_REPLACEMENTS)
+    # Section eyebrow pattern: 05 · OBSERVE -> 05 · 观察（OBSERVE）
+    m = re.fullmatch(r"(\d{2}\s*·\s*)([A-Z0-9][A-Z0-9 &/’'\-]+)", text.strip())
+    if m and m.group(2) in SECTION_LABELS:
+        return text.replace(m.group(0), f'{m.group(1)}{SECTION_LABELS[m.group(2)]}（{m.group(2)}）')
+
+    placeholders = {}
+    out = text
+    # Preserve English that is already intentionally placed after a Chinese term.
+    keep = {}
+    def protect_parenthetical(match):
+        token = f'@@KEEP{len(keep)}@@'
+        keep[token] = match.group(0)
+        return token
+    out = re.sub(r'（[^）]*[A-Za-z][^）]*）', protect_parenthetical, out)
+    for idx, (en, zh) in enumerate(sorted(replacements.items(), key=lambda kv: len(kv[0]), reverse=True)):
+        token = f'@@ZH{idx}@@'
+        # Word-like terms should not match inside a longer Latin token.
+        if re.fullmatch(r"[A-Za-z][A-Za-z0-9 .&/’'?\-]*", en):
+            pat = rf'(?<![A-Za-z]){re.escape(en)}(?![A-Za-z])'
+        else:
+            pat = re.escape(en)
+        new, n = re.subn(pat, token, out)
+        if n:
+            out = new
+            placeholders[token] = zh
+    for token, zh in placeholders.items():
+        out = out.replace(token, zh)
+    for token, original in keep.items():
+        out = out.replace(token, original)
+    # Chinese prose should not inherit the spaces that surrounded an English term
+    # in the source sentence. Keep Latin spacing inside parentheses untouched.
+    out = re.sub(r'(?<=[\u4e00-\u9fff，。！？；：“”‘’）》）])\s+(?=[\u4e00-\u9fff，。！？；：“”‘’《（])', '', out)
+    out = re.sub(r'(?<=[\u4e00-\u9fff）》）])\s*/\s*(?=[\u4e00-\u9fff《（])', '／', out)
+    return out
+
+
+def localize_visible_text(doc):
+    """Chinese-first editorial pass for text nodes; markup/URLs/classes stay untouched."""
+    return re.sub(r'(?<=>)([^<>]+)(?=<)', lambda m: _replace_terms(m.group(1)), doc)
 
 
 def icon(name):
@@ -149,8 +646,8 @@ HEADING_LAYOUTS = {
         ['Gathered Meeting：', '当圆圈变成“一个整体”'],
     'Group mysticism：既不是“集体情绪”，也不是“大家想法一样”':
         ['Group mysticism：既不是“集体情绪”，', '也不是“大家想法一样”'],
-    'Practice：练习感受“群体”而不是只听自己':
-        ['Practice：练习感受“群体”', '而不是只听自己'],
+    '练习：感受“群体”，而不是只听自己':
+        ['练习：感受“群体”，', '而不是只听自己'],
     '历史不是一条直线：三百多年来，Meeting 一直在被重新解释':
         ['历史不是一条直线：', '三百多年来，', 'Meeting 一直在被重新解释'],
     'Brinton 的“四时期”不是唯一答案，却提供了一张很有用的分析地图':
@@ -170,9 +667,13 @@ HEADING_LAYOUTS = {
     'Inner Light 不是“我的感觉就是对的”':
         ['Inner Light 不是', '“我的感觉就是对的”'],
     '六条研究纪律：避免把 Quakerism 做成“灵性语录库”':
-        ['六条研究纪律：', '避免把 Quakerism 做成“灵性语录库”'],
+        ['六条研究纪律：', '避免把 Quakerism', '做成“灵性语录库”'],
+    '六条研究纪律：避免把贵格会传统（Quakerism）做成“灵性语录库”':
+        ['六条研究纪律：', '避免把贵格会传统（Quakerism）', '做成“灵性语录库”'],
     '六种最常见的“看起来像 Meeting，实际上不是”的失败方式':
-        ['六种最常见的“看起来像 Meeting，', '实际上不是”的失败方式'],
+        ['六种最常见的', '“看起来像 Meeting，', '实际上不是”的失败方式'],
+    '六种最常见的“看起来像聚会，实际上不是”的失败方式':
+        ['六种最常见的', '“看起来像聚会，', '实际上不是”的失败方式'],
     '最容易“看起来很像”，其实差异最大的三组':
         ['最容易“看起来很像”，', '其实差异最大的三组'],
     '术语不是“对照表”，而是一张传统内部的关系网':
@@ -245,18 +746,31 @@ def _split_heading_piece(piece):
 
 
 def _protect_terms(text):
+    # English already placed in full-width parentheses is secondary annotation:
+    # keep it intact, smaller and lighter, and never let term locking split it.
+    held = {}
+    def hold_parenthetical(match):
+        token = f'@@PAREN{len(held)}@@'
+        held[token] = match.group(0)
+        return token
+
+    protected = re.sub(r'（[^）]*[A-Za-z][^）]*）', hold_parenthetical, text)
     pattern = '(' + '|'.join(re.escape(x) for x in sorted(HEADING_TERMS, key=len, reverse=True)) + ')'
-    parts = [x for x in re.split(pattern, text) if x]
-    return ''.join(
+    parts = [x for x in re.split(pattern, protected) if x]
+    rendered = ''.join(
         f'<span class="term-lock">{html.escape(part)}</span>'
         if part in HEADING_TERMS else html.escape(part)
         for part in parts
     )
+    for token, original in held.items():
+        rendered = rendered.replace(html.escape(token), f'<span class="en-paren">{html.escape(original)}</span>')
+    return rendered
 
 
 def smart_heading(text):
-    """Editorial heading layout: whole thought-units, never machine-chopped fragments."""
-    lines = HEADING_LAYOUTS.get(text, [text])
+    """Editorial heading layout: Chinese first, English annotation secondary."""
+    raw_lines = HEADING_LAYOUTS.get(text, [text])
+    lines = [_replace_terms(line) for line in raw_lines]
     return ''.join(f'<span class="title-line">{_protect_terms(line)}</span>' for line in lines)
 
 
@@ -331,9 +845,9 @@ def section(title, body, eyebrow=None, cls=''):
 def exhibit_figure(src, kicker, title, caption, credit='', source_url='', license_label='', cls=''):
     credit_bits = []
     if credit:
-        credit_bits.append(html.escape(credit))
+        credit_bits.append(f'图像作者／来源：{html.escape(credit)}')
     if license_label:
-        credit_bits.append(html.escape(license_label))
+        credit_bits.append(f'授权：{html.escape(license_label)}')
     credit_html = ' · '.join(credit_bits)
     if source_url:
         credit_html += ((' · ' if credit_html else '') +
@@ -357,7 +871,7 @@ def portrait_card(src, name, years, note, source_url, credit, license_label):
     return f'''<article class="portrait-card">
       <div class="portrait-image"><img src="{html.escape(src)}" alt="{html.escape(name)}" loading="eager" decoding="async"/></div>
       <div class="portrait-copy"><span>{html.escape(years)}</span><h3>{html.escape(name)}</h3><p>{note}</p>
-      <small>{html.escape(credit)} · {html.escape(license_label)} · <a href="{html.escape(source_url)}" target="_blank" rel="noreferrer">来源 ↗</a></small></div>
+      <small>图像作者／来源：{html.escape(credit)} · 授权：{html.escape(license_label)} · <a href="{html.escape(source_url)}" target="_blank" rel="noreferrer">查看来源 ↗</a></small></div>
     </article>'''
 
 
@@ -368,14 +882,15 @@ def exhibit_label(number, title, text):
 def page_shell(filename, title, intro, body, label='研究与实践', extra_js=''):
     nav = ''.join(f'<a href="{u}" class="{"active" if filename==u else ""}">{t}</a>' for u,t in NAV)
     hero_html = '' if filename == 'index.html' else f'''<section class="page-hero"><div class="hero-copy"><span class="kicker">{label}</span><h1>{smart_heading(title)}</h1><p>{intro}</p><div class="hero-line"></div></div></section>'''
-    doc_title = SITE_NAME if filename == 'index.html' else f'{title}｜{SITE_NAME}'
+    doc_title = SITE_NAME if filename == 'index.html' else _replace_terms(f'{title}｜{SITE_NAME}')
+    meta_intro = _replace_terms(intro)
     return f'''<!doctype html>
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>{html.escape(doc_title)}</title>
-<meta name="description" content="{html.escape(intro[:155])}"/>
+<meta name="description" content="{html.escape(meta_intro[:155])}"/>
 <meta name="theme-color" content="#1f2723"/>
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml"/>
 <link rel="stylesheet" href="assets/style.css"/>
@@ -383,7 +898,7 @@ def page_shell(filename, title, intro, body, label='研究与实践', extra_js='
 <body data-page="{filename}">
 <a class="skip-link" href="#main">跳到正文</a>
 <header class="site-header">
-  <a class="brand" href="index.html"><span class="brand-mark"><i></i><i></i><i></i></span><span><b>共同等候</b><small>Quaker Meeting Lab</small></span></a>
+  <a class="brand" href="index.html"><span class="brand-mark"><i></i><i></i><i></i></span><span><b>共同等候</b><small>贵格会聚会研究室</small></span></a>
   <button class="nav-toggle" aria-label="打开导航">☰</button>
   <nav class="main-nav">{nav}</nav>
 </header>
@@ -391,7 +906,7 @@ def page_shell(filename, title, intro, body, label='研究与实践', extra_js='
 {hero_html}
 {body}
 </main>
-<footer class="site-footer"><div><b>共同等候｜Quaker Meeting 研究与实践</b><p>这是一个中文研究与实践项目，不代表任何贵格会年会或官方机构。</p></div><div class="footer-links"><a href="research.html">来源与研究方法</a><a href="visual-credits.html">图像与史料说明</a><a href="glossary.html">术语表</a><a href="practice.html">开始一次练习</a></div><p class="footer-note">Designed for slow reading, careful listening, and lived practice.</p></footer>
+<footer class="site-footer"><div><b>{SITE_NAME}</b><p>这是一个中文研究与实践项目，不代表任何贵格会年会或官方机构。</p></div><div class="footer-links"><a href="research.html">来源与研究方法</a><a href="visual-credits.html">图像与史料说明</a><a href="glossary.html">术语表</a><a href="practice.html">开始一次练习</a></div><p class="footer-note">为慢读、谨慎聆听与生活实践而设计。</p></footer>
 <script src="assets/app.js"></script>{extra_js}
 </body></html>'''
 
@@ -400,7 +915,7 @@ index_body = f'''
 <section class="home-hero"><div class="home-copy"><span class="kicker">QUAKER MEETING · 研究 × 实践</span><h1>{smart_heading('在静默中，共同聆听。')}</h1><p>{TAGLINE}</p><div class="cta-row"><a class="btn primary" href="practice.html">体验一次 12 分钟 Meeting</a><a class="btn ghost" href="meeting.html">先理解 Meeting 是什么</a></div><div class="hero-note"><span></span>不是冥想 App，也不是宗教百科；这是一个把 Meeting 当作“共同聆听、共同检验与共同明辨的方法”来研究的网站。</div></div>{circle_visual()}</section>
 <section class="home-intro"><div class="big-question"><span>THE QUESTION</span><h2>{smart_heading('如果一群人暂时不争着表达立场，会不会有一些东西，反而更容易被听见？')}</h2></div><div class="intro-copy"><p>贵格会 Meeting 最令人着迷的地方，不只是“安静”。真正独特的是：一群人共同停下来，不把某个人、某套理论或某种程序放在中心，而是通过等待、聆听、说与不说，让一个更深的共同辨识逐渐出现。</p><p>Howard Brinton 把 Quakerism 描述为一种以经验为基础的 <em>method</em>，并把它称为一种 <em>group mysticism</em>：内在经验不是终点，必须进入群体、历史与行动。Parker Palmer 又把 “meeting” 这一精神延伸到学习，使它成为一种关于“我们怎样共同认识真实”的实践。</p></div></section>
 <section class="curated-opening"><div class="section-head"><span>VISUAL ESSAY · 01</span><h2>{smart_heading('先看见一个 Meeting 的空间')}</h2><p>没有讲台、没有屏幕，也没有一个天然占据中心的人。建筑与座位本身，就已经在表达一种关于权威、注意力与共同体的理解。</p></div>
-{exhibit_figure('assets/curated/meetinghouse-interior.jpg','FIELD IMAGE · MEETING HOUSE','Quaker Meetinghouse 的室内空间','这张真实场景照片显示一个传统 Meeting House 的内部：长椅、可移动隔断、几乎没有视觉焦点。空间并不会自动制造共同聆听，却会减少“谁站在中心”的暗示。','Pi3.124','https://commons.wikimedia.org/wiki/File:Interior_of_Quaker_meeting_house.jpg','CC BY-SA 4.0','hero-exhibit')}
+{exhibit_figure('assets/curated/meetinghouse-interior.jpg','FIELD IMAGE · MEETING HOUSE','贵格会聚会所的室内空间','这张真实场景照片显示一个传统聚会所（Meeting House）的内部：长椅、可移动隔断、几乎没有视觉焦点。空间并不会自动制造共同聆听，却会减少“谁站在中心”的暗示。','Pi3.124','https://commons.wikimedia.org/wiki/File:Interior_of_Quaker_meeting_house.jpg','CC BY-SA 4.0','hero-exhibit')}
 <div class="exhibit-annotations">{exhibit_label('A','没有舞台','空间把注意力从“台上的人”移回共同体与共同中心。')}{exhibit_label('B','可被重组的空间','历史上的 Meeting House 常因性别、事务与地方实践存在不同空间安排；形式并不等于本质。')}{exhibit_label('C','建筑也在教人','朴素并不是“没有设计”，而是让结构服务于等待、可见性与共同承担。')}</div></section>
 <section class="home-depth"><div class="section-head"><span>WHY IT MATTERS</span><h2>{smart_heading('Meeting 不只是安静下来，而是在练习“如何共同认识”')}</h2><p>它既涉及灵性，也涉及认识论、群体动力、组织治理与伦理行动。</p></div>{epistemology_visual()}<div class="depth-grid"><article><span>01</span><h3>经验，不等于任性</h3><p>个人经验被认真对待，但重要的 leading 需要时间、共同体与生活后果的检验。</p></article><article><span>02</span><h3>群体，不等于多数</h3><p>Meeting 重视 corporate discernment，却不把人数优势当作 Truth 的替代品。</p></article><article><span>03</span><h3>静默，不等于退避</h3><p>Thomas Kelly 与 Brinton 都把 inward life 指向 outward action：内在聆听若有生命，会进入关系、决定与公共见证。</p></article></div></section>
 <section class="home-map"><div class="section-head"><span>ONE MAP</span><h2>一张图，理解 Meeting 的五个层次</h2><p>从“我里面发生什么”，到“我们如何一起行动”。</p></div>{layer_visual()}<div class="map-links"><a href="worship.html"><b>01</b><span>静默与等候<small>Silence / Waiting</small></span></a><a href="ministry.html"><b>02</b><span>说与不说<small>Vocal Ministry</small></span></a><a href="gathered.html"><b>03</b><span>被聚集的时刻<small>Gathered Meeting</small></span></a><a href="business.html"><b>04</b><span>共同明辨<small>Sense of the Meeting</small></span></a><a href="toolkit.html"><b>05</b><span>进入日常<small>Practice & Action</small></span></a></div></section>
@@ -427,13 +942,13 @@ meeting_body = f'''
 <div class="article-grid"><article class="article-main">
 {section('Meeting：不是“会议”的同义词','''<p>在贵格会语境里，<strong>Meeting</strong> 同时指一次聚集、一个持续存在的共同体，也指一种特殊的共同实践。把它全部翻成“会议”，会让最重要的东西消失。</p><p>在 Meeting 中，中心并不预先被一个讲者、主持人、教义或议程占据。人们首先做的，是让自己安顿下来，进入一种共同的等待：不急着制造结果，也不假装什么都没有发生。</p>''','01 · DEFINITION')}
 {callout('一个抓手','<p><strong>Meeting 可以理解为：一群人共同为“尚未完全显现的真实”腾出空间。</strong></p><p>这不是严格定义，却是理解 Worship、Business、Clearness 和 Learning 的共同钥匙。</p>')}
-{exhibit_figure('assets/curated/arch-street.jpg','PLACE · PHILADELPHIA','Arch Street Friends Meeting House','一座 Meeting House 既是建筑，也是共同体长期记忆的容器。Arch Street Meeting House 建于 1803–05 年；它提醒我们，“Meeting”从来不只是一次活动，也指持续存在、承担事务与见证的地方共同体。','Beyond My Ken',VISUAL_SOURCES['arch'],'CC BY-SA 4.0','article-exhibit')}
+{exhibit_figure('assets/curated/arch-street.jpg','PLACE · PHILADELPHIA','Arch Street Friends Meeting House','一座聚会所（Meeting House）既是建筑，也是共同体长期记忆的容器。拱街贵格会聚会所（Arch Street Friends Meeting House）建于 1803–05 年；它提醒我们，“聚会”从来不只是一次活动，也指持续存在、承担事务与见证的地方共同体。','Beyond My Ken',VISUAL_SOURCES['arch'],'CC BY-SA 4.0','article-exhibit')}
 {section('为什么 Brinton 说 Quakerism 首先是一种 method？','''<p>Howard Brinton 的一个关键判断是：要理解贵格会，不能只列出“它相信什么”，还要看<strong>它如何抵达、检验和修正这些相信</strong>。因此他把 Quakerism 比作一种方法：它不像科学那样测量外部对象，而是面向内在生命、道德要求、宗教洞见与群体经验。</p><p>这使 Meeting 变成一种持续的认识实践。经验很重要，但经验不是“我感觉如此，所以就是真理”；它需要在时间、历史、共同体与行动后果中不断被检验。也正因为如此，Brinton 所说的 <em>group mysticism</em> 不是一群人各自拥有神秘体验，而是个人经验在共同体中被承接、修正并获得社会形态。</p>'''+research_note('把“体验”变成“可检验的实践”','''<p>如果只强调 inward experience，Meeting 很容易滑向私人灵性消费；如果只强调组织规则，它又会失去直接经验的生命。贵格会长期存在的张力，正是在两者之间保持开放：既不把权威外包给制度，也不把权威收回到个人情绪。</p>'''), '02 · METHOD')}
 {section('它与“大家一起静坐”有什么不同？','''<div class="compare-mini"><div><b>一起静坐</b><p>重点可能在个体专注、觉察、放松或禅修。</p></div><div><b>Quaker Meeting</b><p>个人内在安顿很重要，但始终处在一个群体场域中：我在听自己，也在听这个房间、这个共同体，以及可能超越个人意志的引领。</p></div></div><p>Jim Pym 早年把 Meeting 误以为 meditation group，后来才意识到它并不是佛教意义上的冥想团体。这种误解今天依然非常普遍。</p>''','02 · NOT JUST MEDITATION')}
 {section('五个层次同时发生','''<p>一个成熟的 Meeting 往往同时有五个层次。它们不是五步流程，而是五种可以被观察的维度。</p>'''+layer_visual()+'''<div class="definition-list"><dl><dt>Center</dt><dd>这个圆圈最终忠于什么？早期 Friends 会说 God、Christ、Truth、Light；现代不同传统的 Friends 会使用不同语言。</dd><dt>Inward</dt><dd>我是否从惯性反应、紧张和自我表演中稍微退开，变得可听？</dd><dt>Between</dt><dd>我如何听别人？一句 spoken ministry 如何被整个房间接住，而不是立刻讨论？</dd><dt>Corporate</dt><dd>群体有没有出现一种任何单个人都无法制造的清晰、深度或 unity？</dd><dt>Outward</dt><dd>这份清晰最后如何进入决定、关系、工作与社会行动？</dd></dl></div>'''+epistemology_visual(), '03 · FIVE LAYERS')}
 {section('Inner Light 不是“我的感觉就是对的”','''<p>“内在之光”最容易在现代语境里被误读成直觉主义：只要我内在有强烈感觉，就应该忠于它。Michael Marsh 对这一点提出了有价值的哲学追问：<strong>Light 是一个隐喻，它让原本隐藏的关系变得可见；但“看见”本身不自动保证客观正确。</strong></p><p>Patricia Loring 也从实践面提醒：我们内部同时存在愿望、恐惧、自我意志、父母和文化留下的声音。所谓 discernment，恰恰是学习分辨这些声音，而不是把“来自内在”当作免检标签。</p>'''+research_note('专业性来自“允许复杂性存在”','''<p>一个成熟的 Meeting 不急着把 Light 心理学化，也不急着把所有体验神学化。它更像一套长期实践：经验出现——停下来——交给时间——交给共同体——观察果实——再决定是否行动。</p>'''), '04 · INNER LIGHT')}
 {section('最常见的七个误解','''<div class="myth-grid"><article><b>“就是沉默一小时”</b><p>沉默只是外在形式；核心是 expectant waiting。</p></article><article><b>“每个人做自己的内观”</b><p>Meeting 是群体实践，不是并排进行的私人练习。</p></article><article><b>“想说就说”</b><p>传统上 spoken ministry 需要经过内在辨识。</p></article><article><b>“没有领导者”</b><p>不是没有角色，而是角色不拥有 Truth。Clerk、elders 等都服务于共同体。</p></article><article><b>“没有教义，所以什么都可以”</b><p>贵格会长期以 experience、testimony、community testing 形成非常严肃的纪律。</p></article><article><b>“不投票就是共识决策”</b><p>Sense of the Meeting 与现代 consensus 有重叠，但目标与精神基础并不相同。</p></article><article><b>“安静一定会让人平静”</b><p>真正的聆听也可能让人面对不愿承认的冲突、责任或召唤。</p></article></div>''','05 · MISUNDERSTANDINGS')}
-{section('一个极简观察框架','''<div class="process-row"><span>Arrive</span><i>→</i><span>Settle</span><i>→</i><span>Wait</span><i>→</i><span>Listen</span><i>→</i><span>Speak / Remain Silent</span><i>→</i><span>Return</span></div><p class="fineprint">注意：这不是“Quaker Meeting 六步法”。它只是本站为了帮助初学者观察内部动态而做的一张地图。</p>''','05 · OBSERVE')}
+{section('一个极简观察框架','''<div class="process-row bilingual-process"><span><b>到场</b><small>Arrive</small></span><i>→</i><span><b>安顿</b><small>Settle</small></span><i>→</i><span><b>等候</b><small>Wait</small></span><i>→</i><span><b>聆听</b><small>Listen</small></span><i>→</i><span class="wide"><b>发言或保持静默</b><small>Speak / Remain Silent</small></span><i>→</i><span><b>返回</b><small>Return</small></span></div><p class="fineprint">注意：这不是“贵格会聚会（Quaker Meeting）六步法”。它只是本站为了帮助初学者观察内部动态而做的一张地图。</p>''','05 · OBSERVE')}
 {section('带着这些问题继续','''<p>贵格会传统喜欢用 Queries 而不是“标准答案”结束学习。你也可以从这几个问题继续。</p>'''+query_cards(['当我安静下来时，我最先遇到的通常是什么：焦躁、计划、疲惫，还是别的东西？','我能否分辨“我很想表达”与“这句话真的需要被这个圆圈听见”之间的差别？','如果一个群体迟迟没有形成清晰，我是否愿意把“暂不决定”也看作一种成熟的结果？']))}
 </article>{source_box([('Howard H. Brinton, Friends for 300 Years','重点参见第4章 The Meeting for Worship、第5章 Vocal Ministry、第6章 Reaching Decisions。'),('Jim Pym, Listening to the Light','“The Source—the Quaker meeting for worship” 与 “A New Way of Working”。'),('Parker J. Palmer, Meeting for Learning','以 Meeting 作为教育与共同探寻的核心隐喻。')])}</div>
 '''
@@ -492,7 +1007,7 @@ gathered_body = f'''
 {callout('不要把它变成KPI','<p>Gatheredness 不是每次 Meeting 都必须达到的“高峰体验”。越想制造它，越容易让人表演深刻。传统更强调忠实地准备、等待，并接受一次平淡的 Meeting 也可能是完整的。</p>')}
 {section('为什么群体会比个人多出一些东西？','''<p>Brinton 用“多支蜡烛放在一起，光变得更强”来说明 group worship 的群体性。现代语言可以把它理解为：每个人都不是封闭系统；注意力、身体节奏、说话方式、沉默承载力会相互影响。</p><p>但贵格会自己的解释不只停在社会心理学层面。对传统 Friends 而言，这个“多出来的东西”与 Divine Presence、Spirit、Light 和 Truth 的共同临在相关。</p>''','03 · WHY GROUP')}
 {section('Group mysticism：既不是“集体情绪”，也不是“大家想法一样”','''<p>Brinton 用 <em>group mysticism</em> 来强调 Quakerism 的一个罕见特征：它不是“独自的人面对神”的简单复制，而是把垂直维度——人与 Divine / Truth 的关系——和水平维度——人与人的关系——放进同一个 worship 事件。</p><p>因此 gatheredness 不能被简化为氛围感。群体可能非常感动，却仍然彼此投射；也可能没有明显情绪高潮，却出现更深的共同清晰。判断标准不是“房间很有能量”，而是注意、关系与行动是否出现更深的整合。</p>'''+research_note('保留双重解释，而不是急着二选一','''<p>心理学可以帮助解释共同节奏、注意同步、社会调节等现象；Quaker 传统则用 Spirit、Presence、Light 等语言理解其来源。专业的研究不需要仓促把其中一方“证明”为另一方，而是清楚区分解释层次。</p>'''), '04 · GROUP MYSTICISM')}
-{section('Practice：练习感受“群体”而不是只听自己','''<div class="practice-card"><span>20–30 分钟 · 3–8 人</span><ol><li>围成圆形，不放桌子或只放一个很小的中心物。</li><li>开始前只说明：这是共同静默，不要求分享。</li><li>前 3 分钟感受身体和房间。</li><li>接下来不再给指导；同时留意“我”与“我们”的注意如何变化。</li><li>结束后每人只用一句话回答：“刚才房间里，有什么是我一个人做不出来的？”</li><li>不互相评论。</li></ol></div>''','05 · PRACTICE')}
+{section('练习：感受“群体”，而不是只听自己','''<div class="practice-card"><span>20–30 分钟 · 3–8 人</span><ol><li>围成圆形，不放桌子或只放一个很小的中心物。</li><li>开始前只说明：这是共同静默，不要求分享。</li><li>前 3 分钟感受身体和房间。</li><li>接下来不再给指导；同时留意“我”与“我们”的注意如何变化。</li><li>结束后每人只用一句话回答：“刚才房间里，有什么是我一个人做不出来的？”</li><li>不互相评论。</li></ol></div>''','05 · PRACTICE')}
 {section('Queries', query_cards(['我有没有把“群体经验”浪漫化，以至于害怕普通、干燥、没有感觉的 Meeting？','当别人和我意见不同，我是否仍有可能体验到一种不等于认同的 unity？','什么样的空间、节奏与规则，会帮助一群人少一点表演，多一点共同注意？']), '06 · QUERIES')}
 </article>{source_box([('Howard H. Brinton, Friends for 300 Years','第4章关于 collective silent worship、unity 与 group meditation 的讨论。'),('Patricia Loring, Spiritual Discernment','Gathered meeting 与 corporate discernment / unity 的关系。')])}</div>
 '''
@@ -504,14 +1019,14 @@ business_body = f'''
 {section('为什么一个宗教群体发展出一种独特的决策法？','''<p>17世纪的 Friends 很快就遇到现实问题：救济受迫害者、婚姻、教育、旅行传道、财务、纪律与公共行动都需要组织。但一个强调“内在引领”的群体，怎样避免又建立一个由外部权威支配的制度？</p><p>由此逐渐形成 <strong>Meeting for Worship for Business</strong>：议事不是从 worship 中抽离出来的世俗事务，而是在同一种共同聆听与明辨中处理具体事项。</p>''','01 · ORIGIN')}
 {exhibit_figure('assets/curated/free-quaker-interior.jpg','HISTORIC INTERIOR · PHILADELPHIA','议事并不需要“董事会式”的空间','这是费城 Free Quaker Meeting House 的历史建筑内部，并不是某一次 Business Meeting 的现场照片。它在这里作为空间史料出现：Quaker corporate life 长期在朴素、可彼此看见的环境中处理敬拜与公共事务。','U.S. National Park Service',VISUAL_SOURCES['free_interior'],'Public domain (U.S.)','article-exhibit')}
 {decision_visual()}
-{section('Voting、Consensus、Sense of the Meeting','''<div class="compare-table"><div class="row head"><span>机制</span><span>核心问题</span><span>结束条件</span><span>风险</span></div><div class="row"><b>多数表决</b><span>哪个选项票更多？</span><span>达到规则票数</span><span>少数意见被合法压过</span></div><div class="row"><b>Consensus</b><span>我们能接受什么？</span><span>达到足够一致</span><span>可能滑向最低共同点或谈判</span></div><div class="row accent"><b>Sense of the Meeting</b><span>此刻什么方向最忠于 Truth / leading？</span><span>Meeting 形成可被辨认的 unity / clearness</span><span>若缺少敬拜精神，也可能只是假装的“无投票共识”</span></div></div><p>Patricia Loring 特别强调，Quaker unity 不是 agreement、consensus、compromise 或最低共同点。不同意见仍可能存在，但群体可能对“现在应该怎样前进”出现更深的共同清晰。</p>''','02 · THREE MODELS')}
+{section('表决、共识与聚会的共同辨识','''<div class="compare-table"><div class="row head"><span>机制</span><span>核心问题</span><span>结束条件</span><span>风险</span></div><div class="row"><b>多数表决（Voting）</b><span>哪个选项票更多？</span><span>达到规则票数</span><span>少数意见被合法压过</span></div><div class="row"><b>共识（Consensus）</b><span>我们能接受什么？</span><span>达到足够一致</span><span>可能滑向最低共同点或谈判</span></div><div class="row accent"><b>聚会的共同辨识（Sense of the Meeting）</b><span>此刻什么方向最忠于真理与内在引领？</span><span>聚会形成可被辨认和承担的合一与清晰</span><span>若缺少敬拜精神，也可能只是假装的“无投票共识”</span></div></div><p>帕特里夏·洛林（Patricia Loring）特别强调，贵格会的合一不是意见完全一致（agreement）、普通共识（consensus）、妥协（compromise）或最低共同点。不同意见仍可能存在，但群体可能对“现在应该怎样前进”出现更深的共同清晰。</p>''','02 · THREE MODELS')}
 {research_note('为什么“没有反对意见”仍然可能不是 unity？','''<p>沉默可能来自清晰，也可能来自权力差异、疲惫、害怕冲突或对 Clerk 的顺从。因此严肃的 Meeting for Business 会主动听取关键保留意见，尤其当议题重大时。真正的 unity 不是把分歧消音，而是让分歧在共同敬拜中获得足够空间，直到它被理解、转化，或被承认仍然存在。</p>''')}
 {section('Clerk：不是主席','''<div class="role-grid"><article><b>Chairperson</b><p>通常负责控制议程、分配发言、维持程序，必要时推动表决。</p></article><article class="accent"><b>Clerk</b><p>准备议程并照看秩序，但关键任务是<strong>听整个 Meeting</strong>：辨认何时接近清晰，并尝试把 emerging sense 写成 minute，交回群体检验。</p></article></div><p>因此 Clerk 的权威不是“我决定”，而是“我试着说出我听见这个 Meeting 正在形成的东西”。如果群体认为措辞不对，minute 就继续修改，甚至整个议题被推迟。</p>''','03 · CLERK')}
 {section('互动案例：12个人要不要搬迁社区空间？','''<div class="case-lab" id="caseLab"><div class="case-story"><p><strong>情境</strong>：租约即将到期。新空间更大、更便宜，但离原社区 4 公里。12位核心成员中，7人赞成、3人反对、2人不确定。</p><p>你会怎么处理？</p></div><div class="case-options"><button data-case="vote">A · 现在投票</button><button data-case="consensus">B · 继续协商到大家都能接受</button><button data-case="sense">C · 进入 Meeting for Business 的明辨过程</button></div><div id="caseResult" class="case-result">选择一种路径，看它真正优化的是什么。</div></div>''','04 · CASE LAB')}
 {section('什么时候“不决定”反而更成熟？','''<p>Brinton 记录，Friends 在重大议题上可能长时间等待 unity。这个传统很容易被现代组织理解成低效率，但它提醒我们：<strong>“做出决定”与“真正清楚”不是同一件事。</strong></p><p>当然，现实并非所有事项都能无限等待。成熟实践需要区分：哪些只是执行层面的 routine business，哪些会伤及共同体、使命或重大价值，需要更多时间。</p>''','05 · WAITING')}
 {section('Minute：不是会后整理，而是现场检验','''<p>Quaker business 中的 minute 常常在现场形成。Clerk 尝试把自己听见的 emerging sense 写成一句或几句清楚的文字，再读回给 Meeting。这个动作非常重要，因为“感觉差不多了”会被迫转化为具体语言。</p><p>文字一旦不准确，隐藏的分歧就会显现出来。于是 minute 既是记录，也是检验工具：群体是在认可同一个方向，还是只是在各自脑中认可不同的东西？</p>'''+research_note('Clerk 的艺术：既不能过早总结，也不能永远不总结','''<p>过早 minute 会把活的明辨压成结论；过晚 minute 又可能让 Meeting 在重复意见中失去方向。Clerk 需要同时听内容、情绪、沉默与群体能量，却不能把个人偏好偷偷写成“Meeting 的声音”。</p>'''), '06 · MINUTE')}
 {section('一场 90 分钟 Meeting for Business 的简化模板','''<div class="agenda"><div><b>00–10</b><span>共同静默，重新记住“为何在这里”</span></div><div><b>10–20</b><span>事实澄清：只说已知信息，不抢着立场辩论</span></div><div><b>20–50</b><span>围绕议题贡献，Clerk 保护节奏与静默</span></div><div><b>50–60</b><span>更长静默；让意见从“我的方案”退回共同中心</span></div><div><b>60–75</b><span>Clerk 尝试陈述 emerging sense / draft minute</span></div><div><b>75–85</b><span>Meeting 检验措辞；必要时承认尚未形成 clearness</span></div><div><b>85–90</b><span>静默结束，确认后续责任</span></div></div><p class="fineprint">这是现代学习用模板，不是贵格会统一规定。</p>''','07 · PRACTICAL TEMPLATE')}
-</article>{source_box([('Howard H. Brinton, Friends for 300 Years','第6章 Reaching Decisions：无投票、clerk、sense of meeting 与 unity 的历史及方法。'),('Jim Pym, Listening to the Light','“A New Way of Working—the Quaker business method”。'),('Patricia Loring, Spiritual Discernment','关于 meeting for business 中 unity 与 corporate guidance 的解释。')])}</div>
+</article>{source_box([('Howard H. Brinton, Friends for 300 Years','第6章《达成决定》（Reaching Decisions）：无投票、书记、聚会的共同辨识与合一的历史及方法。'),('Jim Pym, Listening to the Light','《一种新的工作方式》（A New Way of Working），讨论贵格会议事方法。'),('Patricia Loring, Spiritual Discernment','关于议事会中的合一与群体引导。')])}</div>
 '''
 pages['business.html'] = page_shell('business.html','不投票，怎么做决定？','Meeting for Worship for Business 把“议事”重新放回共同聆听：不以多数压倒少数，也不把妥协当成终点，而是辨认群体是否真的清楚。',business_body)
 
@@ -593,7 +1108,7 @@ history_body = f'''
 <div class="time-item"><time>1720–1772</time><span class="timeline-node"></span><div class="timeline-card"><h3>John Woolman：当 inward leading 变成生活伦理</h3><p>Woolman 的反奴隶制见证不是一次“立场表态”，而是长期旅行、劝说、消费选择与自我检验的过程。他把一个重要问题留给后来的 Friends：一份 leading 如何经过时间与共同体检验，最终改变生活方式与公共见证？</p><div class="timeline-tag">leading → witness</div></div></div>
 <div class="time-item"><time>1800s</time><span class="timeline-node"></span><div class="timeline-card"><h3>分裂、福音派与多种 Quaker 形态</h3><p>十九世纪 Friends 内部发生重大分歧，福音派、理性主义、传统主义等力量重新排列。不同地区逐渐发展出 programmed / pastoral 与 unprogrammed 等明显不同的敬拜与组织形态。</p><div class="timeline-tag">plural traditions</div></div></div>
 <div class="time-item"><time>1900–1930s</time><span class="timeline-node"></span><div class="timeline-card"><h3>现代重新解释：历史、教育与社会见证</h3><p>现代 Friends 开始系统重读自身传统。Rufus Jones 等人推动神秘主义研究；Pendle Hill 于 1930 年成立，成为学习、静修与实验性 Quaker life 的重要场域。Meeting 不再只被解释为宗派礼仪，也被重新思考为教育、共同体与社会行动的来源。</p><div class="timeline-tag">retrieval & experiment</div></div></div>
-<div class="time-item"><time>1950s</time><span class="timeline-node"></span><div class="timeline-card"><h3>Brinton：Quakerism as method / group mysticism</h3><p>Howard Brinton 用“method”而不是固定教义体系来理解 Quakerism，并以“group mysticism”说明它既是 inward experience，也是社会性、共同体性的宗教实践。这一框架对今天理解 Meeting 仍极有解释力。</p><div class="timeline-tag">method, not mere form</div></div></div>
+<div class="time-item"><time>1950s</time><span class="timeline-node"></span><div class="timeline-card"><h3>布林顿：把贵格会理解为“方法”与“群体神秘主义”</h3><p>Howard Brinton 用“method”而不是固定教义体系来理解 Quakerism，并以“group mysticism”说明它既是 inward experience，也是社会性、共同体性的宗教实践。这一框架对今天理解 Meeting 仍极有解释力。</p><div class="timeline-tag">method, not mere form</div></div></div>
 <div class="time-item"><time>1960s–1990s</time><span class="timeline-node"></span><div class="timeline-card"><h3>Clearness、discernment 与现代实践语言</h3><p>Patricia Loring 记录，北美年轻 Friends 在二十世纪六十年代重新发展 clearness committee，使它从婚姻、membership 等传统“clearance”用途，逐渐成为个人重要 leading 与生命问题的 discernment 工具。Palmer 等人进一步把 Quaker DNA 转译到教育与领导力领域。</p><div class="timeline-tag">tradition → translation</div></div></div>
 <div class="time-item"><time>Today</time><span class="timeline-node"></span><div class="timeline-card"><h3>一个全球、多分支、内部差异很大的传统</h3><p>今天谈“Quaker Meeting”必须先问语境：哪一个国家、哪一个 Yearly Meeting、programmed 还是 unprogrammed、Christian language 是否居于中心？本站主要研究 unprogrammed Meeting 与 Pendle Hill 相关现代传统，同时明确标注这一视角的边界。</p><div class="timeline-tag">context matters</div></div></div>
 </div></section>
@@ -611,7 +1126,7 @@ comparisons_body = '''
 <tr><th>Quaker Meeting</th><td>Light / Truth / Spirit / divine guidance（语言因传统而异）</td><td>共同等待、检验与明辨</td><td>角色服务于 Meeting，不拥有真理</td><td>faithfulness、unity、right action</td><td>不是以体验改善或问题解决为唯一目的</td></tr>
 <tr><th>Mindfulness</th><td>当下经验与觉察</td><td>可个人也可团体</td><td>教师提供练习框架</td><td>觉察、减轻反应性等</td><td>Meeting 强调 corporate listening 与可能的 leading</td></tr>
 <tr><th>禅修 / Zen</th><td>依宗派而异，常含觉悟实践</td><td>共同修行但未必共同明辨</td><td>师承通常更明确</td><td>禅定、洞见、觉悟</td><td>Meeting 无固定 meditation technique，也较少师徒结构</td></tr>
-<tr><th>Consensus</th><td>可接受的共同方案</td><td>协商差异</td><td>facilitator 管理过程</td><td>达成一致</td><td>Sense of Meeting 追求的是被辨认的 unity / rightness，不只是接受度</td></tr>
+<tr><th>共识（Consensus）</th><td>可接受的共同方案</td><td>协商差异</td><td>带领者管理过程</td><td>达成一致</td><td>聚会的共同辨识追求的是可被群体辨认和承担的合一／合宜性，而不只是“大家都能接受”</td></tr>
 <tr><th>Coaching</th><td>来访者目标与行动</td><td>通常一对一</td><td>coach 负责提问框架</td><td>清晰、行动、成长</td><td>澄心会避免以绩效目标或教练关系为中心</td></tr>
 <tr><th>Group Therapy</th><td>心理健康与关系模式</td><td>治疗性互动</td><td>受训治疗师</td><td>治疗与功能改善</td><td>Meeting 不是临床治疗，不以诊断或心理病理为框架</td></tr>
 <tr><th>Circle of Trust</th><td>Inner Teacher / soul / wholeness</td><td>用 touchstones 保护灵魂出现</td><td>facilitator 设计条件</td><td>wholeness、integrity</td><td>受 Quaker 影响，但结构更显性，且常使用第三物与特定 touchstones</td></tr>
@@ -626,41 +1141,41 @@ pages['comparisons.html'] = page_shell('comparisons.html','Meeting 与其他方�
 
 # --- glossary ---
 glossary_terms = [
-('Meeting','Meeting／会聚','既指一次聚集，也可指长期存在的地方共同体；不宜一律译成“会议”。','核心'),
-('Meeting for Worship','静默敬拜会','unprogrammed tradition 中以共同静默、等待与可能出现的 vocal ministry 为特征。','敬拜'),
-('Waiting','等候 / 静默等候','不是等待时间过去，而是带着期待、开放与可被引领的姿态。','敬拜'),
-('Inward Light','内在之光','Quaker 核心语言之一。历史上与 Christ / Spirit 关系紧密，现代不同 Friends 的解释不完全相同。','神学'),
-('That of God in everyone','每个人里面“属神的那一份”','常见 Quaker 表达，但历史语境与现代通俗解释之间存在差异，使用时宜保留复杂性。','神学'),
-('Gathered Meeting','被聚集的 Meeting','群体共同静默出现深层统一、临在或共同注意的经验。不是人为制造的“高峰状态”。','敬拜'),
-('Vocal Ministry','受感分享 / 口头 ministry','在静默中经辨识后说出的分享；不是讨论发言或自由麦。','敬拜'),
+('Meeting','聚会／会聚','既指一次聚集，也可指长期存在的地方共同体；因此不宜一律译成日常行政语境里的“会议”。','核心'),
+('Meeting for Worship','静默敬拜','非程序化传统中，以共同静默、等候，以及可能出现的受感分享为主要特征。','敬拜'),
+('Waiting','等候／静默等候','不是等待时间过去，而是带着期待、开放与可被引领的姿态。','敬拜'),
+('Inward Light','内在之光','贵格会核心语言之一。历史上与基督、圣灵的语言紧密相连；现代不同会友对此有不同理解。','神学'),
+('That of God in everyone','每个人里面“属神的那一份”','贵格会常见表达，但历史语境与现代通俗解释并不完全相同，使用时宜保留这种复杂性。','神学'),
+('Gathered Meeting','深度聚集的聚会','群体在共同静默中出现深层合一、临在或共同注意的经验；不是人为制造的“高峰状态”。','敬拜'),
+('Vocal Ministry','受感分享／口头事奉','在静默中经明辨后说出的分享；不是普通讨论发言，也不是自由麦。','敬拜'),
 ('Leading','内在引领','一种持续推动人走向某行动或方向的内在感知，需要时间与共同体检验。','明辨'),
 ('Concern','内在关切','比“一时兴趣”更持续、更具责任感的召唤，可发展为行动或 witness。','明辨'),
-('Discernment','明辨 / 辨识','分辨不同冲动、声音与可能引领的过程，既有个人层面，也有 corporate 层面。','明辨'),
+('Discernment','明辨／辨识','分辨不同冲动、声音与可能引领的过程，既有个人层面，也有群体层面。','明辨'),
 ('Unity','合一','不是意见完全相同，而是群体在一个方向上形成更深的共同清晰。','议事'),
-('Sense of the Meeting','Meeting 的共同辨识','Clerk 与群体共同辨认“这个 Meeting 此刻正在形成什么判断”。不等同普通共识。','议事'),
-('Clerk','Clerk / 书记','不是 chairman。照看议程、节奏与 minute，并尝试听出 sense of the meeting。','议事'),
-('Minute','会议纪要 / 决议措辞','在 Quaker business 中常现场形成，用来记录已经被 Meeting 认可的 sense。','议事'),
-('Standing Aside','保留但不阻挡','个人仍有不同判断，但不认为自己的保留足以阻挡 Meeting 前进。具体实践因群体而异。','议事'),
+('Sense of the Meeting','聚会的共同辨识','书记与群体共同辨认“这个聚会此刻正在形成什么判断”；它不等同于普通意义上的共识。','议事'),
+('Clerk','书记','不是主席。书记照看议程、节奏与决议纪要，并尝试听出整个聚会正在形成的共同辨识。','议事'),
+('Minute','决议纪要／决议措辞','在贵格会议事中常于现场形成，用来记录已经被聚会认可的共同辨识。','议事'),
+('Standing Aside','保留但不阻挡','个人仍有不同判断，但不认为自己的保留足以阻挡聚会继续前进；具体实践因群体而异。','议事'),
 ('Clearness Committee','澄心会','一小群人以开放问题、静默、保密帮助焦点人获得更清晰的辨识。','实践'),
-('Query','省察问题 / Query','不是考试题，而是让个人与共同体持续检视实践与生命状态的问题。','实践'),
-('Testimony','生活见证 / Testimony','不是抽象信条，而是从信仰实践中逐渐形成的生活方式与公共见证，如 peace、simplicity、integrity 等。','见证'),
-('Third Thing','第三物','Palmer 的学习语境中，连接人与人的文本、诗歌、数据、经验等共同对象。','共学'),
-('Meeting for Learning','共学 Meeting','把学习理解为人与人围绕第三物共同探寻 Truth 的过程。','共学'),
-('Unprogrammed Worship','非程序化敬拜 / 无预设程序的敬拜','没有预先安排讲道、赞美诗或固定发言次序，以共同静默与可能出现的 vocal ministry 为主要形式。','敬拜'),
-('Programmed Worship','程序化敬拜','在部分 Friends 传统中，有牧者、讲道、音乐与预先安排的礼拜结构；并不因此“不是真正的 Quaker”。','敬拜'),
-('Seasoning','酝酿 / 让议题成熟','让一个 concern、proposal 或 leading 经历时间、祷告、讨论与共同体检验，不急于进入正式决定。','明辨'),
-('Threshing Session','预备性深谈 / 梳理会','在正式 Meeting for Business 决策前，充分呈现事实、感受与分歧，但通常不在此时形成决定。','议事'),
-('Right Ordering','合宜的秩序 / 正当安排','指角色、责任与程序服务于 Spirit / Truth，而不是单纯追求行政效率。不同传统用法有所差异。','议事'),
-('Holding in the Light','在光中守望 / 把某人放在光中','为一个人或处境保持祷告式、非操控性的关注；不是在脑中替对方设计解决方案。','实践'),
-('Elder','Elder / 长老性角色','历史上承担 ministry 与 worship 的照看、辨识和培育；现代不同 Meeting 是否正式设置该角色差异很大。','共同体'),
-('Faith and Practice','Faith and Practice / 信仰与实践手册','许多 Yearly Meetings 编纂的传统、经验、纪律、Advices & Queries 等文本；不同 Yearly Meeting 版本并不相同。','共同体'),
+('Query','省察问题','不是考试题，而是让个人与共同体持续检视实践与生命状态的问题。','实践'),
+('Testimony','生活见证','不是抽象信条，而是从信仰实践中逐渐形成的生活方式与公共见证，例如和平、简朴与诚信。','见证'),
+('Third Thing','第三物','在帕尔默的学习语境中，指连接人与人的共同对象，例如文本、诗歌、数据、案例、图像或经验。','共学'),
+('Meeting for Learning','共学会','把学习理解为人与人围绕第三物共同探寻真实的过程。','共学'),
+('Unprogrammed Worship','非程序化敬拜／无预设程序的敬拜','没有预先安排讲道、赞美诗或固定发言次序，以共同静默和可能出现的受感分享为主要形式。','敬拜'),
+('Programmed Worship','程序化敬拜','在部分贵格会传统中，会有牧者、讲道、音乐与预先安排的礼拜结构；这并不表示它“不是真正的贵格会”。','敬拜'),
+('Seasoning','酝酿／让议题成熟','让一份内在关切、提案或内在引领经历时间、祷告、讨论与共同体检验，不急于进入正式决定。','明辨'),
+('Threshing Session','预备性深谈／梳理会','在正式议事决策前，充分呈现事实、感受与分歧，但通常不在此阶段形成决定。','议事'),
+('Right Ordering','合宜秩序／正当安排','指角色、责任与程序服务于灵与真理，而不是单纯追求行政效率；不同传统的具体用法有所差异。','议事'),
+('Holding in the Light','在光中守望／把某人放在光中','为一个人或处境保持祷告式、非操控性的关注；不是在脑中替对方设计解决方案。','实践'),
+('Elder','敬拜照看者／长老性角色','历史上承担敬拜与受感分享的照看、辨识和培育；现代不同聚会是否正式设置该角色，差异很大。','共同体'),
+('Faith and Practice','信仰与实践手册','许多年会编纂的传统、经验、纪律、劝勉与省察问题等文本；不同年会的版本并不相同。','共同体'),
 ('Advices & Queries','劝勉与省察问题','用于持续检视个人与共同体生活的劝勉和问题，不是统一教义问答。','实践'),
 ]
-glossary_cards=''.join(f'<article class="glossary-card" data-term="{html.escape((en+cn+cat).lower())}"><span>{cat}</span><h3>{en}</h3><h4>{cn}</h4><p>{desc}</p></article>' for en,cn,desc,cat in glossary_terms)
+glossary_cards=''.join(f'<article class="glossary-card" data-term="{html.escape((en+cn+cat).lower())}"><span>{cat}</span><h3>{cn}</h3><h4>（{en}）</h4><p>{desc}</p></article>' for en,cn,desc,cat in glossary_terms)
 glossary_body=f'''
-<section class="glossary-top"><div><span class="kicker">WORDS MATTER</span><h2>很多误解，来自翻译过快</h2><p>贵格会大量词汇表面上很普通：meeting、concern、minute、clerk、unity……但进入传统语境后都有特殊含义。本站宁可暂时保留英文，也不急着用一个中文词把复杂性抹平。</p></div><label class="search-box">搜索术语<input id="glossarySearch" placeholder="例如：unity / 澄心 / 静默"/></label></section>
+<section class="glossary-top"><div><span class="kicker">WORDS MATTER</span><h2>很多误解，来自翻译过快</h2><p>贵格会许多术语表面上很普通，例如聚会、关切、纪要、书记、合一；但进入传统语境后，都有更具体的历史与实践含义。本站以中文主称帮助阅读，同时保留英文原词，方便继续查阅原典。</p></div><label class="search-box">搜索术语<input id="glossarySearch" placeholder="例如：合一 / unity / 澄心 / 静默"/></label></section>
 <section class="content-section"><div class="filter-row"><button class="filter active" data-filter="all">全部</button><button class="filter" data-filter="敬拜">敬拜</button><button class="filter" data-filter="明辨">明辨</button><button class="filter" data-filter="议事">议事</button><button class="filter" data-filter="实践">实践</button><button class="filter" data-filter="共学">共学</button><button class="filter" data-filter="神学">神学</button><button class="filter" data-filter="共同体">共同体</button></div><div class="glossary-grid" id="glossaryGrid">{glossary_cards}</div></section>
-<section class="content-section"><div class="section-head"><span>HOW TO READ</span><h2>{smart_heading('术语不是“对照表”，而是一张传统内部的关系网')}</h2></div><div class="term-relations"><article><b>Waiting → Ministry</b><p>先有等候，才谈得上受感分享；否则 ministry 很容易退化成自由发言。</p></article><article><b>Leading → Seasoning → Testing</b><p>引领不是立即执行的冲动；它需要时间、共同体与生活后果的检验。</p></article><article><b>Unity → Sense of the Meeting → Minute</b><p>合一不是“大家都一样想”，而是在足够清晰时形成可被书写和承担的共同方向。</p></article><article><b>Inner Light → Testimony → Witness</b><p>Light 若只停在体验层面，会失去 Quaker tradition 强调的伦理与公共行动维度。</p></article></div></section>
+<section class="content-section"><div class="section-head"><span>HOW TO READ</span><h2>{smart_heading('术语不是“对照表”，而是一张传统内部的关系网')}</h2></div><div class="term-relations"><article><b>等候 → 受感分享</b><small>Waiting → Ministry</small><p>先有等候，才谈得上受感分享；否则受感分享很容易退化成自由发言。</p></article><article><b>内在引领 → 酝酿 → 检验</b><small>Leading → Seasoning → Testing</small><p>引领不是立即执行的冲动；它需要时间、共同体与生活后果的检验。</p></article><article><b>合一 → 聚会的共同辨识 → 决议纪要</b><small>Unity → Sense of the Meeting → Minute</small><p>合一不是“大家都一样想”，而是在足够清晰时形成可被书写和承担的共同方向。</p></article><article><b>内在之光 → 生活见证 → 公共见证</b><small>Inner Light → Testimony → Witness</small><p>内在之光若只停在体验层面，就会失去贵格会传统强调的伦理与公共行动维度。</p></article></div></section>
 <section class="content-section">{callout('翻译原则','<p>本站优先“先懂后译”：先确认词在贵格会实践中的功能，再选择中文。对于 <em>Meeting、Clerk、Sense of the Meeting</em> 这类一译就容易误导的词，宁可中英并列。</p>')}</section>
 '''
 pages['glossary.html']=page_shell('glossary.html','Quaker Meeting 术语表','从 Meeting、Waiting、Inward Light 到 Clerk、Unity、Sense of the Meeting：用准确而不僵硬的中文建立一张概念地图。',glossary_body,label='GLOSSARY')
@@ -671,7 +1186,7 @@ research_body = '''
 <section class="content-section visual-method"><div class="section-head"><span>VISUAL SOURCES</span><h2>图像也要像文本一样被校对</h2><p>研究型网站不能把历史图片当“气氛素材”。我们会问：图像什么时候制作？是同时代记录、后世艺术想象，还是现代建筑照片？谁拥有版权？它能支持什么判断，又不能支持什么判断？</p></div>
 ''' + exhibit_pair(
   exhibit_figure('assets/curated/george-fox.jpg','SOURCE TYPE · PORTRAIT','George Fox：一张带着限定词的肖像','Commons 将这幅 1677 年图像标为“Supposed portrait”。这意味着它具有同时代价值，却仍不应被写成“这就是 Fox 的确定长相”。','Egbert van Heemskerk（归属）',VISUAL_SOURCES['fox'],'Public domain','compact'),
-  exhibit_figure('assets/curated/margaret-fell.jpg','SOURCE TYPE · LATER IMPRESSION','Margaret Fell：后世如何想象一位早期 Friend','这幅形象来自后世蚀刻。它适合研究 Margaret Fell 在后世记忆中的视觉形象，却不能被当作十七世纪现场肖像。','Robert Spence engraving',VISUAL_SOURCES['fell'],'Public domain','compact')
+  exhibit_figure('assets/curated/margaret-fell.jpg','SOURCE TYPE · LATER IMPRESSION','玛格丽特·费尔：后世如何想象一位早期会友','这幅形象来自后世蚀刻。它适合研究 Margaret Fell 在后世记忆中的视觉形象，却不能被当作十七世纪现场肖像。','Robert Spence engraving',VISUAL_SOURCES['fell'],'Public domain','compact')
 ) + '''<div class="curator-note"><span>PROVENANCE</span><p>因此，本站图说会把“作者 / 年代 / 授权 / 不确定性”尽可能留在图片旁边，而不是把来源藏到页面最底部。<a href="visual-credits.html">查看全站图像与史料说明 →</a></p></div></section>
 <section class="content-section"><div class="section-head"><span>PRIMARY LIBRARY</span><h2>第一版核心文献</h2></div><div class="book-grid">
 <article><span>历史 / 方法</span><h3>Howard H. Brinton<br/><em>Friends for 300 Years</em></h3><p>本站最重要的骨架来源。尤其是 The Meeting for Worship、Vocal Ministry、Reaching Decisions、The Meeting Community。</p><small>1952；后有 Pendle Hill 版</small></article>
@@ -687,7 +1202,7 @@ research_body = '''
 <section class="content-section"><div class="section-head"><span>RESEARCH DISCIPLINE</span><h2>六条研究纪律：避免把 Quakerism 做成“灵性语录库”</h2></div><div class="research-discipline"><article><span>01</span><h3>先确认语境</h3><p>同一个词在 1650s、Quietism、20世纪 liberal Quaker 与 evangelical Friends 中，含义可能并不相同。</p></article><article><span>02</span><h3>区分原典与现代转译</h3><p>Palmer、Loring、Pym 的现代实践语言很有价值，但不能反向假定早期 Friends 就以同样概念理解自己。</p></article><article><span>03</span><h3>不把“经验”绝对化</h3><p>经验是材料，也是证据来源之一；还需要历史、共同体、伦理后果与内部一致性来检验。</p></article><article><span>04</span><h3>保留传统内部争论</h3><p>Inner Light 是 Christological、mystical、humanist 还是 universalist？不同 Friends 会给出不同答案。</p></article><article><span>05</span><h3>描述实践，也描述失败方式</h3><p>“不投票”可能退化成隐形权力；“静默”可能掩盖冲突；“开放问题”可能变成精致的建议。</p></article><article><span>06</span><h3>把 inward 与 outward 放在一起</h3><p>如果研究只谈内在体验，却不看 testimony、community 与 witness，就会失去 Quaker tradition 的伦理结构。</p></article></div></section>
 <section class="content-section"><div class="section-head"><span>SOURCE MAP</span><h2>不同文献，各自在回答什么问题？</h2></div><div class="source-matrix"><article><b>Brinton</b><span>结构问题</span><p>Meeting 为何是一种 group mysticism？Quakerism 为什么可以被理解为 method？Worship、ministry、decision、community 如何连成一个整体？</p></article><article><b>Thomas Kelly</b><span>内在生命</span><p>Inner Light 如何从固定静默时段变成 workaday life 中持续的 inward orientation？</p></article><article><b>Michael Marsh</b><span>哲学问题</span><p>Inner Light 是什么隐喻？“我看见了”为什么不自动等于“我看对了”？truth、love、rightness、beauty 如何成为辨识视角？</p></article><article><b>Patricia Loring</b><span>辨识问题</span><p>怎样区分 leading 与自我意志？时间、果实、共同体与 unity 如何成为 tests？澄心会为什么不是提问技巧？</p></article><article><b>Parker Palmer</b><span>教育问题</span><p>Meeting 的认识论如何进入学习？人—人—第三物、群体检验、静默与教师角色之间是什么关系？</p></article><article><b>Inward Light</b><span>现代思想史</span><p>20世纪 Friends 怎样面对神学模糊、心理学、Jung、跨宗教与“现代人还能怎样谈 Light”的问题？</p></article></div></section>
 <section class="content-section"><div class="section-head"><span>CONTESTED CONCEPTS</span><h2>四个不能过早“讲简单”的概念</h2></div><div class="contested-grid"><article><h3>Inner Light</h3><p><b>不能只说：</b>“相信自己的直觉。”</p><p><b>需要追问：</b>Light 与 Christ / Spirit 的历史关系是什么？现代自然主义解释怎样出现？内在经验如何接受检验？</p></article><article><h3>Group Mysticism</h3><p><b>不能只说：</b>“大家一起能量更强。”</p><p><b>需要追问：</b>Brinton 所说的 group 是宗教共同体、社会有机体还是神学现实？现代心理学解释与传统解释如何区分层次？</p></article><article><h3>Sense of the Meeting</h3><p><b>不能只说：</b>“Quaker 版 consensus。”</p><p><b>需要追问：</b>unity、clerk、minute、standing aside、waiting 与 worship 如何共同构成这一实践？</p></article><article><h3>Clearness</h3><p><b>不能只说：</b>“用开放问题帮助对方找答案。”</p><p><b>需要追问：</b>它从 clearance 到 discernment 的历史变化是什么？为何 restraint、prayerful attentiveness 与 community testing 比“好问题”更核心？</p></article></div></section>
-<section class="content-section"><div class="section-head"><span>RESEARCH ROADMAP</span><h2>后续研究专题</h2></div><div class="roadmap-list"><article><b>Waiting upon the Lord</b><p>Fox、Barclay、Quietism、Brinton 与现代 liberal Quaker 的语言变迁。</p></article><article><b>Gathered Meeting</b><p>历史见证、Rufus Jones / Brinton、群体心理学与宗教经验研究。</p></article><article><b>Sense of the Meeting</b><p>历史 practice、现代 consensus 理论、组织治理与 conflict transformation。</p></article><article><b>Inner Light</b><p>Christological、mystical、humanist、universalist 等不同解释路线。</p></article><article><b>Quakerism & Psychology</b><p>Jung、Friends Conference on Religion and Psychology、Clearness 与现代心理治疗边界。</p></article><article><b>From Meeting to Circle of Trust</b><p>Parker Palmer 如何把 Quaker DNA 转译成适用于教育、领导力与公共生活的实践。</p></article></div></section>
+<section class="content-section"><div class="section-head"><span>RESEARCH ROADMAP</span><h2>后续研究专题</h2></div><div class="roadmap-list"><article><b>等候主（Waiting upon the Lord）</b><p>福克斯、巴克莱、静默主义、布林顿与现代自由派贵格会的语言变迁。</p></article><article><b>深度聚集的聚会（Gathered Meeting）</b><p>历史见证、鲁弗斯·琼斯与布林顿、群体心理学及宗教经验研究。</p></article><article><b>聚会的共同辨识（Sense of the Meeting）</b><p>历史实践、现代共识理论、组织治理与冲突转化。</p></article><article><b>内在之光（Inner Light）</b><p>基督论式、神秘主义式、人文主义式、普世主义式等不同解释路线。</p></article><article><b>贵格会与心理学（Quakerism & Psychology）</b><p>荣格、贵格会宗教与心理学会议、澄心会与现代心理治疗边界。</p></article><article><b>从聚会到信任圈（From Meeting to Circle of Trust）</b><p>帕克·帕尔默如何把贵格会传统基因转译成适用于教育、领导力与公共生活的实践。</p></article></div></section>
 <section class="content-section"><div class="section-head"><span>READING PATHS</span><h2>三条进阶阅读路径</h2></div><div class="reading-trails"><article><span>A · Meeting 的骨架</span><p>Brinton → Jim Pym → Patricia Loring</p><small>先理解 worship / ministry / business / community，再进入现代 discernment。</small></article><article><span>B · Inner Light 的深处</span><p>Thomas Kelly → Michael Marsh → Inward Light</p><small>从实践语言进入哲学与心理学争论，避免把 Light 口号化。</small></article><article><span>C · 从 Quaker 到公共实践</span><p>Parker Palmer → Clearness → Circle of Trust</p><small>观察传统如何被转译到教育、领导力、组织与个人生命。</small></article></div></section>
 <section class="content-section"><div class="research-note"><h2>一个重要提醒</h2><p>“贵格会”不是单一、静态、完全一致的传统。不同 Yearly Meetings、programmed / unprogrammed、evangelical / conservative / liberal 等分支，在基督论、圣经、牧师制度、敬拜形式和社会议题上可以有很大差异。本站当前版本以<strong>unprogrammed Meeting、Pendle Hill 传统与相关现代作者</strong>为主要研究入口，并会持续标注这一视角的边界。</p></div></section>
 '''
@@ -697,14 +1212,14 @@ pages['research.html']=page_shell('research.html','Quaker Meeting 研究室','�
 visual_credits_body = f'''
 <section class="credits-intro"><div><span class="kicker">PROVENANCE · LICENSE · UNCERTAINTY</span><h2>{smart_heading('每一张历史图片，都应该知道自己从哪里来')}</h2><p>本站把图片分成三类：历史图像、现代地点/建筑照片、解释性图解。历史图像会尽量说明它是否同时代、是否属于后世艺术家印象；现代照片则保留作者与授权。图像帮助理解，但不替代原典。</p></div></section>
 <section class="content-section"><div class="credits-grid">
-{exhibit_figure('assets/curated/george-fox.jpg','PORTRAIT · 1677','George Fox（被认为是同时代肖像）','Wikimedia Commons 以 “Supposed portrait of George Fox, 1677” 收录。本站保留这个限定语，不把归属不确定性抹掉。','Egbert van Heemskerk（归属）',VISUAL_SOURCES['fox'],'Public domain','credit')}
+{exhibit_figure('assets/curated/george-fox.jpg','PORTRAIT · 1677','George Fox（被认为是同时代肖像）','维基共享资源将此图标为“推定肖像”（Supposed portrait），并注明 1677 年。本站保留这个限定语，不把归属不确定性抹掉。','Egbert van Heemskerk（归属）',VISUAL_SOURCES['fox'],'Public domain','credit')}
 {exhibit_figure('assets/curated/margaret-fell.jpg','LATER IMPRESSION','Margaret Fell','Robert Spence 的蚀刻细节，属于后世艺术形象，不是十七世纪写生肖像。','Robert Spence',VISUAL_SOURCES['fell'],'Public domain','credit')}
 {exhibit_figure('assets/curated/william-penn.jpg','PORTRAIT · 1695','William Penn','Francis Place 1695 年粉笔肖像；来源页称其为已知唯一一幅在 Penn 生前写生的肖像。','Francis Place',VISUAL_SOURCES['penn'],'Public domain','credit')}
 {exhibit_figure('assets/curated/john-woolman.jpg','PORTRAIT / MEMORY SKETCH','John Woolman','来源页认为原作很可能与 Woolman 的同时代友人 Robert Smith III 有关，同时指出图像存在后来的记忆性元素。','Probably Robert Smith III',VISUAL_SOURCES['woolman'],'Public domain in U.S.','credit')}
 {exhibit_figure('assets/curated/swarthmoor-hall.jpg','PLACE · 2005','Swarthmoor Hall','Cumbria 的 Swarthmoor Hall，与 Margaret Fell 及早期 Friends 网络密切相关。','Marion Dutcher',VISUAL_SOURCES['swarthmoor'],'CC BY-SA 2.0','credit')}
-{exhibit_figure('assets/curated/meetinghouse-interior.jpg','FIELD PHOTO · 2021','Quaker Meetinghouse interior','现代建筑照片，用来观察 Meeting House 的座位、隔断与朴素空间语言；不作为十七世纪室内的直接复原。','Pi3.124',VISUAL_SOURCES['interior'],'CC BY-SA 4.0','credit')}
+{exhibit_figure('assets/curated/meetinghouse-interior.jpg','FIELD PHOTO · 2021','贵格会聚会所室内','现代建筑照片，用来观察聚会所（Meeting House）的座位、隔断与朴素空间语言；不作为十七世纪室内的直接复原。','Pi3.124',VISUAL_SOURCES['interior'],'CC BY-SA 4.0','credit')}
 {exhibit_figure('assets/curated/arch-street.jpg','PLACE · 2013','Arch Street Friends Meeting House','费城重要 Quaker 建筑。建于 1803–05 年，后来扩建。','Beyond My Ken',VISUAL_SOURCES['arch'],'CC BY-SA 4.0','credit')}
-{exhibit_figure('assets/curated/free-quaker-interior.jpg','NPS DOCUMENTATION','Free Quaker Meeting House interior','美国国家公园管理局的建筑记录图像；作为美国联邦政府雇员职务作品，在美国属于公有领域。','U.S. National Park Service',VISUAL_SOURCES['free_interior'],'Public domain (U.S.)','credit')}
+{exhibit_figure('assets/curated/free-quaker-interior.jpg','NPS DOCUMENTATION','自由贵格会聚会所室内','美国国家公园管理局的建筑记录图像；作为美国联邦政府雇员职务作品，在美国属于公有领域。','U.S. National Park Service',VISUAL_SOURCES['free_interior'],'Public domain (U.S.)','credit')}
 </div></section>
 <section class="content-section">{callout('使用原则','<p>如果未来加入 AI 场景复原，本站会明确标记为“编辑性复原 / 非历史照片”，不让生成图像冒充档案材料。历史研究页优先使用可追溯来源的真实史料与建筑照片。</p>')}</section>
 '''
@@ -730,7 +1245,7 @@ pages['toolkit.html']=page_shell('toolkit.html','实践工具箱','从个人等�
 # --- assets ---
 css = r'''
 :root{--paper:#f2eee5;--paper2:#e8e1d4;--ink:#1f2723;--ink2:#3f4b45;--moss:#5d6d60;--sage:#8c9a8b;--gold:#b49a5c;--line:#cfc6b7;--white:#fffdf8;--shadow:0 16px 48px rgba(31,39,35,.08);--serif:ui-serif,"Songti SC","STSong","Noto Serif CJK SC",serif;--sans:ui-sans-serif,system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.78;letter-spacing:.01em}a{color:inherit;text-decoration:none}img,svg{max-width:100%}button,input,textarea{font:inherit}.skip-link{position:absolute;left:-999px;top:8px}.skip-link:focus{left:8px;background:#fff;padding:8px;z-index:99}.site-header{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;padding:14px clamp(20px,4vw,64px);background:rgba(242,238,229,.92);backdrop-filter:blur(16px);border-bottom:1px solid rgba(31,39,35,.08)}.brand{display:flex;align-items:center;gap:11px}.brand b{display:block;font-family:var(--serif);font-size:18px}.brand small{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--moss)}.brand-mark{width:34px;height:34px;border:1px solid var(--moss);border-radius:50%;position:relative}.brand-mark i{position:absolute;border:1px solid var(--gold);border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%)}.brand-mark i:nth-child(1){width:6px;height:6px;background:var(--gold)}.brand-mark i:nth-child(2){width:16px;height:16px}.brand-mark i:nth-child(3){width:26px;height:26px;opacity:.45}.main-nav{display:flex;gap:18px;font-size:13px}.main-nav a{padding:8px 0;color:#4d5852;border-bottom:1px solid transparent}.main-nav a:hover,.main-nav a.active{color:var(--ink);border-color:var(--gold)}.nav-toggle{display:none;background:none;border:0;font-size:24px}.page-hero{padding:72px clamp(22px,8vw,140px) 44px;border-bottom:1px solid var(--line)}.page-hero .hero-copy{max-width:940px}.kicker,.section-eyebrow,.section-head>span,.big-question>span{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--moss);font-weight:700}.page-hero h1{font:500 clamp(42px,6vw,82px)/1.08 var(--serif);margin:12px 0 20px}.page-hero p{font-size:18px;max-width:760px;color:var(--ink2)}.hero-line{width:74px;height:1px;background:var(--gold);margin-top:30px}.home-hero{min-height:76vh;display:grid;grid-template-columns:1.05fr .95fr;align-items:center;padding:80px clamp(24px,7vw,120px);background:var(--ink);color:var(--paper)}.home-copy h1{font:500 clamp(60px,8vw,110px)/.96 var(--serif);margin:18px 0 30px;letter-spacing:-.04em}.home-copy>p{max-width:650px;color:#d8d9d1;font-size:18px}.home-hero .kicker{color:#c4b991}.cta-row{display:flex;gap:12px;flex-wrap:wrap;margin:34px 0}.btn{display:inline-flex;justify-content:center;align-items:center;border:1px solid var(--ink);padding:12px 18px;border-radius:999px;cursor:pointer;transition:.2s;background:transparent}.btn.primary{background:var(--ink);color:var(--white)}.home-hero .btn.primary{background:var(--paper);color:var(--ink);border-color:var(--paper)}.btn.ghost{border-color:var(--line)}.home-hero .btn.ghost{color:var(--paper);border-color:#657069}.btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(0,0,0,.08)}.btn.inverted{background:var(--paper);color:var(--ink);border:0}.hero-note{margin-top:40px;display:flex;gap:12px;max-width:650px;color:#aeb7b0;font-size:13px}.hero-note span{width:34px;height:1px;background:var(--gold);margin-top:11px;flex:none}.circle-visual{text-align:center}.circle-visual svg{max-height:510px;overflow:visible}.circle-visual .seat circle{fill:#d8ddd8}.circle-visual .seat path{fill:none;stroke:#aab5ad;stroke-width:1.4;stroke-linecap:round}.circle-visual .center-dot{fill:var(--gold)}.circle-visual .halo{stroke:#c9ab61;stroke-width:.45;transform-origin:50px 50px;animation:pulse 6s ease-in-out infinite}.circle-visual .h2{animation-delay:1s}.circle-visual .h3{animation-delay:2s;opacity:.45}.circle-visual p{font:14px var(--serif);color:#9da7a0;margin-top:-20px}@keyframes pulse{0%,100%{opacity:.18;transform:scale(.92)}50%{opacity:.65;transform:scale(1.07)}}.home-intro{display:grid;grid-template-columns:1.05fr .95fr;gap:8vw;padding:110px clamp(24px,8vw,140px)}.big-question h2{font:500 clamp(34px,4.6vw,68px)/1.3 var(--serif);margin:16px 0}.intro-copy{font-size:17px;color:var(--ink2);padding-top:34px}.home-map{padding:100px clamp(24px,8vw,140px);background:#e6e0d4}.section-head{max-width:850px;margin-bottom:42px}.section-head h2,.content-section h2{font:500 clamp(30px,4vw,52px)/1.2 var(--serif);margin:10px 0 12px}.section-head p{color:var(--ink2)}.layer-diagram{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:60px;max-width:980px;margin:30px auto}.layer-diagram svg{max-height:560px}.layer{fill:none;stroke:var(--moss);stroke-width:.7;opacity:.55}.l1{stroke:var(--gold);stroke-width:1.5}.core{fill:var(--gold)}.layer-legend{display:grid;gap:12px}.layer-legend>div{display:flex;align-items:center;gap:18px;padding:12px 0;border-bottom:1px solid rgba(31,39,35,.14)}.layer-legend b{color:var(--gold);font-weight:500}.layer-legend span{display:flex;flex-direction:column}.layer-legend strong{font-family:var(--serif);font-size:20px}.layer-legend small{color:var(--moss)}.map-links{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:50px}.map-links a{padding:18px;border-top:1px solid var(--ink)}.map-links b{display:block;color:var(--gold);font-weight:500}.map-links span{font-family:var(--serif);font-size:18px}.map-links small{display:block;font-family:var(--sans);font-size:11px;color:var(--moss);margin-top:6px}.meeting-family{padding:100px clamp(24px,8vw,140px)}.family-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.family-grid a{min-height:260px;padding:24px;background:var(--white);border:1px solid var(--line);display:flex;flex-direction:column}.family-grid a span{color:var(--gold)}.family-grid h3{font:500 24px/1.2 var(--serif);margin-top:auto}.family-grid p{color:var(--ink2);font-size:14px}.practice-banner{margin:30px clamp(24px,6vw,100px) 100px;padding:54px 60px;background:var(--ink);color:var(--paper);display:flex;align-items:flex-end;justify-content:space-between;gap:40px}.practice-banner span{color:#bcb69f;font-size:12px;letter-spacing:.15em}.practice-banner h2{font:500 clamp(32px,4vw,54px)/1.2 var(--serif);margin:8px 0}.practice-banner p{color:#bfc7c1}.reading-path{padding:0 clamp(24px,8vw,140px) 120px}.path-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}.path-grid article{background:var(--white);padding:28px 34px;border:1px solid var(--line)}.path-grid article>span{color:var(--moss);font-weight:700;font-size:12px;letter-spacing:.13em}.path-grid ol{padding-left:24px}.path-grid li{padding:8px 0;border-bottom:1px solid #e5dfd5}.path-grid a:hover{color:var(--moss)}.article-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:80px;max-width:1240px;margin:0 auto;padding:30px 34px 120px}.article-main{min-width:0}.content-section{padding:54px 0;border-bottom:1px solid var(--line)}.content-section>p{font-size:17px;max-width:850px;color:var(--ink2)}.section-eyebrow{margin-bottom:8px}.callout{padding:26px 30px;margin:35px 0;background:#e4ddcf;border-left:3px solid var(--gold)}.callout.dark{background:var(--ink);color:var(--paper)}.callout strong{font:500 21px var(--serif)}.callout p{margin:8px 0}.sources{position:sticky;top:100px;align-self:start;margin-top:54px;padding:24px;background:var(--white);border:1px solid var(--line)}.source-head{display:flex;gap:12px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:16px}.source-head svg{width:34px;stroke:var(--moss);fill:none}.source-head span{font-size:11px;color:var(--moss);display:block}.source-head strong{font:500 18px var(--serif)}.sources ul{list-style:none;padding:0;margin:18px 0}.sources li{padding:12px 0;border-bottom:1px dashed var(--line)}.sources li b,.sources li span{display:block}.sources li b{font:500 15px var(--serif)}.sources li span{font-size:12px;color:var(--ink2);margin-top:5px}.text-link{font-size:13px;color:var(--moss)}.compare-mini,.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.compare-mini>div,.role-grid article{padding:24px;background:var(--white);border:1px solid var(--line)}.compare-mini b,.role-grid b{font:500 22px var(--serif)}.definition-list dl{display:grid;grid-template-columns:140px 1fr;margin:0}.definition-list dt,.definition-list dd{padding:15px 0;border-bottom:1px solid var(--line)}.definition-list dt{font-weight:700;color:var(--moss)}.definition-list dd{margin:0}.myth-grid,.signal-grid,.care-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.myth-grid article,.signal-grid article,.care-grid article{padding:22px;background:var(--white);border:1px solid var(--line)}.myth-grid b,.signal-grid b{font:500 18px var(--serif)}.myth-grid p,.signal-grid p,.care-grid p{font-size:14px;color:var(--ink2)}.process-row{display:flex;align-items:center;flex-wrap:wrap;gap:8px}.process-row span{padding:9px 13px;border:1px solid var(--line);border-radius:999px;background:var(--white)}.process-row i{color:var(--gold)}.fineprint{font-size:12px!important;color:#68726c!important}.query-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:24px}.query-card{min-height:180px;padding:22px;background:var(--ink);color:var(--paper)}.query-card span{font-size:10px;letter-spacing:.16em;color:#b9b49f}.query-card p{font:500 20px/1.55 var(--serif)}.three-stage{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.three-stage article{padding:22px;border-top:2px solid var(--gold);background:var(--white)}.three-stage span{font-size:11px;color:var(--gold)}.three-stage h3{font:500 28px var(--serif);margin:8px 0}.practice-steps{display:grid;gap:10px}.practice-steps article{padding:19px 22px;background:var(--white);border-left:2px solid var(--moss)}.practice-steps b{font:500 19px var(--serif)}.practice-steps p{margin:5px 0;color:var(--ink2)}.ladder{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--line)}.ladder>div{padding:18px;border-right:1px solid var(--line)}.ladder>div:last-child{border:0}.ladder span{font-weight:700}.ladder p{font-size:13px;color:var(--ink2)}.cta-inline{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}.practice-intro,.after-practice,.timer-shell{max-width:1120px;margin:0 auto;padding:50px 34px}.practice-intro{display:grid;grid-template-columns:1.3fr .7fr;gap:50px}.practice-intro h2,.after-practice h2{font:500 clamp(34px,4vw,54px)/1.2 var(--serif)}.practice-rules{display:flex;flex-wrap:wrap;align-content:center;gap:8px}.practice-rules span{padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:var(--white);font-size:13px}.timer-shell{background:var(--ink);color:var(--paper);margin-top:20px;box-shadow:var(--shadow)}.timer-top{display:grid;grid-template-columns:1fr 240px;align-items:center;gap:40px}.timer-top h2{font:500 clamp(30px,4vw,54px)/1.2 var(--serif);margin:10px 0}.timer-top p{color:#bdc6c0}.timer-circle{position:relative;width:220px;height:220px}.timer-circle svg{transform:rotate(-90deg)}.timer-bg,.timer-progress{fill:none;stroke-width:5}.timer-bg{stroke:#3b4641}.timer-progress{stroke:var(--gold);stroke-linecap:round;stroke-dasharray:327;stroke-dashoffset:0}.timer-circle strong{position:absolute;inset:0;display:grid;place-items:center;font:500 42px var(--serif)}.timer-controls{display:flex;gap:10px;margin:24px 0}.timer-shell .btn.primary{background:var(--paper);color:var(--ink);border-color:var(--paper)}.timer-shell .btn.ghost{color:var(--paper);border-color:#5d6862}.stage-track{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.stage-track span{height:4px;background:#46514c}.stage-track span.active{background:var(--gold)}.reflection-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.reflection-grid label{font-size:13px;font-weight:700}.reflection-grid textarea{width:100%;min-height:150px;margin-top:8px;padding:14px;border:1px solid var(--line);background:var(--white);resize:vertical}.reflection-actions{display:flex;align-items:center;gap:12px;margin-top:18px}.skill-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.skill-grid article{padding:20px;border:1px solid var(--line);background:var(--white)}.skill-grid svg{width:38px;height:38px;stroke:var(--moss);fill:none;stroke-width:1.4}.skill-grid h3{font:500 21px var(--serif)}.skill-grid p{font-size:13px;color:var(--ink2)}.ministry-flow{display:flex;flex-direction:column;max-width:520px;margin:20px auto}.ministry-flow span,.ministry-flow strong{padding:13px 18px;border:1px solid var(--line);background:var(--white);text-align:center}.ministry-flow i{text-align:center;color:var(--gold)}.discern-box{display:grid;gap:10px;background:var(--white);padding:24px;border:1px solid var(--line)}.discern-box label{display:flex;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}.discern-box .btn{justify-self:start}.result-note{font:500 18px var(--serif);color:var(--moss)}.signal-grid{grid-template-columns:repeat(3,1fr)}.practice-card{padding:26px;background:var(--white);border:1px solid var(--line)}.practice-card>span{font-size:12px;color:var(--moss);font-weight:700}.practice-card li{margin:8px 0}.decision-visual{margin:30px 0;padding:28px;background:var(--ink);color:var(--paper)}.decision-track{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.decision-track span,.decision-track strong{padding:8px 11px;border:1px solid #637068;border-radius:999px;font-size:12px}.decision-track i{color:var(--gold)}.decision-visual p{font-size:13px;color:#b9c1bc}.compare-table{border:1px solid var(--line);background:var(--white)}.compare-table .row{display:grid;grid-template-columns:.7fr 1.2fr 1fr 1.2fr}.compare-table .row>*{padding:14px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}.compare-table .row>*:last-child{border-right:0}.compare-table .head{background:#ddd5c7;font-size:12px;font-weight:700}.compare-table .accent{background:#ece6d8}.role-grid .accent{border-top:3px solid var(--gold)}.case-lab,.question-lab{padding:26px;background:var(--white);border:1px solid var(--line)}.case-options,.question-actions{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}.case-options button,.question-actions button,.filter-row button,.tool-grid button{border:1px solid var(--line);background:var(--paper);padding:10px 12px;cursor:pointer}.case-result,.question-feedback{padding:16px;background:#eee8dc;border-left:3px solid var(--gold);min-height:76px}.agenda{border-top:1px solid var(--ink)}.agenda>div{display:grid;grid-template-columns:90px 1fr;gap:20px;padding:13px 0;border-bottom:1px solid var(--line)}.agenda b{color:var(--gold)}.clearness-flow{display:grid;grid-template-columns:1fr 1fr;gap:10px}.clearness-flow article{padding:18px;background:var(--white);border:1px solid var(--line)}.clearness-flow b{font:500 18px var(--serif)}.clearness-flow p{font-size:13px;color:var(--ink2)}.question-example{font:500 26px/1.55 var(--serif);padding:20px;background:#f5f1e8}.rewrite-list{display:grid;gap:12px}.rewrite-list article{padding:20px;background:var(--white);border:1px solid var(--line)}.rewrite-list small{color:var(--moss)}.rewrite-list b{display:block;color:var(--moss)}.triad-visual{margin:30px 0}.triad-visual svg circle{fill:var(--white);stroke:var(--moss);stroke-width:1.5}.triad-visual svg .third{fill:#e6ddc9;stroke:var(--gold)}.triad-line{fill:none;stroke:#a7aea9;stroke-width:1}.triad-visual text{text-anchor:middle;font:500 23px var(--serif);fill:var(--ink)}.triad-visual .sub{font:12px var(--sans);fill:var(--moss)}.triad-visual .center-label{font:12px var(--sans);fill:var(--gold)}.org-map{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.org-map div{padding:16px 18px;border:1px solid var(--line);background:var(--white)}.org-map small{display:block;color:var(--moss)}.org-map i{color:var(--gold)}.history-lead,.comparison-intro,.research-intro,.toolkit-top,.glossary-top{max-width:1100px;margin:0 auto;padding:60px 34px}.history-lead h2,.comparison-intro h2,.research-intro h2,.toolkit-top h2,.glossary-top h2{font:500 clamp(38px,5vw,66px)/1.18 var(--serif);margin:12px 0}.timeline-section{max-width:1120px;margin:0 auto;padding:20px 34px 110px}.timeline{border-left:1px solid var(--moss);margin-left:100px}.time-item{display:grid;grid-template-columns:110px 1fr;gap:30px;margin-left:-110px;padding:0 0 42px}.time-item time{color:var(--gold);font:500 18px var(--serif);text-align:right;padding-top:7px}.time-item>div{position:relative;padding-left:30px}.time-item>div:before{content:"";position:absolute;width:9px;height:9px;border-radius:50%;background:var(--gold);left:-5px;top:12px}.time-item h3{font:500 28px var(--serif);margin:0}.time-item p{color:var(--ink2)}.tension-grid,.scenario-grid,.book-grid,.roadmap-list,.tool-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.tension-grid article,.scenario-grid article,.book-grid article,.roadmap-list article,.tool-grid article{padding:22px;background:var(--white);border:1px solid var(--line)}.tension-grid b,.roadmap-list b{font:500 19px var(--serif)}.comparison-intro,.research-intro,.toolkit-top{max-width:100%;padding-left:clamp(24px,8vw,140px);padding-right:clamp(24px,8vw,140px)}.matrix-wrap{overflow:auto}.matrix{width:100%;border-collapse:collapse;min-width:980px;background:var(--white);font-size:13px}.matrix th,.matrix td{padding:14px;border:1px solid var(--line);vertical-align:top}.matrix thead th{background:#ddd5c7;text-align:left}.matrix tbody th{font-family:var(--serif);font-size:15px}.scenario-grid article span{font-size:11px;color:var(--moss)}.scenario-grid h3{font:500 20px var(--serif)}.glossary-top{display:grid;grid-template-columns:1fr 340px;gap:70px;align-items:end}.search-box{display:grid;gap:8px;font-size:12px;color:var(--moss)}.search-box input{padding:14px 16px;border:1px solid var(--line);background:var(--white)}.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}.filter-row button.active{background:var(--ink);color:var(--paper)}.glossary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.glossary-card{padding:22px;background:var(--white);border:1px solid var(--line)}.glossary-card>span{font-size:10px;color:var(--moss)}.glossary-card h3{font:500 22px var(--serif);margin:8px 0 2px}.glossary-card h4{margin:0;color:var(--moss)}.glossary-card p{font-size:13px;color:var(--ink2)}.book-grid article>span{font-size:10px;color:var(--moss);letter-spacing:.1em}.book-grid h3{font:500 22px/1.35 var(--serif)}.book-grid p{font-size:13px;color:var(--ink2)}.book-grid small{color:var(--moss)}.method-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.method-grid b{min-height:120px;display:flex;align-items:flex-end;padding:18px;background:var(--ink);color:var(--paper);font:500 17px/1.5 var(--serif)}.research-note{padding:40px;background:var(--ink);color:var(--paper)}.research-note h2{margin-top:0}.tool-grid article>span{font-size:11px;color:var(--moss)}.tool-grid h3{font:500 23px var(--serif)}.tool-grid li{margin:7px 0}.tool-grid button{margin-top:8px}.four-lines{display:grid;grid-template-columns:1fr 1fr;gap:10px}.four-lines p{margin:0;padding:28px;background:var(--white);border:1px solid var(--line);font:500 24px/1.45 var(--serif)}.site-footer{background:#19201d;color:#d8ddd8;padding:50px clamp(24px,6vw,100px);display:grid;grid-template-columns:1.3fr .7fr;gap:40px}.site-footer b{font-family:var(--serif);font-size:20px}.site-footer p{color:#9eaaa3;font-size:13px}.footer-links{display:flex;flex-direction:column;gap:8px}.footer-links a{color:#c9d0cb}.footer-note{grid-column:1/-1;border-top:1px solid #364039;padding-top:20px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.78;letter-spacing:.01em}a{color:inherit;text-decoration:none}img,svg{max-width:100%}button,input,textarea{font:inherit}.skip-link{position:absolute;left:-999px;top:8px}.skip-link:focus{left:8px;background:#fff;padding:8px;z-index:99}.site-header{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;padding:14px clamp(20px,4vw,64px);background:rgba(242,238,229,.92);backdrop-filter:blur(16px);border-bottom:1px solid rgba(31,39,35,.08)}.brand{display:flex;align-items:center;gap:11px}.brand b{display:block;font-family:var(--serif);font-size:18px}.brand small{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--moss)}.brand-mark{width:34px;height:34px;border:1px solid var(--moss);border-radius:50%;position:relative}.brand-mark i{position:absolute;border:1px solid var(--gold);border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%)}.brand-mark i:nth-child(1){width:6px;height:6px;background:var(--gold)}.brand-mark i:nth-child(2){width:16px;height:16px}.brand-mark i:nth-child(3){width:26px;height:26px;opacity:.45}.main-nav{display:flex;gap:18px;font-size:13px}.main-nav a{padding:8px 0;color:#4d5852;border-bottom:1px solid transparent}.main-nav a:hover,.main-nav a.active{color:var(--ink);border-color:var(--gold)}.nav-toggle{display:none;background:none;border:0;font-size:24px}.page-hero{padding:72px clamp(22px,8vw,140px) 44px;border-bottom:1px solid var(--line)}.page-hero .hero-copy{max-width:940px}.kicker,.section-eyebrow,.section-head>span,.big-question>span{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--moss);font-weight:700}.page-hero h1{font:500 clamp(42px,6vw,82px)/1.08 var(--serif);margin:12px 0 20px}.page-hero p{font-size:18px;max-width:760px;color:var(--ink2)}.hero-line{width:74px;height:1px;background:var(--gold);margin-top:30px}.home-hero{min-height:76vh;display:grid;grid-template-columns:1.05fr .95fr;align-items:center;padding:80px clamp(24px,7vw,120px);background:var(--ink);color:var(--paper)}.home-copy h1{font:500 clamp(60px,8vw,110px)/.96 var(--serif);margin:18px 0 30px;letter-spacing:-.04em}.home-copy>p{max-width:650px;color:#d8d9d1;font-size:18px}.home-hero .kicker{color:#c4b991}.cta-row{display:flex;gap:12px;flex-wrap:wrap;margin:34px 0}.btn{display:inline-flex;justify-content:center;align-items:center;border:1px solid var(--ink);padding:12px 18px;border-radius:999px;cursor:pointer;transition:.2s;background:transparent}.btn.primary{background:var(--ink);color:var(--white)}.home-hero .btn.primary{background:var(--paper);color:var(--ink);border-color:var(--paper)}.btn.ghost{border-color:var(--line)}.home-hero .btn.ghost{color:var(--paper);border-color:#657069}.btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(0,0,0,.08)}.btn.inverted{background:var(--paper);color:var(--ink);border:0}.hero-note{margin-top:40px;display:flex;gap:12px;max-width:650px;color:#aeb7b0;font-size:13px}.hero-note span{width:34px;height:1px;background:var(--gold);margin-top:11px;flex:none}.circle-visual{text-align:center}.circle-visual svg{max-height:510px;overflow:visible}.circle-visual .seat circle{fill:#d8ddd8}.circle-visual .seat path{fill:none;stroke:#aab5ad;stroke-width:1.4;stroke-linecap:round}.circle-visual .center-dot{fill:var(--gold)}.circle-visual .halo{stroke:#c9ab61;stroke-width:.45;transform-origin:50px 50px;animation:pulse 6s ease-in-out infinite}.circle-visual .h2{animation-delay:1s}.circle-visual .h3{animation-delay:2s;opacity:.45}.circle-visual p{font:14px var(--serif);color:#9da7a0;margin-top:-20px}@keyframes pulse{0%,100%{opacity:.18;transform:scale(.92)}50%{opacity:.65;transform:scale(1.07)}}.home-intro{display:grid;grid-template-columns:1.05fr .95fr;gap:8vw;padding:110px clamp(24px,8vw,140px)}.big-question h2{font:500 clamp(34px,4.6vw,68px)/1.3 var(--serif);margin:16px 0}.intro-copy{font-size:17px;color:var(--ink2);padding-top:34px}.home-map{padding:100px clamp(24px,8vw,140px);background:#e6e0d4}.section-head{max-width:850px;margin-bottom:42px}.section-head h2,.content-section h2{font:500 clamp(30px,4vw,52px)/1.2 var(--serif);margin:10px 0 12px}.section-head p{color:var(--ink2)}.layer-diagram{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:60px;max-width:980px;margin:30px auto}.layer-diagram svg{max-height:560px}.layer{fill:none;stroke:var(--moss);stroke-width:.7;opacity:.55}.l1{stroke:var(--gold);stroke-width:1.5}.core{fill:var(--gold)}.layer-legend{display:grid;gap:12px}.layer-legend>div{display:flex;align-items:center;gap:18px;padding:12px 0;border-bottom:1px solid rgba(31,39,35,.14)}.layer-legend b{color:var(--gold);font-weight:500}.layer-legend span{display:flex;flex-direction:column}.layer-legend strong{font-family:var(--serif);font-size:20px}.layer-legend small{color:var(--moss)}.map-links{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:50px}.map-links a{padding:18px;border-top:1px solid var(--ink)}.map-links b{display:block;color:var(--gold);font-weight:500}.map-links span{font-family:var(--serif);font-size:18px}.map-links small{display:block;font-family:var(--sans);font-size:11px;color:var(--moss);margin-top:6px}.meeting-family{padding:100px clamp(24px,8vw,140px)}.family-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.family-grid a{min-height:260px;padding:24px;background:var(--white);border:1px solid var(--line);display:flex;flex-direction:column}.family-grid a span{color:var(--gold)}.family-grid h3{font:500 24px/1.2 var(--serif);margin-top:auto}.family-grid p{color:var(--ink2);font-size:14px}.practice-banner{margin:30px clamp(24px,6vw,100px) 100px;padding:54px 60px;background:var(--ink);color:var(--paper);display:flex;align-items:flex-end;justify-content:space-between;gap:40px}.practice-banner span{color:#bcb69f;font-size:12px;letter-spacing:.15em}.practice-banner h2{font:500 clamp(32px,4vw,54px)/1.2 var(--serif);margin:8px 0}.practice-banner p{color:#bfc7c1}.reading-path{padding:0 clamp(24px,8vw,140px) 120px}.path-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}.path-grid article{background:var(--white);padding:28px 34px;border:1px solid var(--line)}.path-grid article>span{color:var(--moss);font-weight:700;font-size:12px;letter-spacing:.13em}.path-grid ol{padding-left:24px}.path-grid li{padding:8px 0;border-bottom:1px solid #e5dfd5}.path-grid a:hover{color:var(--moss)}.article-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:80px;max-width:1240px;margin:0 auto;padding:30px 34px 120px}.article-main{min-width:0}.content-section{padding:54px 0;border-bottom:1px solid var(--line)}.content-section>p{font-size:17px;max-width:850px;color:var(--ink2)}.section-eyebrow{margin-bottom:8px}.callout{padding:26px 30px;margin:35px 0;background:#e4ddcf;border-left:3px solid var(--gold)}.callout.dark{background:var(--ink);color:var(--paper)}.callout strong{font:500 21px var(--serif)}.callout p{margin:8px 0}.sources{position:sticky;top:100px;align-self:start;margin-top:54px;padding:24px;background:var(--white);border:1px solid var(--line)}.source-head{display:flex;gap:12px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:16px}.source-head svg{width:34px;stroke:var(--moss);fill:none}.source-head span{font-size:11px;color:var(--moss);display:block}.source-head strong{font:500 18px var(--serif)}.sources ul{list-style:none;padding:0;margin:18px 0}.sources li{padding:12px 0;border-bottom:1px dashed var(--line)}.sources li b,.sources li span{display:block}.sources li b{font:500 15px var(--serif)}.sources li span{font-size:12px;color:var(--ink2);margin-top:5px}.text-link{font-size:13px;color:var(--moss)}.compare-mini,.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.compare-mini>div,.role-grid article{padding:24px;background:var(--white);border:1px solid var(--line)}.compare-mini b,.role-grid b{font:500 22px var(--serif)}.definition-list dl{display:grid;grid-template-columns:140px 1fr;margin:0}.definition-list dt,.definition-list dd{padding:15px 0;border-bottom:1px solid var(--line)}.definition-list dt{font-weight:700;color:var(--moss)}.definition-list dd{margin:0}.myth-grid,.signal-grid,.care-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.myth-grid article,.signal-grid article,.care-grid article{padding:22px;background:var(--white);border:1px solid var(--line)}.myth-grid b,.signal-grid b{font:500 18px var(--serif)}.myth-grid p,.signal-grid p,.care-grid p{font-size:14px;color:var(--ink2)}.process-row{display:flex;align-items:center;flex-wrap:wrap;gap:8px}.process-row span{padding:9px 13px;border:1px solid var(--line);border-radius:999px;background:var(--white)}.process-row i{color:var(--gold)}.bilingual-process{gap:10px}.bilingual-process span{min-width:92px;padding:11px 18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}.bilingual-process span.wide{min-width:176px}.bilingual-process b{font:500 18px/1.2 var(--serif)}.bilingual-process small{font:10px/1.3 var(--sans);color:var(--moss);letter-spacing:.02em}.fineprint{font-size:12px!important;color:#68726c!important}.query-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:24px}.query-card{min-height:180px;padding:22px;background:var(--ink);color:var(--paper)}.query-card span{font-size:10px;letter-spacing:.16em;color:#b9b49f}.query-card p{font:500 20px/1.55 var(--serif)}.three-stage{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.three-stage article{padding:22px;border-top:2px solid var(--gold);background:var(--white)}.three-stage span{font-size:11px;color:var(--gold)}.three-stage h3{font:500 28px var(--serif);margin:8px 0}.practice-steps{display:grid;gap:10px}.practice-steps article{padding:19px 22px;background:var(--white);border-left:2px solid var(--moss)}.practice-steps b{font:500 19px var(--serif)}.practice-steps p{margin:5px 0;color:var(--ink2)}.ladder{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--line)}.ladder>div{padding:18px;border-right:1px solid var(--line)}.ladder>div:last-child{border:0}.ladder span{font-weight:700}.ladder p{font-size:13px;color:var(--ink2)}.cta-inline{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}.practice-intro,.after-practice,.timer-shell{max-width:1120px;margin:0 auto;padding:50px 34px}.practice-intro{display:grid;grid-template-columns:1.3fr .7fr;gap:50px}.practice-intro h2,.after-practice h2{font:500 clamp(34px,4vw,54px)/1.2 var(--serif)}.practice-rules{display:flex;flex-wrap:wrap;align-content:center;gap:8px}.practice-rules span{padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:var(--white);font-size:13px}.timer-shell{background:var(--ink);color:var(--paper);margin-top:20px;box-shadow:var(--shadow)}.timer-top{display:grid;grid-template-columns:1fr 240px;align-items:center;gap:40px}.timer-top h2{font:500 clamp(30px,4vw,54px)/1.2 var(--serif);margin:10px 0}.timer-top p{color:#bdc6c0}.timer-circle{position:relative;width:220px;height:220px}.timer-circle svg{transform:rotate(-90deg)}.timer-bg,.timer-progress{fill:none;stroke-width:5}.timer-bg{stroke:#3b4641}.timer-progress{stroke:var(--gold);stroke-linecap:round;stroke-dasharray:327;stroke-dashoffset:0}.timer-circle strong{position:absolute;inset:0;display:grid;place-items:center;font:500 42px var(--serif)}.timer-controls{display:flex;gap:10px;margin:24px 0}.timer-shell .btn.primary{background:var(--paper);color:var(--ink);border-color:var(--paper)}.timer-shell .btn.ghost{color:var(--paper);border-color:#5d6862}.stage-track{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.stage-track span{height:4px;background:#46514c}.stage-track span.active{background:var(--gold)}.reflection-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.reflection-grid label{font-size:13px;font-weight:700}.reflection-grid textarea{width:100%;min-height:150px;margin-top:8px;padding:14px;border:1px solid var(--line);background:var(--white);resize:vertical}.reflection-actions{display:flex;align-items:center;gap:12px;margin-top:18px}.skill-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.skill-grid article{padding:20px;border:1px solid var(--line);background:var(--white)}.skill-grid svg{width:38px;height:38px;stroke:var(--moss);fill:none;stroke-width:1.4}.skill-grid h3{font:500 21px var(--serif)}.skill-grid p{font-size:13px;color:var(--ink2)}.ministry-flow{display:flex;flex-direction:column;max-width:520px;margin:20px auto}.ministry-flow span,.ministry-flow strong{padding:13px 18px;border:1px solid var(--line);background:var(--white);text-align:center}.ministry-flow i{text-align:center;color:var(--gold)}.discern-box{display:grid;gap:10px;background:var(--white);padding:24px;border:1px solid var(--line)}.discern-box label{display:flex;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}.discern-box .btn{justify-self:start}.result-note{font:500 18px var(--serif);color:var(--moss)}.signal-grid{grid-template-columns:repeat(3,1fr)}.practice-card{padding:26px;background:var(--white);border:1px solid var(--line)}.practice-card>span{font-size:12px;color:var(--moss);font-weight:700}.practice-card li{margin:8px 0}.decision-visual{margin:30px 0;padding:28px;background:var(--ink);color:var(--paper)}.decision-track{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.decision-track span,.decision-track strong{padding:8px 11px;border:1px solid #637068;border-radius:999px;font-size:12px}.decision-track i{color:var(--gold)}.decision-visual p{font-size:13px;color:#b9c1bc}.compare-table{border:1px solid var(--line);background:var(--white)}.compare-table .row{display:grid;grid-template-columns:.7fr 1.2fr 1fr 1.2fr}.compare-table .row>*{padding:14px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}.compare-table .row>*:last-child{border-right:0}.compare-table .head{background:#ddd5c7;font-size:12px;font-weight:700}.compare-table .accent{background:#ece6d8}.role-grid .accent{border-top:3px solid var(--gold)}.case-lab,.question-lab{padding:26px;background:var(--white);border:1px solid var(--line)}.case-options,.question-actions{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}.case-options button,.question-actions button,.filter-row button,.tool-grid button{border:1px solid var(--line);background:var(--paper);padding:10px 12px;cursor:pointer}.case-result,.question-feedback{padding:16px;background:#eee8dc;border-left:3px solid var(--gold);min-height:76px}.agenda{border-top:1px solid var(--ink)}.agenda>div{display:grid;grid-template-columns:90px 1fr;gap:20px;padding:13px 0;border-bottom:1px solid var(--line)}.agenda b{color:var(--gold)}.clearness-flow{display:grid;grid-template-columns:1fr 1fr;gap:10px}.clearness-flow article{padding:18px;background:var(--white);border:1px solid var(--line)}.clearness-flow b{font:500 18px var(--serif)}.clearness-flow p{font-size:13px;color:var(--ink2)}.question-example{font:500 26px/1.55 var(--serif);padding:20px;background:#f5f1e8}.rewrite-list{display:grid;gap:12px}.rewrite-list article{padding:20px;background:var(--white);border:1px solid var(--line)}.rewrite-list small{color:var(--moss)}.rewrite-list b{display:block;color:var(--moss)}.triad-visual{margin:30px 0}.triad-visual svg circle{fill:var(--white);stroke:var(--moss);stroke-width:1.5}.triad-visual svg .third{fill:#e6ddc9;stroke:var(--gold)}.triad-line{fill:none;stroke:#a7aea9;stroke-width:1}.triad-visual text{text-anchor:middle;font:500 23px var(--serif);fill:var(--ink)}.triad-visual .sub{font:12px var(--sans);fill:var(--moss)}.triad-visual .center-label{font:12px var(--sans);fill:var(--gold)}.org-map{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.org-map div{padding:16px 18px;border:1px solid var(--line);background:var(--white)}.org-map small{display:block;color:var(--moss)}.org-map i{color:var(--gold)}.history-lead,.comparison-intro,.research-intro,.toolkit-top,.glossary-top{max-width:1100px;margin:0 auto;padding:60px 34px}.history-lead h2,.comparison-intro h2,.research-intro h2,.toolkit-top h2,.glossary-top h2{font:500 clamp(38px,5vw,66px)/1.18 var(--serif);margin:12px 0}.timeline-section{max-width:1120px;margin:0 auto;padding:20px 34px 110px}.timeline{border-left:1px solid var(--moss);margin-left:100px}.time-item{display:grid;grid-template-columns:110px 1fr;gap:30px;margin-left:-110px;padding:0 0 42px}.time-item time{color:var(--gold);font:500 18px var(--serif);text-align:right;padding-top:7px}.time-item>div{position:relative;padding-left:30px}.time-item>div:before{content:"";position:absolute;width:9px;height:9px;border-radius:50%;background:var(--gold);left:-5px;top:12px}.time-item h3{font:500 28px var(--serif);margin:0}.time-item p{color:var(--ink2)}.tension-grid,.scenario-grid,.book-grid,.roadmap-list,.tool-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.tension-grid article,.scenario-grid article,.book-grid article,.roadmap-list article,.tool-grid article{padding:22px;background:var(--white);border:1px solid var(--line)}.tension-grid b,.roadmap-list b{font:500 19px var(--serif)}.comparison-intro,.research-intro,.toolkit-top{max-width:100%;padding-left:clamp(24px,8vw,140px);padding-right:clamp(24px,8vw,140px)}.matrix-wrap{overflow:auto}.matrix{width:100%;border-collapse:collapse;min-width:980px;background:var(--white);font-size:13px}.matrix th,.matrix td{padding:14px;border:1px solid var(--line);vertical-align:top}.matrix thead th{background:#ddd5c7;text-align:left}.matrix tbody th{font-family:var(--serif);font-size:15px}.scenario-grid article span{font-size:11px;color:var(--moss)}.scenario-grid h3{font:500 20px var(--serif)}.glossary-top{display:grid;grid-template-columns:1fr 340px;gap:70px;align-items:end}.search-box{display:grid;gap:8px;font-size:12px;color:var(--moss)}.search-box input{padding:14px 16px;border:1px solid var(--line);background:var(--white)}.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}.filter-row button.active{background:var(--ink);color:var(--paper)}.glossary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.glossary-card{padding:22px;background:var(--white);border:1px solid var(--line)}.glossary-card>span{font-size:10px;color:var(--moss)}.glossary-card h3{font:500 22px var(--serif);margin:8px 0 2px}.glossary-card h4{margin:0;color:var(--moss)}.glossary-card p{font-size:13px;color:var(--ink2)}.book-grid article>span{font-size:10px;color:var(--moss);letter-spacing:.1em}.book-grid h3{font:500 22px/1.35 var(--serif)}.book-grid p{font-size:13px;color:var(--ink2)}.book-grid small{color:var(--moss)}.method-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.method-grid b{min-height:120px;display:flex;align-items:flex-end;padding:18px;background:var(--ink);color:var(--paper);font:500 17px/1.5 var(--serif)}.research-note{padding:40px;background:var(--ink);color:var(--paper)}.research-note h2{margin-top:0}.tool-grid article>span{font-size:11px;color:var(--moss)}.tool-grid h3{font:500 23px var(--serif)}.tool-grid li{margin:7px 0}.tool-grid button{margin-top:8px}.four-lines{display:grid;grid-template-columns:1fr 1fr;gap:10px}.four-lines p{margin:0;padding:28px;background:var(--white);border:1px solid var(--line);font:500 24px/1.45 var(--serif)}.site-footer{background:#19201d;color:#d8ddd8;padding:50px clamp(24px,6vw,100px);display:grid;grid-template-columns:1.3fr .7fr;gap:40px}.site-footer b{font-family:var(--serif);font-size:20px}.site-footer p{color:#9eaaa3;font-size:13px}.footer-links{display:flex;flex-direction:column;gap:8px}.footer-links a{color:#c9d0cb}.footer-note{grid-column:1/-1;border-top:1px solid #364039;padding-top:20px}
 @media(max-width:1100px){.main-nav{display:none;position:absolute;left:0;right:0;top:64px;background:var(--paper);padding:20px 24px;flex-wrap:wrap;border-bottom:1px solid var(--line)}.main-nav.open{display:flex}.nav-toggle{display:block}.home-hero,.home-intro,.layer-diagram,.practice-intro,.glossary-top{grid-template-columns:1fr}.home-hero{padding-top:60px}.circle-visual svg{max-height:400px}.map-links,.family-grid{grid-template-columns:1fr 1fr}.article-grid{grid-template-columns:1fr;gap:0}.sources{position:relative;top:auto}.tension-grid,.scenario-grid,.book-grid,.roadmap-list,.tool-grid,.glossary-grid{grid-template-columns:1fr 1fr}.method-grid{grid-template-columns:1fr 1fr}.query-grid,.signal-grid,.skill-grid{grid-template-columns:1fr 1fr}.timer-top{grid-template-columns:1fr}.timer-circle{width:190px;height:190px}.reflection-grid{grid-template-columns:1fr}.site-footer{grid-template-columns:1fr}}
 @media(max-width:640px){.page-hero{padding-top:48px}.home-hero{grid-template-columns:1fr}.home-copy h1{font-size:58px}.map-links,.family-grid,.path-grid,.myth-grid,.care-grid,.compare-mini,.role-grid,.three-stage,.clearness-flow,.query-grid,.signal-grid,.skill-grid,.tension-grid,.scenario-grid,.book-grid,.roadmap-list,.tool-grid,.glossary-grid,.four-lines{grid-template-columns:1fr}.layer-legend{margin-top:-20px}.practice-banner{padding:34px;display:block}.practice-banner .btn{margin-top:20px}.ladder{grid-template-columns:1fr}.ladder>div{border-right:0;border-bottom:1px solid var(--line)}.compare-table .row{grid-template-columns:1fr}.compare-table .head{display:none}.compare-table .row>*{border-right:0}.stage-track{grid-template-columns:repeat(5,1fr)}.time-item{grid-template-columns:70px 1fr;margin-left:-80px}.timeline{margin-left:80px}.agenda>div{grid-template-columns:70px 1fr}.method-grid{grid-template-columns:1fr}.site-footer{padding:40px 24px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}.halo{animation:none!important}.btn{transition:none}}
@@ -747,7 +1262,8 @@ h1,h2,h3,.query-card p,.four-lines p,.question-example{
 }
 .title-line{display:block;white-space:nowrap;max-width:100%}
 .term-lock{display:inline-block;white-space:nowrap;letter-spacing:-.015em}
-.exhibit-figure h3 .title-line,.portrait-card h3 .title-line,.visual-index-grid h3 .title-line{white-space:normal}
+.en-paren{font-family:var(--sans);font-size:.58em;font-weight:500;color:var(--moss);letter-spacing:0;white-space:nowrap;vertical-align:.08em}.page-hero h1 .en-paren,.history-lead h2 .en-paren,.research-intro h2 .en-paren,.glossary-top h2 .en-paren{font-size:.48em}
+.exhibit-figure h3 .title-line,.portrait-card h3 .title-line,.visual-index-grid h3 .title-line,.family-grid h3 .title-line,.research-card h3 .title-line,.history-thesis h3 .title-line,.timeline-card h3 .title-line,.false-friends h3 .title-line,.tool-grid h3 .title-line{white-space:normal}
 p,li,dd{orphans:2;widows:2;overflow-wrap:anywhere}
 .section-heading-row{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
 .section-heading-row>div:first-child{min-width:0}
@@ -1040,6 +1556,9 @@ main>.content-section{padding-left:clamp(24px,8vw,140px);padding-right:clamp(24p
   .curator-note{grid-template-columns:1fr;gap:10px}
   .visual-index{padding:62px 24px}
   .visual-index-grid{grid-template-columns:1fr}
+  .bilingual-process{display:grid;grid-template-columns:1fr;gap:6px;max-width:100%}
+  .bilingual-process span,.bilingual-process span.wide{width:100%;min-width:0;padding:11px 16px}
+  .bilingual-process i{justify-self:center;transform:rotate(90deg);line-height:1}
 }
 '''
 
@@ -1092,7 +1611,7 @@ js = r'''
 
   // Business case lab
   const caseLab=document.getElementById('caseLab');
-  if(caseLab){const res=document.getElementById('caseResult');caseLab.querySelectorAll('[data-case]').forEach(b=>b.onclick=()=>{const k=b.dataset.case;res.innerHTML={vote:'<b>多数表决</b>优化的是速度与程序明确。7:3 很快有结果，但“离开原社区意味着什么”可能仍未被共同体真正消化。',consensus:'<b>Consensus</b>优化的是可接受度。大家会继续协商方案，但也可能把目标缩成“每个人都勉强能接受”。',sense:'<b>Sense of the Meeting</b>会把问题从“新址好不好”下沉到“我们的使命、邻里关系与可持续性中，什么方向最忠实？”结果可能是搬、也可能是不搬，甚至是暂缓决定。'}[k];});}
+  if(caseLab){const res=document.getElementById('caseResult');caseLab.querySelectorAll('[data-case]').forEach(b=>b.onclick=()=>{const k=b.dataset.case;res.innerHTML={vote:'<b>多数表决</b>优化的是速度与程序明确。7:3 很快有结果，但“离开原社区意味着什么”可能仍未被共同体真正消化。',consensus:'<b>共识（Consensus）</b>优化的是可接受度。大家会继续协商方案，但也可能把目标缩成“每个人都勉强能接受”。',sense:'<b>聚会的共同辨识（Sense of the Meeting）</b>会把问题从“新址好不好”下沉到“我们的使命、邻里关系与可持续性中，什么方向最忠实？”结果可能是搬、也可能是不搬，甚至是暂缓决定。'}[k];});}
 
   // Clearness question lab
   const qLab=document.getElementById('questionLab');
@@ -1115,7 +1634,10 @@ js = r'''
 
 # write pages
 for fn, content in pages.items():
-    (ROOT/fn).write_text(enhance_plain_headings(content), encoding='utf-8')
+    # Localize before heading enhancement so entities such as '&' are still plain text.
+    rendered = localize_visible_text(content)
+    rendered = enhance_plain_headings(rendered)
+    (ROOT/fn).write_text(rendered, encoding='utf-8')
 
 
 # favicon
