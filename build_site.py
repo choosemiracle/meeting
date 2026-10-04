@@ -5,7 +5,7 @@ ROOT = Path(__file__).resolve().parent
 
 SITE_NAME = '共同等候｜贵格会聚会研究与实践'
 TAGLINE = '研究贵格会聚会（Meeting）如何通过静默、共同聆听与群体明辨，让尚未被任何个人完全拥有的真实，有机会出现。'
-ASSET_VERSION = '20261004-ux5'
+ASSET_VERSION = '20261004-ux6'
 
 NAV_PRIMARY = [
     ('index.html','首页'),
@@ -23,7 +23,8 @@ NAV_MORE = [
     ('clearness.html','澄心会'),
     ('learning.html','共学'),
     ('community.html','共同体'),
-    ('comparisons.html','比较'),
+    ('comparisons.html','方法比较'),
+    ('traditions.html','会聚传统'),
     ('glossary.html','术语'),
     ('toolkit.html','工具箱'),
 ]
@@ -40,8 +41,9 @@ PAGE_CONTINUE = {
     'clearness.html': [('learning.html','进入共学会'), ('toolkit.html','查看实践模板')],
     'learning.html': [('community.html','从共学走向共同体'), ('history.html','回到历史脉络')],
     'community.html': [('history.html','理解传统如何形成'), ('comparisons.html','与其他方法比较')],
-    'history.html': [('comparisons.html','比较相近方法'), ('research.html','进入研究室')],
-    'comparisons.html': [('glossary.html','建立术语坐标'), ('toolkit.html','选择合适实践')],
+    'history.html': [('comparisons.html','比较相近方法'), ('traditions.html','放进更大的会聚传统')],
+    'comparisons.html': [('traditions.html','横向看世界会聚传统'), ('toolkit.html','选择合适实践')],
+    'traditions.html': [('research.html','回到来源与研究方法'), ('toolkit.html','把洞见转成实践')],
     'glossary.html': [('research.html','查阅原典与研究方法'), ('meeting.html','回到核心概念')],
     'research.html': [('visual-credits.html','查看图像与史料说明'), ('toolkit.html','把研究转成实践')],
     'toolkit.html': [('practice.html','开始一次练习'), ('meeting.html','回到聚会全貌')],
@@ -1114,7 +1116,7 @@ index_body = f'''
 <a href="learning.html"><span>04</span><h3>Meeting for Learning</h3><p>让人、人和“第三物”真正相遇，把学习从信息摄取变成共同探寻。</p></a>
 </div></section>
 <section class="practice-banner"><div><span>不要只读。</span><h2>Meeting 最终只能通过 Meeting 来理解。</h2><p>先做一次 12 分钟练习。没有指导语轰炸，也没有“放松成功”的要求。</p></div><a class="btn inverted" href="practice.html">进入实践 →</a></section>
-<section class="reading-path"><div class="section-head"><span>TWO PATHS</span><h2>你可以这样进入</h2></div><div class="path-grid"><article><span>第一次接触</span><ol><li><a href="meeting.html">Meeting 到底是什么？</a></li><li><a href="worship.html">静默不是空白</a></li><li><a href="practice.html">12 分钟体验</a></li><li><a href="ministry.html">什么时候该说话？</a></li><li><a href="business.html">为什么不投票？</a></li></ol></article><article><span>想刨根究底</span><ol><li><a href="history.html">从 Seekers 到现代</a></li><li><a href="gathered.html">Gathered Meeting</a></li><li><a href="research.html">原典与研究书目</a></li><li><a href="comparisons.html">与其他方法比较</a></li><li><a href="glossary.html">建立术语坐标</a></li></ol></article></div></section>
+<section class="reading-path"><div class="section-head"><span>TWO PATHS</span><h2>你可以这样进入</h2></div><div class="path-grid"><article><span>第一次接触</span><ol><li><a href="meeting.html">Meeting 到底是什么？</a></li><li><a href="worship.html">静默不是空白</a></li><li><a href="practice.html">12 分钟体验</a></li><li><a href="ministry.html">什么时候该说话？</a></li><li><a href="business.html">为什么不投票？</a></li></ol></article><article><span>想刨根究底</span><ol><li><a href="history.html">从 Seekers 到现代</a></li><li><a href="gathered.html">Gathered Meeting</a></li><li><a href="research.html">原典与研究书目</a></li><li><a href="comparisons.html">与其他方法比较</a></li><li><a href="traditions.html">世界会聚传统与 AI 时代</a></li><li><a href="glossary.html">建立术语坐标</a></li></ol></article></div></section>
 '''
 
 pages = {}
@@ -1318,9 +1320,159 @@ comparisons_body = '''
 <section class="content-section"><div class="section-head"><span>HOW TO CHOOSE</span><h2>什么场景更适合用什么？</h2></div><div class="scenario-grid"><article><span>需要临床支持</span><h3>优先心理治疗 / 医疗</h3><p>不要把 Meeting 或澄心会当治疗替代品。</p></article><article><span>要训练注意与减压</span><h3>Mindfulness 更直接</h3><p>Meeting 不承诺把“平静”作为输出。</p></article><article><span>团队要快速做可逆决定</span><h3>普通决策机制更高效</h3><p>并非所有事情都值得进入深度 corporate discernment。</p></article><article><span>价值冲突、使命方向、重大共同体议题</span><h3>Meeting for Business 值得尝试</h3><p>尤其当“赢得辩论”会伤害共同体时。</p></article><article><span>一个人面对重要人生选择</span><h3>澄心会可提供独特空间</h3><p>前提是问题不属于需要专业危机处理的范畴。</p></article><article><span>深度共读、教育、团队学习</span><h3>Meeting for Learning 很合适</h3><p>第三物 + 静默 + 经验检验，会改变普通讨论结构。</p></article></div></section>
 <section class="content-section"><div class="section-head"><span>FALSE FRIENDS</span><h2>最容易“看起来很像”，其实差异最大的三组</h2></div><div class="false-friends"><article><h3>Meeting ≠ Meditation group</h3><p>两者都可能安静，但 Meeting 的单位不是“很多个正在练习的个人”，而是一个正在共同等待的群体。个体注意力训练可以发生，却不是全部。</p></article><article><h3>Sense of the Meeting ≠ Consensus</h3><p>两者都避免简单多数压制，但 consensus 常以“大家都能接受”为目标；Quaker practice 更关心群体是否辨认到一个可以被承担的 rightness / unity。</p></article><article><h3>Clearness ≠ Coaching</h3><p>两者都使用提问，但澄心会不以目标达成、绩效或行动计划为中心；它更严格地限制 advice，并给沉默与 spiritual discernment 更大位置。</p></article></div></section>
 <section class="content-section"><div class="research-card"><span>比较方法</span><h3>不要问“哪个方法最好”，先问“它在解决什么问题”</h3><div><p>一个方法是否合适，取决于问题类型、风险、权力结构、时间尺度与参与者期待。Meeting 的优势在于处理那些不能只靠信息和偏好解决的价值性问题；它的弱点也同样明显：慢、依赖群体成熟度、容易被隐形权力伪装成“灵性共识”。</p></div></div></section>
+<section class="content-section"><div class="research-card"><span>把镜头拉远</span><h3>不只比较现代方法，也把贵格会放回人类的“会聚传统”</h3><div><p>苏菲记念、禅宗坐禅、犹太同伴研习、吠檀多真理共聚、锡克圣众与东正教静修，都提供了不同答案：一群人为什么聚在一起？共同中心在哪里？权威如何被约束？实践怎样回到生活？</p><p><a class="text-link" href="traditions.html">进入「会聚传统与 AI 时代」专题 →</a></p></div></div></section>
 <section class="content-section">''' + query_cards(['我是否因为喜欢某种方法，就急着说“其实都一样”？','我当前真正需要的是什么：疗愈、学习、决策、灵性实践、关系修复，还是行动？','一个方法的边界在哪里？什么情况应该明确转介给更合适的专业？']) + '''</section>
 '''
 pages['comparisons.html'] = page_shell('comparisons.html','Meeting 与其他方法，有何异同？','不要把所有“安静、倾听、圆圈、提问”都混成一种东西。通过目标、权威、群体作用与成功标准，建立清楚的方法边界。',comparisons_body,label='COMPARE')
+
+# --- gathering traditions / AI age ---
+traditions_body = f'''
+<section class="traditions-intro">
+  <div class="traditions-intro-copy">
+    <span class="kicker">跨传统会聚（ACROSS TRADITIONS）</span>
+    <h2 class="semantic-title"><span>古往今来，</span><span>人类如何共同求真？</span></h2>
+    <p>贵格会聚会不是人类历史上唯一把“群体”当作灵性器官的传统。苏菲的记念（dhikr）、禅宗的坐禅（zazen）、犹太传统的同伴研习（havruta）、印度传统的真理共聚（satsang）、锡克教的圣众（sadh sangat）、东正教的静修祈祷（hesychasm），都在回答相近却不相同的问题：<strong>当个人经验不够时，一群人怎样共同靠近真实、善、神圣或觉醒？</strong></p>
+    <div class="curator-note"><span>比较原则</span><p>这里比较的是<strong>群体实践的结构</strong>，不是说这些传统“本质上一样”，更不是建立一条虚构的影响谱系。每一种实践都只能放回自己的神学、历史、语言与权威结构中理解。</p></div>
+  </div>
+  <div class="tradition-orbit" aria-label="七种会聚传统的关系示意图">
+    <div class="orbit-center"><b>共同会聚</b><small>Gathering</small></div>
+    <span style="--i:0">贵格会<br/><small>Meeting</small></span>
+    <span style="--i:1">苏菲<br/><small>Dhikr</small></span>
+    <span style="--i:2">禅宗<br/><small>Zazen</small></span>
+    <span style="--i:3">犹太<br/><small>Havruta</small></span>
+    <span style="--i:4">吠檀多<br/><small>Vedanta · Satsang</small></span>
+    <span style="--i:5">锡克教<br/><small>Sangat</small></span>
+    <span style="--i:6">东正教<br/><small>Hesychasm</small></span>
+  </div>
+</section>
+
+<section class="content-section">
+  <div class="section-head"><span>七扇窗口（SEVEN WINDOWS）</span><h2>{smart_heading('七种传统，不是七个版本的同一件事')}</h2><p>如果只看表面，它们都可能出现安静、围坐、诵念、老师、经文、共同体。但真正决定实践气质的，是“中心是什么、权威在哪里、群体做什么、最后如何回到生活”。</p></div>
+  <div class="tradition-cards">
+    <article><div class="tradition-icon">{icon('light')}</div><span>17世纪英国 · 基督教贵格会</span><h3>静默敬拜与共同明辨<br/><small>静默敬拜（Meeting for Worship）/ 明辨（Discernment）</small></h3><p>共同静默不是并排冥想，而是一起等候、聆听，并让可能出现的受感分享接受群体检验。带领角色服务于聚会，不拥有真理。</p><b>核心动作：等候 → 聆听 → 检验 → 行动</b></article>
+    <article><div class="tradition-icon">{icon('group')}</div><span>伊斯兰神秘传统</span><h3>记念与苏菲圆圈<br/><small>记念（Dhikr）/ 苏菲圆圈（Sufi Circle）</small></h3><p>记念（dhikr）意为“记得并记念真主”。不同苏菲教团可能通过诵念真主之名、呼吸、诗歌、音乐、动作或静默来实践，并通常处在导师（shaykh / pir）与教团（tariqa）的传承脉络中。</p><b>核心动作：记念 → 聚焦心灵 → 归向真主</b></article>
+    <article><div class="tradition-icon">{icon('silence')}</div><span>佛教 · 曹洞禅</span><h3>坐禅与僧团共修<br/><small>坐禅（Zazen）/ 僧团（Sangha）</small></h3><p>共同坐禅强调姿势、呼吸、觉照与持续练习。群体提供纪律、节奏和传承环境；它与贵格会最明显的差别，是禅有更清楚的身体方法与师承传统。</p><b>核心动作：坐 → 觉察 → 回到姿势 → 持续修行</b></article>
+    <article><div class="tradition-icon">{icon('book')}</div><span>犹太学习传统</span><h3>同伴研习<br/><small>同伴研习（Havruta）/ 学习院（Beit Midrash）</small></h3><p>两人围绕文本反复诘问、争论、解释，让“另一双眼睛”打破自己的理解局限。这里的神圣共同体并不以安静为主，反而常常通过声音、分歧与文本生成理解。</p><b>核心动作：读 → 问 → 辩 → 重新理解</b></article>
+    <article><div class="tradition-icon">{icon('path')}</div><span>印度 · 吠檀多（Vedanta）语境</span><h3>真理共聚<br/><small>真理共聚（Satsang）</small></h3><p>真理共聚（satsang）常包含祈祷、诵唱（bhajan）、经文学习、老师讲解与问答。它强调“与真理及寻求真理的人相伴”，群体既是学习空间，也是价值与生活方式的共同塑造。</p><b>核心动作：亲近善知识 → 学习 → 反思 → 生活化</b></article>
+    <article><div class="tradition-icon">{icon('group')}</div><span>锡克教</span><h3>圣众与共同敬拜<br/><small>圣众（Sadh Sangat）</small></h3><p>圣众（Sangat）不只是“来听讲的人群”。在锡克传统中，共同诵唱古尔巴尼（Gurbani）、祈祷、聆听经文与服务（seva）彼此联结；个人修持与共同体生活不可完全分开。</p><b>核心动作：聆听经文 → 共同记念 → 服务</b></article>
+    <article><div class="tradition-icon">{icon('silence')}</div><span>东方基督教</span><h3>静修与心祷<br/><small>静修传统（Hesychasm）/ 耶稣祷文（Jesus Prayer）</small></h3><p>静修传统（hesychasm）强调静止、心祷与持续祈祷，历史上深植修道与教会传统。它能帮助理解“静默不是空白”，但其祈祷结构与贵格会的群体明辨仍非常不同。</p><b>核心动作：静止 → 心祷 → 持续记念 → 与神相交</b></article>
+  </div>
+</section>
+
+<section class="content-section tradition-matrix-section">
+  <div class="section-head"><span>横向矩阵（HORIZONTAL MAP）</span><h2>{smart_heading('把“聚在一起”拆成六个可以比较的维度')}</h2></div>
+  <div class="matrix-wrap"><table class="matrix tradition-matrix">
+    <thead><tr><th>传统 / 实践</th><th>共同中心</th><th>主要媒介</th><th>群体在做什么</th><th>权威结构</th><th>从会聚走向哪里</th></tr></thead>
+    <tbody>
+      <tr class="accent"><th>贵格会聚会<br/><small>Quaker Meeting</small></th><td>神圣临在、内在之光、真理（不同分支语言有差异）</td><td>静默、受感分享、共同等候</td><td>共同聆听与明辨</td><td>低讲台化；书记、长老等角色服务群体</td><td>忠实行动、合一、公共见证</td></tr>
+      <tr><th>苏菲记念<br/><small>Dhikr</small></th><td>真主、记念、爱的临在</td><td>诵念、呼吸、诗、音乐、动作或静默</td><td>共同记念并调谐心灵</td><td>常有导师（shaykh / pir）与教团（tariqa）传承</td><td>净化自我、爱、服务、亲近真主</td></tr>
+      <tr><th>曹洞禅坐禅<br/><small>Zazen</small></th><td>修行本身、觉照、佛道</td><td>身体姿势、呼吸、坐与行禅</td><td>共同维持修行纪律与场</td><td>僧团与老师 / 法脉较明确</td><td>觉醒、日常修行、菩萨道</td></tr>
+      <tr><th>犹太同伴研习<br/><small>Havruta</small></th><td>《妥拉》（Torah）、文本与解释传统</td><td>朗读、问题、争论、互相纠正</td><td>用差异深化理解</td><td>文本与传统权威 + 同伴互证</td><td>更深理解、实践、共同体记忆</td></tr>
+      <tr><th>真理共聚<br/><small>Satsang</small></th><td>真理、经文、自性（Self）/ 梵（Brahman，依传统而异）</td><td>讲解、经文、诵唱（bhajan）、问答</td><td>与老师及同道共同学习</td><td>教师、导师（acharya / swami / guru）角色通常较强</td><td>内在转化、价值生活、修持</td></tr>
+      <tr><th>锡克圣众<br/><small>Sadh Sangat</small></th><td>《古鲁·格兰特·萨希卜》（Guru Granth Sahib）、圣名（Naam）、神圣旨意（Hukam）</td><td>古尔巴尼（Gurbani）、赞颂（kirtan）、祈祷、服务</td><td>在圣众中共同敬拜与塑造生活</td><td>经典中心 + 圣众与潘特（Panth）</td><td>记念圣名、平等、服务（seva）、共同体责任</td></tr>
+      <tr><th>东正教静修<br/><small>Hesychasm</small></th><td>基督、神的临在</td><td>静默、耶稣祷文（Jesus Prayer）、修道纪律</td><td>共同体承托个人持续祈祷</td><td>教会、修道传统与属灵指导</td><td>悔改、医治、与神相交</td></tr>
+    </tbody>
+  </table></div>
+  <p class="fineprint">这张表是研究地图，不是神学裁判。每一行内部都存在巨大的地区、宗派、历史与当代差异；尤其苏菲主义（Sufism）、印度宗教传统与佛教本身，都不能被当成单一体系。</p>
+</section>
+
+<section class="content-section">
+  <div class="section-head"><span>共同语法（COMMON GRAMMAR）</span><h2>{smart_heading('跨越差异之后，可以看见六个反复出现的人类设计')}</h2></div>
+  <div class="shared-grammar">
+    <article><b>01</b><h3>把“我”放回一个更大的中心</h3><p>神、真理、经典、觉醒、Naam、共同辨识——名字完全不同，但都通过某种方式限制“我的即时偏好就是答案”。</p></article>
+    <article><b>02</b><h3>让身体进入认识过程</h3><p>坐姿、呼吸、诵念、步行、围坐、共同歌唱：人类传统很少把深层认识只交给抽象思考。</p></article>
+    <article><b>03</b><h3>用节奏抵抗冲动</h3><p>静默、重复、仪轨、等待、轮流发言、反复读经，都在制造“不要立刻反应”的时间。</p></article>
+    <article><b>04</b><h3>让另一个人纠正我的盲区</h3><p>无论是 havruta 的争论、sangha 的纪律，还是 Meeting 的 corporate testing，成熟传统都不把私人感觉自动升级为真理。</p></article>
+    <article><b>05</b><h3>让传统成为“第三方”</h3><p>经典、法脉、师承、Faith & Practice、诗歌或故事，把群体从“只有我们当下的意见”连接到更长的时间轴。</p></article>
+    <article><b>06</b><h3>最后必须回到生活</h3><p>如果会聚只制造舒服体验，却不改变关系、伦理、服务与行动，多数传统都会认为实践尚未完成。</p></article>
+  </div>
+</section>
+
+<section class="content-section">
+  <div class="section-head"><span>不要抹平差异（DO NOT COLLAPSE）</span><h2>{smart_heading('真正有价值的跨传统学习，先从“不借壳”开始')}</h2></div>
+  <div class="do-not-collapse">
+    <article><span>苏菲主义（Sufism）</span><h3>不要只借“旋转、鲁米、爱”</h3><p>记念（dhikr）位于伊斯兰的《古兰经》、记念真主、教团与师承语境中。把它抽成“高能量圆圈技巧”，会失去它真正的宗教骨架。</p></article>
+    <article><span>禅（Zen）</span><h3>不要只借“安静地坐”</h3><p>坐禅（zazen）有身体规范、僧团秩序、法脉与佛教思想背景；它不是贵格会聚会（Meeting）的东方版本。</p></article>
+    <article><span>同伴研习（Havruta）</span><h3>不要把争论误解为不够灵性</h3><p>有些传统通过安静认识，有些通过高密度的问答与争论认识。声音的多少并不是深度的通用指标。</p></article>
+    <article><span>真理共聚（Satsang）</span><h3>不要忽略老师与传承的不对称</h3><p>许多真理共聚（satsang）的结构比贵格会聚会（Quaker Meeting）更明确地围绕老师与教法组织；这既可能带来传承深度，也带来权力与依赖问题。</p></article>
+  </div>
+</section>
+
+<section class="ai-era">
+  <div class="ai-era-head">
+    <span>未来会聚（FUTURE GATHERING）</span>
+    <h2 class="semantic-title"><span>机器越来越会说话，</span><span>人类为何还要相聚？</span></h2>
+    <p>AI 可以在几秒钟内总结经典、模拟争论、生成祷词、提出问题、归纳“群体共识”。这恰恰让一个更古老的问题重新变得尖锐：<strong>哪些事情可以交给机器，哪些必须由有身体、会受伤、要承担后果的人亲自完成？</strong></p>
+  </div>
+  <div class="ai-rings">
+    <div class="ai-ring ai-ring-outer"><span>AI 可以协助<br/><small>研究 · 翻译 · 检索 · 记录 · 无障碍</small></span>
+      <div class="ai-ring ai-ring-middle"><span>AI 只能在旁<br/><small>提问 · 显示差异 · 提醒遗漏</small></span>
+        <div class="ai-ring ai-ring-center"><strong>人类共同中心</strong><small>临在 · 静默 · 良知 · 责任 · 关系</small></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="content-section">
+  <div class="section-head"><span>人类核心（HUMAN CORE）</span><h2 class="semantic-title"><span>人工智能越强，</span><span>人类更要保留“慢能力”</span></h2></div>
+  <div class="human-core-grid">
+    <article><span>01</span><h3>未经优化的静默</h3><p>没有提示词、没有下一句建议、没有自动总结。人必须承受“不知道接下来会发生什么”。</p></article>
+    <article><span>02</span><h3>身体共在</h3><p>一张脸的迟疑、呼吸变慢、房间里的紧张与温度，不只是“待处理信号”，而是关系本身的一部分。</p></article>
+    <article><span>03</span><h3>真正的分歧</h3><p>AI 很擅长把差异压成漂亮摘要；人类共同体需要练习让冲突仍然存在，同时不把彼此逐出关系。</p></article>
+    <article><span>04</span><h3>不可外包的良知</h3><p>“模型建议这样做”不能成为道德免责条款。决定影响谁，谁就必须进入责任链。</p></article>
+    <article><span>05</span><h3>有代价的承诺</h3><p>真正的 minute、vow、leading 或 concern 最后要有人用时间、金钱、名誉与生活去承担。</p></article>
+    <article><span>06</span><h3>代际记忆</h3><p>AI 可以检索传统，但不能替一个共同体活过它的历史。传统不是数据库，而是被实践、争论和修正过的记忆。</p></article>
+  </div>
+</section>
+
+<section class="content-section">
+  <div class="section-head"><span>人工智能使用边界</span><h2>{smart_heading('让 AI 做“第三物”，不要让它坐上“内在导师”的位置')}</h2><p>一个简单原则：AI 可以增加材料、可见性与可访问性，却不应被赋予最后的属灵权威、关系权威或道德责任。</p></div>
+  <div class="ai-boundary-grid">
+    <article class="ai-yes"><span>可以积极使用</span><h3>外圈辅助</h3><ul><li>跨语言翻译与术语比对</li><li>史料检索、时间线与来源导航</li><li>会前事实整理与多视角资料包</li><li>经明确同意后的行政记录</li><li>为听障、视障等提供无障碍支持</li></ul></article>
+    <article class="ai-caution"><span>只能谨慎使用</span><h3>反照与提问</h3><ul><li>指出群体可能遗漏的观点</li><li>生成开放问题供人重新筛选</li><li>比较不同措辞隐藏的假设</li><li>帮助回顾过程，但不替代人的记忆</li><li>任何总结必须回到现场参与者验证</li></ul></article>
+    <article class="ai-no"><span>应设明确红线</span><h3>不可外包</h3><ul><li>让 AI 判定某人是否“真的有 leading”</li><li>自动宣布聚会已形成 unity</li><li>未经同意录音、转写或推断情绪</li><li>把澄心会等高度私密内容上传公共模型</li><li>用生成式权威冒充神谕、老师或 Clerk</li></ul></article>
+  </div>
+</section>
+
+<section class="content-section">
+  <div class="section-head"><span>面向未来（PROTOCOL 2035）</span><h2>{smart_heading('一个 AI 时代 Meeting 可以怎样设计？')}</h2></div>
+  <div class="future-protocol">
+    <article><b>01</b><h3>先有人，再有工具</h3><p>开场先共同到场与静默，AI 不参与前几分钟，不用屏幕替代彼此的脸。</p></article>
+    <article><b>02</b><h3>把 AI 使用说出来</h3><p>谁调用了什么模型、输入了什么资料、输出会保存多久，都成为显性伦理契约。</p></article>
+    <article><b>03</b><h3>先让差异完整出现</h3><p>禁止一开始就让 AI “总结共识”。先保护少数意见、异议和还未成形的语言。</p></article>
+    <article><b>04</b><h3>AI 只提供候选，不宣布答案</h3><p>它可以生成三个版本、指出遗漏、追溯来源；最终判断与措辞必须由群体承担。</p></article>
+    <article><b>05</b><h3>保留一段无机器时间</h3><p>重大价值议题至少有一段完全离线、无转写、无建议的共同静默。</p></article>
+    <article><b>06</b><h3>结束时回到责任人</h3><p>每个行动都回答：谁决定？谁承担？谁受影响？何时复盘？不能写“由 AI 建议”。</p></article>
+  </div>
+  {research_note('继往开来，不是把古老形式数字化','''<p>更深的方向，是把不同传统几百上千年积累的<strong>注意、节制、师承、互证、共同体、伦理与行动</strong>重新理解成 AI 时代的“人类基础设施”。机器越擅长生成语言，人类越需要保存那些不能靠生成完成的能力：等待、承担、关系、身体、良知与共同生活。</p>''')}
+</section>
+
+<section class="content-section tradition-sources">
+  <div class="section-head"><span>研究线索（RESEARCH TRAIL）</span><h2>继续查证，而不是停在漂亮类比</h2><p>以下链接用于核对各传统自己的表述；贵格会部分继续以本站研究室中的 Brinton、Loring、Palmer 等原典为主。</p></div>
+  <div class="source-link-grid">
+    <a href="https://pluralism.org/remembrance-of-god-the-sufi-circle" target="_blank" rel="noopener"><b>苏菲记念（Dhikr）</b><span>哈佛多元主义项目（Harvard Pluralism Project）</span></a>
+    <a href="https://www.sotozen.com/eng/zazen/howto/" target="_blank" rel="noopener"><b>曹洞禅坐禅（Zazen）</b><span>曹洞宗国际网站（Soto Zen）</span></a>
+    <a href="https://www.myjewishlearning.com/article/havruta-learning-in-pairs/" target="_blank" rel="noopener"><b>同伴研习（Havruta）</b><span>犹太学习网（My Jewish Learning）</span></a>
+    <a href="https://www.chinmayamission.com/global/chinmaya-mission-satsang" target="_blank" rel="noopener"><b>真理共聚（Satsang）</b><span>钦马亚灵修组织（Chinmaya Mission）</span></a>
+    <a href="https://sgpc.net/sadh-sangat/" target="_blank" rel="noopener"><b>锡克圣众（Sadh Sangat）</b><span>锡克教中央管理机构（SGPC）</span></a>
+    <a href="https://www.goarch.org/-/did-you-know-sunday-of-saint-gregory-palamas" target="_blank" rel="noopener"><b>静修祈祷（Hesychasm）</b><span>希腊正教总教区（Greek Orthodox Archdiocese）</span></a>
+    <a href="https://www.unesco.org/zh/artificial-intelligence/recommendation-ethics" target="_blank" rel="noopener"><b>人工智能伦理</b><span>联合国教科文组织（UNESCO）</span></a>
+  </div>
+</section>
+
+<section class="content-section">''' + query_cards([
+  '如果把贵格会聚会（Meeting）放进世界会聚传统中，哪些特征会突然显得不再理所当然？',
+  '我的群体最需要从哪个传统学习：静默、记念、文本争辩、身体纪律、共同服务，还是师承？为什么？',
+  '如果明天所有 AI 工具都消失，我们的共同体还剩下哪些真正属于人的能力？'
+]) + '''</section>
+'''
+pages['traditions.html'] = page_shell(
+    'traditions.html',
+    '人类聚在一起，如何寻找真实？',
+    '从贵格会聚会、苏菲记念、禅宗坐禅、犹太同伴研习、吠檀多（Vedanta）真理共聚、锡克圣众到东正教静修：横向比较古往今来的会聚传统，并追问 AI 时代人类必须继续亲自承担什么。',
+    traditions_body,
+    label='会聚传统（GATHERING TRADITIONS）'
+)
 
 # --- glossary ---
 glossary_terms = [
@@ -1683,6 +1835,299 @@ main>.content-section{padding-left:clamp(24px,8vw,140px);padding-right:clamp(24p
 .false-friends{grid-template-columns:repeat(3,1fr)}
 .false-friends article{border-top:3px solid var(--gold)}
 
+/* ---- cross-tradition gathering / AI age ---- */
+.traditions-intro{
+  display:grid;
+  grid-template-columns:minmax(0,1.08fr) minmax(360px,.92fr);
+  gap:clamp(48px,7vw,110px);
+  align-items:center;
+  padding:88px clamp(24px,8vw,140px) 94px;
+  background:linear-gradient(135deg,#eee8dc 0%,#f7f3ea 58%,#e9e2d5 100%);
+  border-bottom:1px solid var(--line);
+}
+.traditions-intro-copy{max-width:760px}
+.semantic-title span{display:inline}
+.traditions-intro h2{
+  font:500 clamp(38px,4.5vw,62px)/1.2 var(--serif);
+  margin:16px 0 24px;
+  letter-spacing:-.025em;
+}
+.traditions-intro-copy>p{font-size:17px;line-height:1.92;color:var(--ink2)}
+.traditions-intro .curator-note{margin-top:28px}
+
+.tradition-orbit{
+  position:relative;
+  width:min(100%,520px);
+  aspect-ratio:1;
+  margin:auto;
+  border:1px solid rgba(93,109,96,.36);
+  border-radius:50%;
+  background:
+    radial-gradient(circle at center,rgba(180,154,92,.18) 0 2%,transparent 2.5% 26%,rgba(93,109,96,.09) 26.5% 27%,transparent 27.5% 48%,rgba(180,154,92,.12) 48.5% 49%,transparent 49.5%);
+}
+.tradition-orbit:before,.tradition-orbit:after{
+  content:"";
+  position:absolute;
+  left:50%;top:50%;
+  transform:translate(-50%,-50%);
+  border:1px solid rgba(93,109,96,.2);
+  border-radius:50%;
+  pointer-events:none;
+}
+.tradition-orbit:before{width:72%;height:72%}
+.tradition-orbit:after{width:42%;height:42%}
+.orbit-center{
+  position:absolute;
+  left:50%;top:50%;
+  transform:translate(-50%,-50%);
+  width:118px;height:118px;
+  display:grid;place-content:center;text-align:center;
+  border-radius:50%;
+  background:var(--ink);
+  color:var(--paper);
+  box-shadow:0 16px 40px rgba(31,39,35,.14);
+  z-index:2;
+}
+.orbit-center b{font:500 20px/1.25 var(--serif)}
+.orbit-center small{color:#bdb69f;font-size:10px;letter-spacing:.1em;margin-top:4px}
+.tradition-orbit>span{
+  position:absolute;
+  transform:translate(-50%,-50%);
+  min-width:108px;
+  padding:10px 12px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:rgba(255,253,248,.94);
+  text-align:center;
+  font:500 15px/1.25 var(--serif);
+  box-shadow:0 8px 24px rgba(31,39,35,.06);
+}
+.tradition-orbit>span small{font:10px/1.2 var(--sans);color:var(--moss)}
+.tradition-orbit>span:nth-of-type(1){left:50%;top:5%}
+.tradition-orbit>span:nth-of-type(2){left:83%;top:21%}
+.tradition-orbit>span:nth-of-type(3){left:94%;top:54%}
+.tradition-orbit>span:nth-of-type(4){left:74%;top:87%}
+.tradition-orbit>span:nth-of-type(5){left:28%;top:90%}
+.tradition-orbit>span:nth-of-type(6){left:5%;top:58%}
+.tradition-orbit>span:nth-of-type(7){left:16%;top:22%}
+
+.tradition-cards{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;
+}
+.tradition-cards article{
+  min-width:0;
+  padding:26px;
+  background:var(--white);
+  border:1px solid var(--line);
+  display:flex;
+  flex-direction:column;
+  min-height:330px;
+}
+.tradition-cards article:first-child{
+  grid-column:1/-1;
+  min-height:0;
+  display:grid;
+  grid-template-columns:64px 1.1fr 1.4fr;
+  gap:24px;
+  align-items:center;
+  background:#e7dfd0;
+  border-top:3px solid var(--gold);
+}
+.tradition-icon{
+  width:52px;height:52px;
+  display:grid;place-items:center;
+  border:1px solid var(--line);
+  border-radius:50%;
+  margin-bottom:18px;
+}
+.tradition-icon svg{width:30px;height:30px;stroke:var(--moss);fill:none;stroke-width:1.3}
+.tradition-cards article:first-child .tradition-icon{margin:0;grid-column:1;grid-row:1/4}
+.tradition-cards article:first-child>span{grid-column:2;grid-row:1}
+.tradition-cards article:first-child h3{grid-column:2;grid-row:2;margin-top:4px}
+.tradition-cards article:first-child p{grid-column:3;grid-row:1/3;margin:0}
+.tradition-cards article:first-child>b{grid-column:2/4;grid-row:3}
+.tradition-cards article>span{
+  color:var(--moss);
+  font-size:11px;
+  letter-spacing:.06em;
+}
+.tradition-cards h3{
+  font:500 23px/1.35 var(--serif);
+  margin:12px 0;
+}
+.tradition-cards h3 small{
+  display:block;
+  margin-top:4px;
+  font:500 11px/1.4 var(--sans);
+  color:var(--moss);
+}
+.tradition-cards p{font-size:14px;line-height:1.82;color:var(--ink2)}
+.tradition-cards article>b{
+  display:block;
+  margin-top:auto;
+  padding-top:18px;
+  border-top:1px solid var(--line);
+  color:#756338;
+  font-size:12px;
+  font-weight:600;
+}
+
+.tradition-matrix{min-width:1180px}
+.tradition-matrix th:first-child{min-width:175px}
+.tradition-matrix td,.tradition-matrix th{line-height:1.65}
+.tradition-matrix small{color:var(--moss);font-weight:500}
+
+.shared-grammar,.human-core-grid,.future-protocol{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+}
+.shared-grammar article,.human-core-grid article,.future-protocol article{
+  padding:24px;
+  min-width:0;
+  border:1px solid var(--line);
+  background:var(--white);
+}
+.shared-grammar article>b,.future-protocol article>b{
+  color:var(--gold);
+  font-size:12px;
+  letter-spacing:.12em;
+}
+.shared-grammar h3,.human-core-grid h3,.future-protocol h3{
+  font:500 21px/1.4 var(--serif);
+  margin:10px 0 8px;
+}
+.shared-grammar p,.human-core-grid p,.future-protocol p{
+  margin:0;
+  color:var(--ink2);
+  font-size:14px;
+  line-height:1.82;
+}
+
+.do-not-collapse{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+.do-not-collapse article{
+  padding:26px 28px;
+  border-top:3px solid var(--gold);
+  background:#e9e2d5;
+}
+.do-not-collapse span{font-size:11px;color:var(--moss);letter-spacing:.06em}
+.do-not-collapse h3{font:500 23px/1.4 var(--serif);margin:10px 0}
+.do-not-collapse p{font-size:14px;line-height:1.82;color:var(--ink2)}
+
+.ai-era{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(420px,.8fr);
+  gap:clamp(40px,7vw,100px);
+  align-items:center;
+  padding:92px clamp(24px,8vw,140px);
+  background:var(--ink);
+  color:var(--paper);
+}
+.ai-era-head>span{
+  color:#cbbd94;
+  font-size:11px;
+  letter-spacing:.18em;
+  font-weight:700;
+}
+.ai-era h2{
+  font:500 clamp(38px,4.7vw,64px)/1.18 var(--serif);
+  margin:16px 0 24px;
+  max-width:12em;
+}
+.ai-era p{color:#c5ccc7;font-size:17px;line-height:1.9;max-width:720px}
+.ai-era p strong{color:var(--paper)}
+.ai-rings{display:grid;place-items:center;min-width:0}
+.ai-ring{
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  text-align:center;
+}
+.ai-ring-outer{
+  width:min(100%,500px);
+  aspect-ratio:1;
+  border:1px solid rgba(203,189,148,.48);
+  background:radial-gradient(circle,rgba(180,154,92,.04),rgba(255,255,255,.015));
+}
+.ai-ring-middle{
+  width:68%;aspect-ratio:1;
+  border:1px solid rgba(173,186,178,.42);
+  background:#222d28;
+}
+.ai-ring-center{
+  width:53%;aspect-ratio:1;
+  border:1px solid var(--gold);
+  background:#efe8d9;
+  color:var(--ink);
+  box-shadow:0 0 60px rgba(180,154,92,.15);
+}
+.ai-ring>span{font:500 17px/1.35 var(--serif);color:#ddd7c9}
+.ai-ring>span small,.ai-ring-center small{
+  display:block;
+  margin-top:5px;
+  font:10px/1.5 var(--sans);
+  color:#9eaaa3;
+}
+.ai-ring-center strong{font:500 20px/1.3 var(--serif)}
+.ai-ring-center small{color:var(--moss);padding:0 14px}
+
+.human-core-grid article{background:#eee7da}
+.human-core-grid article>span{
+  color:var(--gold);
+  font-size:11px;
+  letter-spacing:.12em;
+}
+
+.ai-boundary-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:14px;
+}
+.ai-boundary-grid article{
+  padding:26px;
+  border:1px solid var(--line);
+  background:var(--white);
+}
+.ai-boundary-grid article>span{
+  display:inline-block;
+  padding:5px 8px;
+  border-radius:999px;
+  font-size:10px;
+  letter-spacing:.08em;
+  background:#e7e1d5;
+  color:var(--moss);
+}
+.ai-boundary-grid h3{font:500 26px/1.3 var(--serif);margin:12px 0}
+.ai-boundary-grid ul{padding-left:19px;margin:0;color:var(--ink2)}
+.ai-boundary-grid li{margin:8px 0;line-height:1.7}
+.ai-boundary-grid .ai-yes{border-top:4px solid #718275}
+.ai-boundary-grid .ai-caution{border-top:4px solid var(--gold)}
+.ai-boundary-grid .ai-no{border-top:4px solid #7b6359}
+
+.source-link-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+.source-link-grid a{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:20px;
+  padding:18px 20px;
+  border:1px solid var(--line);
+  background:var(--white);
+}
+.source-link-grid a:hover{border-color:#9e9079;box-shadow:0 8px 24px rgba(31,39,35,.06)}
+.source-link-grid b{font:500 17px/1.4 var(--serif)}
+.source-link-grid span{font-size:11px;color:var(--moss);text-align:right}
+
 .family-grid a,.myth-grid article,.signal-grid article,.care-grid article,.book-grid article,.roadmap-list article,.tool-grid article,.glossary-card,.query-card,.scenario-grid article{
   transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;
 }
@@ -1702,6 +2147,14 @@ main>.content-section{padding-left:clamp(24px,8vw,140px);padding-right:clamp(24p
   .credits-grid{grid-template-columns:1fr 1fr}
   .exhibit-annotations{grid-template-columns:1fr}
   .visual-index-grid{grid-template-columns:1fr 1fr}
+  .traditions-intro,.ai-era{grid-template-columns:minmax(0,1fr)}
+  .traditions-intro>* ,.ai-era>*{min-width:0}
+  .tradition-orbit{max-width:480px}
+  .tradition-cards{grid-template-columns:1fr 1fr}
+  .tradition-cards article:first-child{grid-column:1/-1;grid-template-columns:52px 1fr 1.25fr}
+  .shared-grammar,.human-core-grid,.future-protocol{grid-template-columns:1fr 1fr}
+  .ai-boundary-grid{grid-template-columns:1fr}
+  .source-link-grid{grid-template-columns:1fr 1fr}
 }
 @media(max-width:1100px){
   .visual-index-grid{grid-template-columns:1fr 1fr}
@@ -1747,6 +2200,30 @@ main>.content-section{padding-left:clamp(24px,8vw,140px);padding-right:clamp(24p
   .curator-note{grid-template-columns:1fr;gap:10px}
   .visual-index{padding:62px 24px}
   .visual-index-grid{grid-template-columns:1fr}
+  .traditions-intro{padding:58px 22px 68px;gap:42px}
+  .traditions-intro h2{font-size:clamp(31px,9vw,38px)}
+  .semantic-title span{display:block;white-space:nowrap}
+  .traditions-intro h2.semantic-title,.ai-era h2.semantic-title{font-size:clamp(30px,8vw,34px)}
+  .content-section h2.semantic-title{font-size:clamp(27px,7.2vw,31px)}
+  .tradition-orbit{width:min(100%,360px);max-width:100%}
+  .tradition-orbit>span{min-width:86px;padding:8px 9px;font-size:13px}
+  .tradition-orbit>span:nth-of-type(2){left:80%}
+  .tradition-orbit>span:nth-of-type(3){left:88%}
+  .tradition-orbit>span:nth-of-type(6){left:12%}
+  .tradition-orbit>span:nth-of-type(7){left:20%}
+  .orbit-center{width:96px;height:96px}
+  .orbit-center b{font-size:17px}
+  .tradition-cards,.shared-grammar,.human-core-grid,.future-protocol,.do-not-collapse,.source-link-grid{grid-template-columns:1fr}
+  .tradition-cards article{min-height:0}
+  .tradition-cards article:first-child{grid-column:auto;display:flex;min-height:0}
+  .tradition-cards article:first-child .tradition-icon{margin-bottom:18px}
+  .ai-era{padding:64px 22px;gap:46px}
+  .ai-era h2{font-size:clamp(32px,9.5vw,42px);max-width:none}
+  .ai-ring-outer{width:min(100%,360px);max-width:100%}
+  .ai-ring>span{font-size:14px}
+  .ai-ring-center strong{font-size:16px}
+  .source-link-grid a{align-items:flex-start;flex-direction:column;gap:4px}
+  .source-link-grid span{text-align:left}
   .bilingual-process{display:grid;grid-template-columns:1fr;gap:6px;max-width:100%}
   .bilingual-process span,.bilingual-process span.wide{width:100%;min-width:0;padding:11px 16px}
   .bilingual-process i{justify-self:center;transform:rotate(90deg);line-height:1}
