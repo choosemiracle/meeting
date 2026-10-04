@@ -266,7 +266,7 @@ main>.content-section{padding-left:clamp(24px,8vw,140px);padding-right:clamp(24p
   border-bottom:1px solid var(--line);
 }
 .traditions-intro-copy{max-width:760px}
-.semantic-title span{display:inline}
+.semantic-title>span{display:inline;white-space:nowrap}
 .traditions-intro h2{
   font:500 clamp(38px,4.5vw,62px)/1.2 var(--serif);
   margin:16px 0 24px;
@@ -854,7 +854,8 @@ main>.content-section{padding-left:clamp(24px,8vw,140px);padding-right:clamp(24p
   .visual-index-grid{grid-template-columns:1fr}
   .traditions-intro,.china-intro{padding:58px 22px 68px;gap:42px}
   .traditions-intro h2,.china-intro h2{font-size:clamp(31px,9vw,38px)}
-  .semantic-title span{display:block;white-space:nowrap}
+  .semantic-title>span{display:block;white-space:nowrap}
+  .title-line>wbr+.title-segment{display:block}
   .traditions-intro h2.semantic-title,.ai-era h2.semantic-title,.china-intro h2.semantic-title{font-size:clamp(28px,7.6vw,33px)}
   .content-section h2.semantic-title{font-size:clamp(27px,7.2vw,31px)}
   .china-principle{grid-template-columns:1fr;gap:8px}

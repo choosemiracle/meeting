@@ -5,7 +5,7 @@ ROOT = Path(__file__).resolve().parent
 
 SITE_NAME = '共同等候｜贵格会聚会研究与实践'
 TAGLINE = '研究贵格会聚会（Meeting）如何通过静默、共同聆听与群体明辨，让尚未被任何个人完全拥有的真实，有机会出现。'
-ASSET_VERSION = '20261004-ux7'
+ASSET_VERSION = '20261004-ux8'
 
 NAV_PRIMARY = [
     ('index.html','首页'),
@@ -844,12 +844,23 @@ def _protect_terms(text):
     # English already placed in full-width parentheses is secondary annotation:
     # keep it intact, smaller and lighter, and never let term locking split it.
     held = {}
+    locked = {}
+
     def hold_parenthetical(match):
         token = f'@@PAREN{len(held)}@@'
         held[token] = match.group(0)
         return token
 
+    def hold_short_quote(match):
+        token = f'@@QUOTE{len(locked)}@@'
+        locked[token] = match.group(0)
+        return token
+
     protected = re.sub(r'（[^）]*[A-Za-z][^）]*）', hold_parenthetical, text)
+    # Short quoted phrases are semantic units in Chinese headlines. Keeping them
+    # together prevents awkward mobile breaks such as “不会 / 静默”.
+    protected = re.sub(r'“[^”\n]{1,10}”|‘[^’\n]{1,10}’|《[^》\n]{1,10}》', hold_short_quote, protected)
+
     pattern = '(' + '|'.join(re.escape(x) for x in sorted(HEADING_TERMS, key=len, reverse=True)) + ')'
     parts = [x for x in re.split(pattern, protected) if x]
     rendered = ''.join(
@@ -859,10 +870,12 @@ def _protect_terms(text):
     )
     for token, original in held.items():
         rendered = rendered.replace(html.escape(token), f'<span class="en-paren">{html.escape(original)}</span>')
+    for token, original in locked.items():
+        rendered = rendered.replace(html.escape(token), f'<span class="term-lock">{html.escape(original)}</span>')
     return rendered
 
 
-def _heading_segments(text, soft_limit=18, target=14):
+def _heading_segments(text, soft_limit=18):
     """Keep headings whole; only expose semantic wrap points for genuinely long titles."""
     clean = text.strip()
     compact = re.sub(r'\s+', '', clean)
@@ -871,28 +884,15 @@ def _heading_segments(text, soft_limit=18, target=14):
     # only gives the browser a better place to wrap when the container needs it.
     pieces = re.findall(r'.+?[，,；;：:](?=.)|.+$', clean)
     pieces = [p.strip() for p in pieces if p.strip()]
-    if len(pieces) <= 1:
-        return [(clean, len(compact) > soft_limit)]
 
-    # Even a short title can need two lines on a phone. Keep each side of the
-    # punctuation intact, so "共同聆听" never becomes "共 / 同聆听".
-    if len(compact) <= soft_limit:
+    # Punctuation already gives us the best semantic boundaries. Keep each
+    # punctuation-delimited phrase intact on desktop and let the browser wrap only
+    # between phrases. This avoids ugly breaks such as “不会 / 静默”.
+    if len(pieces) > 1:
         return [(piece, False) for piece in pieces]
 
-    segments, current = [], ''
-    for piece in pieces:
-        candidate = f'{current}{piece}' if current else piece
-        if current and len(re.sub(r'\s+', '', candidate)) > target:
-            segments.append(current)
-            current = piece
-        else:
-            current = candidate
-    if current:
-        segments.append(current)
-
-    if len(segments) <= 1:
-        return [(clean, True)]
-    return [(seg, len(re.sub(r'\s+', '', seg)) > target) for seg in segments]
+    # No useful punctuation: allow ordinary wrapping only for genuinely long titles.
+    return [(clean, len(compact) > soft_limit)]
 
 
 def smart_heading(text):
@@ -1332,7 +1332,7 @@ traditions_body = f'''
 <section class="traditions-intro">
   <div class="traditions-intro-copy">
     <span class="kicker">跨传统会聚（ACROSS TRADITIONS）</span>
-    <h2 class="semantic-title"><span>古往今来，</span><span>人类如何共同求真？</span></h2>
+    <h2 class="semantic-title"><span>古往今来，</span><wbr><span>人类如何共同求真？</span></h2>
     <p>贵格会聚会不是人类历史上唯一把“群体”当作灵性器官的传统。苏菲的记念（dhikr）、禅宗的坐禅（zazen）、犹太传统的同伴研习（havruta）、印度传统的真理共聚（satsang）、锡克教的圣众（sadh sangat）、东正教的静修祈祷（hesychasm），都在回答相近却不相同的问题：<strong>当个人经验不够时，一群人怎样共同靠近真实、善、神圣或觉醒？</strong></p>
     <div class="curator-note"><span>比较原则</span><p>这里比较的是<strong>群体实践的结构</strong>，不是说这些传统“本质上一样”，更不是建立一条虚构的影响谱系。每一种实践都只能放回自己的神学、历史、语言与权威结构中理解。</p></div>
   </div>
@@ -1403,7 +1403,7 @@ traditions_body = f'''
 <section class="ai-era">
   <div class="ai-era-head">
     <span>未来会聚（FUTURE GATHERING）</span>
-    <h2 class="semantic-title"><span>机器越来越会说话，</span><span>人类为何还要相聚？</span></h2>
+    <h2 class="semantic-title"><span>机器越来越会说话，</span><wbr><span>人类为何还要相聚？</span></h2>
     <p>AI 可以在几秒钟内总结经典、模拟争论、生成祷词、提出问题、归纳“群体共识”。这恰恰让一个更古老的问题重新变得尖锐：<strong>哪些事情可以交给机器，哪些必须由有身体、会受伤、要承担后果的人亲自完成？</strong></p>
   </div>
   <div class="ai-rings">
@@ -1416,7 +1416,7 @@ traditions_body = f'''
 </section>
 
 <section class="content-section">
-  <div class="section-head"><span>人类核心（HUMAN CORE）</span><h2 class="semantic-title"><span>人工智能越强，</span><span>人类更要保留“慢能力”</span></h2></div>
+  <div class="section-head"><span>人类核心（HUMAN CORE）</span><h2 class="semantic-title"><span>人工智能越强，</span><wbr><span>人类更要保留“慢能力”</span></h2></div>
   <div class="human-core-grid">
     <article><span>01</span><h3>未经优化的静默</h3><p>没有提示词、没有下一句建议、没有自动总结。人必须承受“不知道接下来会发生什么”。</p></article>
     <article><span>02</span><h3>身体共在</h3><p>一张脸的迟疑、呼吸变慢、房间里的紧张与温度，不只是“待处理信号”，而是关系本身的一部分。</p></article>
@@ -1481,7 +1481,7 @@ china_body = f'''
 <section class="china-intro">
   <div class="china-intro-copy">
     <span class="kicker">中国语境（CHINA CONTEXT）</span>
-    <h2 class="semantic-title"><span>不是把 Meeting “中国化”，</span><span>而是让传统彼此相遇。</span></h2>
+    <h2 class="semantic-title"><span>不是把 Meeting “中国化”，</span><wbr><span>而是让传统彼此相遇。</span></h2>
     <p>如果只是把“静默”等同于禅，把“内在之光”等同于良知或佛性，把“合一”等同于和为贵，表面上很亲切，实际上会同时误读两边。更有生命力的做法，是先问：<strong>中国文化里，哪些长期实践也在训练人放慢、反省、倾听差异、共同求真，并把认识落实到生活？</strong></p>
     <div class="china-principle"><b>本页的整合原则</b><p>找<strong>结构上的共鸣</strong>，保留<strong>思想上的差异</strong>，最后才进入<strong>当代实践的再设计</strong>。</p></div>
   </div>
@@ -1974,7 +1974,7 @@ main>.content-section{padding-left:clamp(24px,8vw,140px);padding-right:clamp(24p
   border-bottom:1px solid var(--line);
 }
 .traditions-intro-copy{max-width:760px}
-.semantic-title span{display:inline}
+.semantic-title>span{display:inline;white-space:nowrap}
 .traditions-intro h2{
   font:500 clamp(38px,4.5vw,62px)/1.2 var(--serif);
   margin:16px 0 24px;
@@ -2562,7 +2562,8 @@ main>.content-section{padding-left:clamp(24px,8vw,140px);padding-right:clamp(24p
   .visual-index-grid{grid-template-columns:1fr}
   .traditions-intro,.china-intro{padding:58px 22px 68px;gap:42px}
   .traditions-intro h2,.china-intro h2{font-size:clamp(31px,9vw,38px)}
-  .semantic-title span{display:block;white-space:nowrap}
+  .semantic-title>span{display:block;white-space:nowrap}
+  .title-line>wbr+.title-segment{display:block}
   .traditions-intro h2.semantic-title,.ai-era h2.semantic-title,.china-intro h2.semantic-title{font-size:clamp(28px,7.6vw,33px)}
   .content-section h2.semantic-title{font-size:clamp(27px,7.2vw,31px)}
   .china-principle{grid-template-columns:1fr;gap:8px}
