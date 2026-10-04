@@ -1,8 +1,88 @@
 
 (() => {
+  // Navigation: explicit state, keyboard escape, scrim close, and mobile focus.
   const navToggle = document.querySelector('.nav-toggle');
-  const nav = document.querySelector('.main-nav');
-  navToggle?.addEventListener('click', () => nav?.classList.toggle('open'));
+  const mobileNav = document.querySelector('.mobile-nav');
+  const navScrim = document.querySelector('.nav-scrim');
+  let navPreviousFocus = null;
+  const setNavOpen = (open, restoreFocus=false) => {
+    if (!navToggle || !mobileNav) return;
+    if (open) navPreviousFocus = document.activeElement;
+    mobileNav.classList.toggle('open', open);
+    document.body.classList.toggle('nav-open', open);
+    navToggle.setAttribute('aria-expanded', String(open));
+    navToggle.setAttribute('aria-label', open ? '关闭目录' : '打开目录');
+    mobileNav.setAttribute('aria-hidden', String(!open));
+    if (open) requestAnimationFrame(() => mobileNav.querySelector('a')?.focus());
+    if (!open && restoreFocus && navPreviousFocus instanceof HTMLElement) navPreviousFocus.focus();
+  };
+  navToggle?.addEventListener('click', () => setNavOpen(navToggle.getAttribute('aria-expanded') !== 'true'));
+  navScrim?.addEventListener('click', () => setNavOpen(false, true));
+  mobileNav?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setNavOpen(false)));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && navToggle?.getAttribute('aria-expanded') === 'true') setNavOpen(false, true);
+  });
+  addEventListener('resize', () => { if (innerWidth > 1100 && navToggle?.getAttribute('aria-expanded') === 'true') setNavOpen(false); }, {passive:true});
+  document.addEventListener('click', e => {
+    document.querySelectorAll('.nav-more[open]').forEach(menu => {
+      if (!menu.contains(e.target)) menu.removeAttribute('open');
+    });
+  });
+
+  // Reading progress for every page.
+  const readingBar = document.querySelector('.reading-progress span');
+  const renderReadingProgress = () => {
+    if (!readingBar) return;
+    const root = document.documentElement;
+    const max = Math.max(1, root.scrollHeight - innerHeight);
+    const ratio = Math.min(1, Math.max(0, scrollY / max));
+    readingBar.style.width = `${(ratio * 100).toFixed(2)}%`;
+  };
+  addEventListener('scroll', renderReadingProgress, {passive:true});
+  addEventListener('resize', renderReadingProgress, {passive:true});
+  renderReadingProgress();
+
+  // Long-form navigation: build a desktop rail + compact mobile table of contents.
+  const articleGrid = document.querySelector('.article-grid');
+  const articleMain = articleGrid?.querySelector('.article-main');
+  if (articleGrid && articleMain) {
+    const headings = [...articleMain.querySelectorAll('.content-section h2')]
+      .filter(h => h.textContent.trim().length > 0);
+    if (headings.length >= 3) {
+      headings.forEach((h, i) => { if (!h.id) h.id = `section-${i+1}`; });
+      const links = headings.map(h => `<li><a href="#${h.id}">${h.textContent.trim()}</a></li>`).join('');
+      const toc = document.createElement('nav');
+      toc.className = 'article-toc';
+      toc.setAttribute('aria-label', '本页导览');
+      toc.innerHTML = `<span>本页导览</span><ol>${links}</ol>`;
+
+      const rail = document.createElement('aside');
+      rail.className = 'article-rail';
+      rail.setAttribute('aria-label', '本页辅助导航与来源');
+      rail.appendChild(toc);
+      const sources = [...articleGrid.children].find(el => el.classList?.contains('sources'));
+      if (sources) rail.appendChild(sources);
+      articleGrid.appendChild(rail);
+
+      const mobileToc = document.createElement('details');
+      mobileToc.className = 'article-toc-mobile';
+      mobileToc.innerHTML = `<summary>本页导览 · ${headings.length} 个部分</summary><nav>${headings.map(h => `<a href="#${h.id}">${h.textContent.trim()}</a>`).join('')}</nav>`;
+      articleMain.insertBefore(mobileToc, articleMain.firstChild);
+      mobileToc.querySelectorAll('a').forEach(a => a.addEventListener('click', () => { mobileToc.open = false; }));
+
+      const tocLinks = [...toc.querySelectorAll('a')];
+      const observer = new IntersectionObserver(entries => {
+        const visible = entries.filter(x => x.isIntersecting).sort((a,b) => a.boundingClientRect.top - b.boundingClientRect.top);
+        if (!visible.length) return;
+        const id = visible[0].target.id;
+        tocLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === `#${id}`));
+      }, {rootMargin:'-20% 0px -68% 0px', threshold:0});
+      headings.forEach(h => observer.observe(h));
+    }
+  }
+
+  // Interaction feedback should be announced without stealing focus.
+  document.querySelectorAll('#ministryResult,#caseResult,#questionFeedback,#saveStatus').forEach(el=>el.setAttribute('aria-live','polite'));
 
   // 12 minute practice timer
   const display = document.getElementById('timeDisplay');
@@ -60,5 +140,42 @@
 
   // Glossary search & filter
   const gSearch=document.getElementById('glossarySearch');
-  if(gSearch){let active='all';const cards=[...document.querySelectorAll('.glossary-card')];function apply(){const q=gSearch.value.trim().toLowerCase();cards.forEach(c=>{const txt=c.dataset.term+' '+c.textContent.toLowerCase();const cat=c.querySelector('span').textContent; c.style.display=(!q||txt.includes(q))&&(active==='all'||cat===active)?'block':'none';});}gSearch.oninput=apply;document.querySelectorAll('.filter').forEach(b=>b.onclick=()=>{document.querySelectorAll('.filter').forEach(x=>x.classList.remove('active'));b.classList.add('active');active=b.dataset.filter;apply();});}
+  if(gSearch){
+    let active='all';
+    const cards=[...document.querySelectorAll('.glossary-card')];
+    const filters=[...document.querySelectorAll('.filter')];
+    const status=document.getElementById('glossaryStatus');
+    const empty=document.getElementById('glossaryEmpty');
+    const clear=document.getElementById('clearGlossary');
+    function apply(){
+      const q=gSearch.value.trim().toLowerCase();
+      let visible=0;
+      cards.forEach(c=>{
+        const txt=c.dataset.term+' '+c.textContent.toLowerCase();
+        const cat=c.querySelector('span').textContent;
+        const show=(!q||txt.includes(q))&&(active==='all'||cat===active);
+        c.style.display=show?'block':'none';
+        if(show) visible++;
+      });
+      if(status) status.textContent=`显示 ${visible} / ${cards.length} 个术语`;
+      if(empty) empty.style.display=visible?'none':'block';
+      if(clear) clear.hidden=!q&&active==='all';
+    }
+    gSearch.addEventListener('input',apply);
+    filters.forEach(b=>b.addEventListener('click',()=>{
+      filters.forEach(x=>{x.classList.remove('active');x.setAttribute('aria-pressed','false');});
+      b.classList.add('active');
+      b.setAttribute('aria-pressed','true');
+      active=b.dataset.filter;
+      apply();
+    }));
+    clear?.addEventListener('click',()=>{
+      gSearch.value='';
+      active='all';
+      filters.forEach(x=>{const isAll=x.dataset.filter==='all';x.classList.toggle('active',isAll);x.setAttribute('aria-pressed',String(isAll));});
+      apply();
+      gSearch.focus();
+    });
+    apply();
+  }
 })();
