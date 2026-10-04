@@ -20,6 +20,17 @@ NAV = [
     ('research.html','研究室'),
 ]
 
+VISUAL_SOURCES = {
+    'fox': 'https://commons.wikimedia.org/wiki/File:Supposed_portrait_of_George_Fox,_1677.png',
+    'fell': 'https://commons.wikimedia.org/wiki/File:Margaret_Fell.jpg',
+    'woolman': 'https://commons.wikimedia.org/wiki/File:John_Woolman.jpg',
+    'penn': 'https://commons.wikimedia.org/wiki/File:Francis_Place_Chalk_Portrait_of_William_Penn_1695.jpg',
+    'swarthmoor': 'https://commons.wikimedia.org/wiki/File:Swarthmoor_Hall.jpg',
+    'interior': 'https://commons.wikimedia.org/wiki/File:Interior_of_Quaker_meeting_house.jpg',
+    'arch': 'https://commons.wikimedia.org/wiki/File:Arch_Street_Meetinghouse_from_front.jpg',
+    'free_interior': 'https://commons.wikimedia.org/wiki/File:Free_Quaker_Meeting_House,_interior_(813d353d-1dd8-b71b-0b26-1682e0a20a30).jpg',
+}
+
 
 def icon(name):
     icons = {
@@ -104,6 +115,14 @@ HEADING_TERMS = [
 
 HEADING_LAYOUTS = {
     '在静默中，共同聆听。': ['在静默中，', '共同聆听。'],
+    '静默，不是什么都不做': ['静默，', '不是什么都不做'],
+    'Meeting 的历史与演变': ['Meeting 的', '历史与演变'],
+    'Quaker Meeting 研究室': ['Quaker Meeting', '研究室'],
+    'Quaker Meeting 术语表': ['Quaker Meeting', '术语表'],
+    'Meeting 如何成为共同体': ['Meeting 如何成为', '共同体'],
+    'Meeting 与其他方法，有何异同？': ['Meeting 与其他方法，', '有何异同？'],
+    '每一张历史图片，都应该知道自己从哪里来':
+        ['每一张历史图片，', '都应该知道自己从哪里来'],
     '如果一群人暂时不争着表达立场，会不会有一些东西，反而更容易被听见？':
         ['如果一群人暂时', '不争着表达立场，', '会不会有一些东西，', '反而更容易被听见？'],
     # Worship / practice — manually edited as Chinese editorial headlines.
@@ -226,11 +245,13 @@ def _split_heading_piece(piece):
 
 
 def _protect_terms(text):
-    safe = html.escape(text)
-    for term in sorted(HEADING_TERMS, key=len, reverse=True):
-        escaped = html.escape(term)
-        safe = safe.replace(escaped, f'<span class="term-lock">{escaped}</span>')
-    return safe
+    pattern = '(' + '|'.join(re.escape(x) for x in sorted(HEADING_TERMS, key=len, reverse=True)) + ')'
+    parts = [x for x in re.split(pattern, text) if x]
+    return ''.join(
+        f'<span class="term-lock">{html.escape(part)}</span>'
+        if part in HEADING_TERMS else html.escape(part)
+        for part in parts
+    )
 
 
 def smart_heading(text):
@@ -307,6 +328,43 @@ def section(title, body, eyebrow=None, cls=''):
     </section>'''
 
 
+def exhibit_figure(src, kicker, title, caption, credit='', source_url='', license_label='', cls=''):
+    credit_bits = []
+    if credit:
+        credit_bits.append(html.escape(credit))
+    if license_label:
+        credit_bits.append(html.escape(license_label))
+    credit_html = ' · '.join(credit_bits)
+    if source_url:
+        credit_html += ((' · ' if credit_html else '') +
+                        f'<a href="{html.escape(source_url)}" target="_blank" rel="noreferrer">查看原始来源 ↗</a>')
+    return f'''<figure class="exhibit-figure {cls}">
+      <div class="exhibit-image-wrap"><img src="{html.escape(src)}" alt="{html.escape(title)}" loading="lazy" decoding="async"/></div>
+      <figcaption>
+        <span class="exhibit-kicker">{html.escape(kicker)}</span>
+        <h3>{html.escape(title)}</h3>
+        <p>{caption}</p>
+        {f'<small>{credit_html}</small>' if credit_html else ''}
+      </figcaption>
+    </figure>'''
+
+
+def exhibit_pair(a, b, cls=''):
+    return f'<div class="exhibit-pair {cls}">{a}{b}</div>'
+
+
+def portrait_card(src, name, years, note, source_url, credit, license_label):
+    return f'''<article class="portrait-card">
+      <div class="portrait-image"><img src="{html.escape(src)}" alt="{html.escape(name)}" loading="eager" decoding="async"/></div>
+      <div class="portrait-copy"><span>{html.escape(years)}</span><h3>{html.escape(name)}</h3><p>{note}</p>
+      <small>{html.escape(credit)} · {html.escape(license_label)} · <a href="{html.escape(source_url)}" target="_blank" rel="noreferrer">来源 ↗</a></small></div>
+    </article>'''
+
+
+def exhibit_label(number, title, text):
+    return f'''<aside class="exhibit-label"><span>{html.escape(number)}</span><div><b>{html.escape(title)}</b><p>{text}</p></div></aside>'''
+
+
 def page_shell(filename, title, intro, body, label='研究与实践', extra_js=''):
     nav = ''.join(f'<a href="{u}" class="{"active" if filename==u else ""}">{t}</a>' for u,t in NAV)
     hero_html = '' if filename == 'index.html' else f'''<section class="page-hero"><div class="hero-copy"><span class="kicker">{label}</span><h1>{smart_heading(title)}</h1><p>{intro}</p><div class="hero-line"></div></div></section>'''
@@ -333,7 +391,7 @@ def page_shell(filename, title, intro, body, label='研究与实践', extra_js='
 {hero_html}
 {body}
 </main>
-<footer class="site-footer"><div><b>共同等候｜Quaker Meeting 研究与实践</b><p>这是一个中文研究与实践项目，不代表任何贵格会年会或官方机构。</p></div><div class="footer-links"><a href="research.html">来源与研究方法</a><a href="glossary.html">术语表</a><a href="practice.html">开始一次练习</a></div><p class="footer-note">Designed for slow reading, careful listening, and lived practice.</p></footer>
+<footer class="site-footer"><div><b>共同等候｜Quaker Meeting 研究与实践</b><p>这是一个中文研究与实践项目，不代表任何贵格会年会或官方机构。</p></div><div class="footer-links"><a href="research.html">来源与研究方法</a><a href="visual-credits.html">图像与史料说明</a><a href="glossary.html">术语表</a><a href="practice.html">开始一次练习</a></div><p class="footer-note">Designed for slow reading, careful listening, and lived practice.</p></footer>
 <script src="assets/app.js"></script>{extra_js}
 </body></html>'''
 
@@ -341,8 +399,16 @@ def page_shell(filename, title, intro, body, label='研究与实践', extra_js='
 index_body = f'''
 <section class="home-hero"><div class="home-copy"><span class="kicker">QUAKER MEETING · 研究 × 实践</span><h1>{smart_heading('在静默中，共同聆听。')}</h1><p>{TAGLINE}</p><div class="cta-row"><a class="btn primary" href="practice.html">体验一次 12 分钟 Meeting</a><a class="btn ghost" href="meeting.html">先理解 Meeting 是什么</a></div><div class="hero-note"><span></span>不是冥想 App，也不是宗教百科；这是一个把 Meeting 当作“共同聆听、共同检验与共同明辨的方法”来研究的网站。</div></div>{circle_visual()}</section>
 <section class="home-intro"><div class="big-question"><span>THE QUESTION</span><h2>{smart_heading('如果一群人暂时不争着表达立场，会不会有一些东西，反而更容易被听见？')}</h2></div><div class="intro-copy"><p>贵格会 Meeting 最令人着迷的地方，不只是“安静”。真正独特的是：一群人共同停下来，不把某个人、某套理论或某种程序放在中心，而是通过等待、聆听、说与不说，让一个更深的共同辨识逐渐出现。</p><p>Howard Brinton 把 Quakerism 描述为一种以经验为基础的 <em>method</em>，并把它称为一种 <em>group mysticism</em>：内在经验不是终点，必须进入群体、历史与行动。Parker Palmer 又把 “meeting” 这一精神延伸到学习，使它成为一种关于“我们怎样共同认识真实”的实践。</p></div></section>
+<section class="curated-opening"><div class="section-head"><span>VISUAL ESSAY · 01</span><h2>{smart_heading('先看见一个 Meeting 的空间')}</h2><p>没有讲台、没有屏幕，也没有一个天然占据中心的人。建筑与座位本身，就已经在表达一种关于权威、注意力与共同体的理解。</p></div>
+{exhibit_figure('assets/curated/meetinghouse-interior.jpg','FIELD IMAGE · MEETING HOUSE','Quaker Meetinghouse 的室内空间','这张真实场景照片显示一个传统 Meeting House 的内部：长椅、可移动隔断、几乎没有视觉焦点。空间并不会自动制造共同聆听，却会减少“谁站在中心”的暗示。','Pi3.124','https://commons.wikimedia.org/wiki/File:Interior_of_Quaker_meeting_house.jpg','CC BY-SA 4.0','hero-exhibit')}
+<div class="exhibit-annotations">{exhibit_label('A','没有舞台','空间把注意力从“台上的人”移回共同体与共同中心。')}{exhibit_label('B','可被重组的空间','历史上的 Meeting House 常因性别、事务与地方实践存在不同空间安排；形式并不等于本质。')}{exhibit_label('C','建筑也在教人','朴素并不是“没有设计”，而是让结构服务于等待、可见性与共同承担。')}</div></section>
 <section class="home-depth"><div class="section-head"><span>WHY IT MATTERS</span><h2>{smart_heading('Meeting 不只是安静下来，而是在练习“如何共同认识”')}</h2><p>它既涉及灵性，也涉及认识论、群体动力、组织治理与伦理行动。</p></div>{epistemology_visual()}<div class="depth-grid"><article><span>01</span><h3>经验，不等于任性</h3><p>个人经验被认真对待，但重要的 leading 需要时间、共同体与生活后果的检验。</p></article><article><span>02</span><h3>群体，不等于多数</h3><p>Meeting 重视 corporate discernment，却不把人数优势当作 Truth 的替代品。</p></article><article><span>03</span><h3>静默，不等于退避</h3><p>Thomas Kelly 与 Brinton 都把 inward life 指向 outward action：内在聆听若有生命，会进入关系、决定与公共见证。</p></article></div></section>
 <section class="home-map"><div class="section-head"><span>ONE MAP</span><h2>一张图，理解 Meeting 的五个层次</h2><p>从“我里面发生什么”，到“我们如何一起行动”。</p></div>{layer_visual()}<div class="map-links"><a href="worship.html"><b>01</b><span>静默与等候<small>Silence / Waiting</small></span></a><a href="ministry.html"><b>02</b><span>说与不说<small>Vocal Ministry</small></span></a><a href="gathered.html"><b>03</b><span>被聚集的时刻<small>Gathered Meeting</small></span></a><a href="business.html"><b>04</b><span>共同明辨<small>Sense of the Meeting</small></span></a><a href="toolkit.html"><b>05</b><span>进入日常<small>Practice & Action</small></span></a></div></section>
+<section class="visual-index"><div class="section-head"><span>PEOPLE · PLACE · ARCHIVE</span><h2>不只读概念，也看见传统留下的痕迹</h2><p>人物肖像、Meeting House 与历史地点不是装饰；它们帮助我们把抽象词放回时间、空间和具体的人。</p></div><div class="visual-index-grid">
+<a href="history.html"><div class="visual-index-image"><img src="assets/curated/george-fox.jpg" alt="George Fox 肖像" loading="lazy"/></div><span>人物</span><h3>从 George Fox 到 John Woolman</h3><p>四个生命切面，看 Meeting 如何进入组织、治理与见证。</p></a>
+<a href="community.html"><div class="visual-index-image"><img src="assets/curated/swarthmoor-hall.jpg" alt="Swarthmoor Hall" loading="lazy"/></div><span>地点</span><h3>Swarthmoor Hall 与 Meeting House</h3><p>看建筑、家庭与共同体怎样成为实践长期发生的容器。</p></a>
+<a href="research.html"><div class="visual-index-image"><img src="assets/curated/margaret-fell.jpg" alt="Margaret Fell 后世艺术形象" loading="lazy"/></div><span>史料</span><h3>一张图，也需要知道它从哪里来</h3><p>同时代图像、后世印象、现代照片，各自能支持不同程度的判断。</p></a>
+</div></section>
 <section class="meeting-family"><div class="section-head"><span>MEETING FAMILY</span><h2>Meeting 不是只有一种</h2></div><div class="family-grid">
 <a href="worship.html"><span>01</span><h3>Meeting for Worship</h3><p>共同静默、等候、聆听；必要时出现受感分享。</p></a>
 <a href="business.html"><span>02</span><h3>Meeting for Worship for Business</h3><p>不以投票决定，而在敬拜精神中辨认群体是否形成清晰。</p></a>
@@ -361,6 +427,7 @@ meeting_body = f'''
 <div class="article-grid"><article class="article-main">
 {section('Meeting：不是“会议”的同义词','''<p>在贵格会语境里，<strong>Meeting</strong> 同时指一次聚集、一个持续存在的共同体，也指一种特殊的共同实践。把它全部翻成“会议”，会让最重要的东西消失。</p><p>在 Meeting 中，中心并不预先被一个讲者、主持人、教义或议程占据。人们首先做的，是让自己安顿下来，进入一种共同的等待：不急着制造结果，也不假装什么都没有发生。</p>''','01 · DEFINITION')}
 {callout('一个抓手','<p><strong>Meeting 可以理解为：一群人共同为“尚未完全显现的真实”腾出空间。</strong></p><p>这不是严格定义，却是理解 Worship、Business、Clearness 和 Learning 的共同钥匙。</p>')}
+{exhibit_figure('assets/curated/arch-street.jpg','PLACE · PHILADELPHIA','Arch Street Friends Meeting House','一座 Meeting House 既是建筑，也是共同体长期记忆的容器。Arch Street Meeting House 建于 1803–05 年；它提醒我们，“Meeting”从来不只是一次活动，也指持续存在、承担事务与见证的地方共同体。','Beyond My Ken',VISUAL_SOURCES['arch'],'CC BY-SA 4.0','article-exhibit')}
 {section('为什么 Brinton 说 Quakerism 首先是一种 method？','''<p>Howard Brinton 的一个关键判断是：要理解贵格会，不能只列出“它相信什么”，还要看<strong>它如何抵达、检验和修正这些相信</strong>。因此他把 Quakerism 比作一种方法：它不像科学那样测量外部对象，而是面向内在生命、道德要求、宗教洞见与群体经验。</p><p>这使 Meeting 变成一种持续的认识实践。经验很重要，但经验不是“我感觉如此，所以就是真理”；它需要在时间、历史、共同体与行动后果中不断被检验。也正因为如此，Brinton 所说的 <em>group mysticism</em> 不是一群人各自拥有神秘体验，而是个人经验在共同体中被承接、修正并获得社会形态。</p>'''+research_note('把“体验”变成“可检验的实践”','''<p>如果只强调 inward experience，Meeting 很容易滑向私人灵性消费；如果只强调组织规则，它又会失去直接经验的生命。贵格会长期存在的张力，正是在两者之间保持开放：既不把权威外包给制度，也不把权威收回到个人情绪。</p>'''), '02 · METHOD')}
 {section('它与“大家一起静坐”有什么不同？','''<div class="compare-mini"><div><b>一起静坐</b><p>重点可能在个体专注、觉察、放松或禅修。</p></div><div><b>Quaker Meeting</b><p>个人内在安顿很重要，但始终处在一个群体场域中：我在听自己，也在听这个房间、这个共同体，以及可能超越个人意志的引领。</p></div></div><p>Jim Pym 早年把 Meeting 误以为 meditation group，后来才意识到它并不是佛教意义上的冥想团体。这种误解今天依然非常普遍。</p>''','02 · NOT JUST MEDITATION')}
 {section('五个层次同时发生','''<p>一个成熟的 Meeting 往往同时有五个层次。它们不是五步流程，而是五种可以被观察的维度。</p>'''+layer_visual()+'''<div class="definition-list"><dl><dt>Center</dt><dd>这个圆圈最终忠于什么？早期 Friends 会说 God、Christ、Truth、Light；现代不同传统的 Friends 会使用不同语言。</dd><dt>Inward</dt><dd>我是否从惯性反应、紧张和自我表演中稍微退开，变得可听？</dd><dt>Between</dt><dd>我如何听别人？一句 spoken ministry 如何被整个房间接住，而不是立刻讨论？</dd><dt>Corporate</dt><dd>群体有没有出现一种任何单个人都无法制造的清晰、深度或 unity？</dd><dt>Outward</dt><dd>这份清晰最后如何进入决定、关系、工作与社会行动？</dd></dl></div>'''+epistemology_visual(), '03 · FIVE LAYERS')}
@@ -376,6 +443,7 @@ pages['meeting.html'] = page_shell('meeting.html','Meeting 到底是什么？','
 worship_body = f'''
 <div class="article-grid"><article class="article-main">
 {section('静默不是空白','''<p>贵格会 Meeting 的静默常常被误解为“清空头脑”。但传统中的 waiting 更接近<strong>带着期待的开放</strong>：人不必把念头清掉，也不急着跟随每个念头，而是让注意力逐渐从惯性反应中松开。</p><p>Brinton 在讨论 worship 时强调，与其说要消灭纷乱思想，不如说要“活在那超越它们的地方”。这使静默不是一种对心智的暴力控制，而是一种重新排序注意力的方式。</p>''','01 · SILENCE')}
+{exhibit_figure('assets/curated/meetinghouse-interior.jpg','FIELD IMAGE · WORSHIP SPACE','静默不是发生在真空里','这张 Meeting House 室内照片让一个抽象概念变得具体：人进入的不是“个人冥想隔间”，而是一个能看见彼此、共同承受静默的空间。历史上不同 Meeting House 的座位、隔断与礼仪安排并不相同，但“共同在场”一直是关键。','Pi3.124',VISUAL_SOURCES['interior'],'CC BY-SA 4.0','article-exhibit')}
 {section('Silence → Waiting → Worship','''<div class="three-stage"><article><span>01</span><h3>Silence</h3><p>外在声音减少，身体和注意力开始有空间。</p></article><article><span>02</span><h3>Waiting</h3><p>不只是没有讲话，而是期待某种尚未被制造出来的清晰。</p></article><article><span>03</span><h3>Worship</h3><p>等待带有关系性：我把自己置于 Light / Truth / God 的可能引领之下。</p></article></div>''','02 · THREE DEPTHS')}
 {silence_visual()}
 {callout('重要区别','<p><strong>静默是外在条件；waiting 是内在姿态；worship 是关系与方向。</strong></p>','dark')}
@@ -434,6 +502,7 @@ pages['gathered.html'] = page_shell('gathered.html','当 Meeting 被“聚集”
 business_body = f'''
 <div class="article-grid"><article class="article-main">
 {section('为什么一个宗教群体发展出一种独特的决策法？','''<p>17世纪的 Friends 很快就遇到现实问题：救济受迫害者、婚姻、教育、旅行传道、财务、纪律与公共行动都需要组织。但一个强调“内在引领”的群体，怎样避免又建立一个由外部权威支配的制度？</p><p>由此逐渐形成 <strong>Meeting for Worship for Business</strong>：议事不是从 worship 中抽离出来的世俗事务，而是在同一种共同聆听与明辨中处理具体事项。</p>''','01 · ORIGIN')}
+{exhibit_figure('assets/curated/free-quaker-interior.jpg','HISTORIC INTERIOR · PHILADELPHIA','议事并不需要“董事会式”的空间','这是费城 Free Quaker Meeting House 的历史建筑内部，并不是某一次 Business Meeting 的现场照片。它在这里作为空间史料出现：Quaker corporate life 长期在朴素、可彼此看见的环境中处理敬拜与公共事务。','U.S. National Park Service',VISUAL_SOURCES['free_interior'],'Public domain (U.S.)','article-exhibit')}
 {decision_visual()}
 {section('Voting、Consensus、Sense of the Meeting','''<div class="compare-table"><div class="row head"><span>机制</span><span>核心问题</span><span>结束条件</span><span>风险</span></div><div class="row"><b>多数表决</b><span>哪个选项票更多？</span><span>达到规则票数</span><span>少数意见被合法压过</span></div><div class="row"><b>Consensus</b><span>我们能接受什么？</span><span>达到足够一致</span><span>可能滑向最低共同点或谈判</span></div><div class="row accent"><b>Sense of the Meeting</b><span>此刻什么方向最忠于 Truth / leading？</span><span>Meeting 形成可被辨认的 unity / clearness</span><span>若缺少敬拜精神，也可能只是假装的“无投票共识”</span></div></div><p>Patricia Loring 特别强调，Quaker unity 不是 agreement、consensus、compromise 或最低共同点。不同意见仍可能存在，但群体可能对“现在应该怎样前进”出现更深的共同清晰。</p>''','02 · THREE MODELS')}
 {research_note('为什么“没有反对意见”仍然可能不是 unity？','''<p>沉默可能来自清晰，也可能来自权力差异、疲惫、害怕冲突或对 Clerk 的顺从。因此严肃的 Meeting for Business 会主动听取关键保留意见，尤其当议题重大时。真正的 unity 不是把分歧消音，而是让分歧在共同敬拜中获得足够空间，直到它被理解、转化，或被承认仍然存在。</p>''')}
@@ -469,6 +538,7 @@ learning_body = f'''
 {section('如果学习也被当作 Meeting，会发生什么？','''<p>Parker J. Palmer 观察到，Friends 用 “meeting” 描述 Worship、Business、婚礼、纪念等不同场合并非偶然：这些场合都可以在同一种 search for truth 的精神中举行。于是他进一步提出 <strong>Meeting for Learning</strong>。</p><p>这并不是给课堂加几分钟静默，而是重新理解学习：知识不是老师“装进”学生头脑里，而是在<strong>人—人—第三物</strong>的关系中出现。</p>''','01 · MEETING FOR LEARNING')}
 {triad_visual()}
 {section('第三物为什么如此重要？','''<p>如果只有“我和你”，对话很容易滑向互相分析、讨好、辩论或交换主观感受。第三物——一首诗、一段电影、一个数据集、一则案例、一幅画——让关系有一个共同中心。</p><p>Palmer 认为第三物有自己的现实性，它可以打破两个人之间的封闭，让双方同时聆听一个“不是你，也不是我”的东西。</p>''','02 · THIRD THING')}
+{exhibit_figure('assets/curated/john-woolman.jpg','THIRD THING · IMAGE','一张历史肖像，也可以成为“第三物”','不要先问“这是谁、代表什么”。可以先观察：姿态、服饰、绘画方式、后来添加的符号；再查看来源说明。John Woolman 这张图本身就带着不确定性——来源页把它描述为很可能出自同时代友人之手，但又包含后来时代的元素。学习因此不是“认图”，而是让对象反过来挑战我们的快速判断。','Probably Robert Smith III',VISUAL_SOURCES['woolman'],'Public domain in U.S.','article-exhibit')}
 {section('Meeting for Learning 背后，其实是一种知识观','''<p>Palmer 的激进之处，不只是课堂设计。他认为学习发生在关系里：个人经验重要，却要公开地放到群体中接受检验；群体重要，却不能成为新的权威；文本重要，却不能因为“写在书里”就免于追问。</p><p>因此学习不是把知识从一个已经拥有者搬运给另一个空容器，而是让人、他人和对象彼此校正。真正要信任的，最终不是老师、群体或技巧，而是一个超出我们控制的 Truth。</p>'''+research_note('为什么静默是认识论的一部分？','''<p>Palmer 说，Meeting for Learning 要知道什么时候停止追逐答案。静默不是课堂气氛工具，而是在承认：有些知识需要沉淀，有些对象带着 mystery；我们可以解决问题，却不能把所有真实都压缩成“可立即说清”的结论。</p>'''), '03 · EPISTEMOLOGY')}
 {section('Meeting for Learning 的五条纪律','''<div class="practice-steps"><article><b>经验优先于权威</b><p>文本值得尊重，但不能仅因“书上这样写”就终止探寻。</p></article><article><b>只认领自己真正知道的部分</b><p>允许说“不知道”，让疑惑重新成为学习动力。</p></article><article><b>角色可以移动</b><p>老师拥有专业资源，但不垄断 insight；学生也可能成为下一刻的“老师”。</p></article><article><b>信任群体，但不迷信群体</b><p>个人 insight 需要放到群体中检验，却不等于服从多数。</p></article><article><b>知道什么时候停止追赶答案</b><p>有些时刻需要停止讲话，让 insight 沉淀；学习不只有 problems to solve，也有 mysteries to ponder。</p></article></div>''','03 · DISCIPLINES')}
 {section('一场 90 分钟共读，如何从“读书会”变成 Meeting for Learning？','''<div class="agenda"><div><b>0–8</b><span>静默到场；不急着签到聊天</span></div><div><b>8–20</b><span>第三物进入：共同阅读一段短文本</span></div><div><b>20–32</b><span>个人圈画 + 自由书写：“哪里让我停住？”</span></div><div><b>32–50</b><span>两人聆听：只说“我在文本里遇到什么”</span></div><div><b>50–58</b><span>静默</span></div><div><b>58–78</b><span>大组：围绕文本，不互相诊断、不抢总结</span></div><div><b>78–85</b><span>再次静默，让学习落回自己</span></div><div><b>85–90</b><span>每人一句：“这段文本现在怎样继续跟着我？”</span></div></div>''','04 · 90-MINUTE DESIGN')}
@@ -483,6 +553,10 @@ pages['learning.html'] = page_shell('learning.html','Meeting for Learning','如�
 community_body = f'''
 <div class="article-grid"><article class="article-main">
 {section('Meeting 既是一场聚集，也是一个共同体','''<p>贵格会语境里，Meeting 既可以指今天上午十点开始的一场 worship，也可以指一个长期存在的地方共同体。这个双重含义很重要：一次深刻静默如果没有进入关系、照顾、责任与共同生活，很容易变成个人体验消费。</p>''','01 · COMMUNITY')}
+{exhibit_pair(
+  exhibit_figure('assets/curated/arch-street.jpg','PLACE · COMMUNITY','Meeting House：共同体的长期容器','建筑不是共同体本身，却让照顾、敬拜、教育、议事和纪念拥有可持续发生的地方。','Beyond My Ken',VISUAL_SOURCES['arch'],'CC BY-SA 4.0','compact'),
+  exhibit_figure('assets/curated/swarthmoor-hall.jpg','PLACE · ORIGIN','Swarthmoor Hall：家庭、运动与网络的交汇点','Swarthmoor Hall 与 Margaret Fell 及早期 Friends 的形成密切相关。它提醒我们，Quaker movement 一开始就不仅是思想，也依赖具体家庭、旅行网络与接待关系。','Marion Dutcher',VISUAL_SOURCES['swarthmoor'],'CC BY-SA 2.0','compact')
+)}
 {section('从圆圈到组织，但不让组织吞掉圆圈','''<p>早期 Friends 很快建立 local / monthly 等层级来处理照顾、婚姻、旅行 ministry、财务与公共见证。组织不是为了制造权威中心，而是为了让共同体能承担持续责任。</p><div class="org-map"><div><b>Local worship</b><small>一起敬拜</small></div><i>→</i><div><b>Local / Area Meeting</b><small>照顾与事务</small></div><i>→</i><div><b>Yearly Meeting</b><small>更大范围的共同体与见证</small></div></div><p class="fineprint">不同国家和分支的组织名称、层级与制度并不完全相同；此图只表达功能关系。</p>''','02 · ORGANIZATION')}
 {section('一个 Meeting Community 需要照顾什么？','''<div class="care-grid"><article><h3>Worship</h3><p>共同体的源头是否仍有真实生命，而不是只剩例行程序？</p></article><article><h3>Hospitality</h3><p>新人进入时是否被欢迎，又不会被拉拢或传教？</p></article><article><h3>Pastoral care</h3><p>成员遭遇疾病、丧亲、关系或生活危机时，谁来照看？</p></article><article><h3>Conflict</h3><p>差异是否只能在礼貌下压住，还是能进入共同辨识？</p></article><article><h3>Children & learning</h3><p>下一代是否只有“活动”，还是能进入一种活的实践？</p></article><article><h3>Witness</h3><p>内在聆听是否结出外在行动，而不是停在个人平静？</p></article></div>''','03 · CARE')}
 {section('Community 也是对“内在声音”的外部检验','''<p>Patricia Loring 提醒，人的内部不只有 divine leading；还有自我意志、欲望、恐惧，以及父母、老师、文化留下的诸多声音。因此 Friends 历来重视把重要 leading 带到可信任的人和 Meeting 中接受检验。</p><p>这不是让群体接管个人良知，而是承认：<strong>完全没有外部检验的“内在灵性”也可能非常危险。</strong></p>''','04 · TESTING')}
@@ -495,12 +569,28 @@ pages['community.html'] = page_shell('community.html','Meeting 如何成为共�
 # --- history ---
 history_body = f'''
 <section class="history-lead"><div><span class="kicker">1640s → TODAY</span><h2>{smart_heading('历史不是一条直线：三百多年来，Meeting 一直在被重新解释')}</h2><p>Meeting 的历史不是从“宗教”逐渐变成“冥想”。形式不断改变，但几个问题反复回来：直接经验怎样不变成任性？共同体怎样不变成权威机器？静默怎样结出行动？传统怎样更新而不失去自身？</p></div></section>
+<section class="history-gallery"><div class="section-head"><span>FOUR LIVES · FOUR WINDOWS</span><h2>{smart_heading('先从四个人进入这段历史')}</h2><p>人物不是“伟人名单”。更有价值的是看他们分别把 Meeting 的哪一个维度推到了前景：直接经验、组织与女性声音、宗教自由、以及由 inward leading 走向社会见证。</p></div>
+<div class="portrait-grid">
+{portrait_card('assets/curated/george-fox.jpg','George Fox','1624–1691','早期 Friends 最重要的见证者之一。这里使用的是一幅“被认为是 1677 年 Fox 肖像”的同时代图像；图像归属本身也应被当作史料问题，而不是无条件当成写真。',VISUAL_SOURCES['fox'],'Egbert van Heemskerk（归属）','Public domain')}
+{portrait_card('assets/curated/margaret-fell.jpg','Margaret Fell','1614–1702','Swarthmoor Hall 的核心人物、早期运动的重要组织者与作者，也是女性 ministry 的有力辩护者。此图来自后世蚀刻中的艺术家印象，并非同时代肖像。',VISUAL_SOURCES['fell'],'Robert Spence engraving','Public domain')}
+{portrait_card('assets/curated/william-penn.jpg','William Penn','1644–1718','Pennsylvania 的建立，使 Friends 的宗教自由、治理与公共伦理进入制度实验。这里采用 Francis Place 1695 年粉笔肖像，被资料描述为已知唯一一幅在 Penn 生前写生的肖像。',VISUAL_SOURCES['penn'],'Francis Place, 1695','Public domain')}
+{portrait_card('assets/curated/john-woolman.jpg','John Woolman','1720–1772','他的日记和旅行 ministry 展示了一个 inward leading 如何经由长期检验，进入反奴隶制、消费伦理与 simplicity 的生活实践。图像来源页将原作归为“很可能”由同时代友人 Robert Smith III 所作。',VISUAL_SOURCES['woolman'],'Probably Robert Smith III','Public domain in U.S.')}
+</div>
+<div class="curator-note"><span>CURATORIAL NOTE</span><p><strong>历史人物图像也需要辨识。</strong>“有一张脸”不等于“我们确知他/她当时长这样”。本站会区分同时代肖像、后世艺术家印象、建筑照片与现代复原图，并把不确定性直接写进图说。</p></div>
+</section>
+<section class="history-place-study">
+{exhibit_pair(
+  exhibit_figure('assets/curated/swarthmoor-hall.jpg','PLACE · CUMBRIA','Swarthmoor Hall','这里不是“贵格会圣地”的浪漫背景，而是早期 Friends 网络得以聚集、接待、书写与组织的重要地点。空间、家庭与运动史在这里交叠。','Marion Dutcher',VISUAL_SOURCES['swarthmoor'],'CC BY-SA 2.0','compact'),
+  exhibit_figure('assets/curated/arch-street.jpg','PLACE · PHILADELPHIA','Arch Street Friends Meeting House','十九世纪初的 Meeting House 让我们看见传统跨越大西洋后如何进入城市、制度和持续性共同体。建筑本身也是治理与记忆的容器。','Beyond My Ken',VISUAL_SOURCES['arch'],'CC BY-SA 4.0','compact')
+)}</section>
 <section class="history-thesis"><article><span>01</span><h3>形式会变，目的未必变</h3><p>Brinton 特别提醒：保存传统的“原始目的”，不等于复制十七世纪的可见形式。真正的问题是：一项新形式是否仍服务于等待、辨识、共同体与见证。</p></article><article><span>02</span><h3>“Quietism”不是一句贬义标签就能概括</h3><p>十八世纪既可以被看作活力下降，也可以被理解为保存、整合与纪律化。历史评价取决于我们用什么标准看“生命力”。</p></article><article><span>03</span><h3>今天没有单一版本的 Quakerism</h3><p>programmed / unprogrammed、evangelical / conservative / liberal 等传统在神学、牧者角色、敬拜形式与社会议题上差异显著。</p></article></section>
 <section class="timeline-section"><div class="timeline-v2">
 <div class="time-item"><time>1640s</time><span class="timeline-node"></span><div class="timeline-card"><h3>Seekers 与英格兰宗教动荡</h3><p>内战、宗教权威危机与大量激进宗教群体，为“直接经验是否可能超越既有制度”提供了历史土壤。George Fox 的寻找并非凭空发生，而是在一个普遍质疑既有教会形式的时代中成熟。</p><div class="timeline-tag">背景：authority crisis</div></div></div>
 <div class="time-item"><time>1652</time><span class="timeline-node"></span><div class="timeline-card"><h3>从个人寻找变成运动</h3><p>Brinton 把 1652 视为关键节点：Fox 在英格兰西北遇到大量 Seekers，信息迅速扩散。早期 Friends 的突破不是发明“安静聚会”，而是把直接启示、共同敬拜、先知式行动与群体生活连在一起。</p><div class="timeline-tag">experience → movement</div></div></div>
 <div class="time-item"><time>1650s–1670s</time><span class="timeline-node"></span><div class="timeline-card"><h3>Meeting 从灵性事件变成可持续共同体</h3><p>迫害、救济、婚姻、旅行 ministry、财务与纪律迫使 Friends 建立稳定组织。这里出现了一个重要转折：如果每个人都有直接引领，共同体如何检验引领、承担责任，又不重新制造教阶？Meeting for Business 的精神由此逐渐成熟。</p><div class="timeline-tag">charisma → discipline</div></div></div>
+<div class="time-item"><time>1681–1701</time><span class="timeline-node"></span><div class="timeline-card"><h3>Pennsylvania：把宗教自由带进政治实验</h3><p>William Penn 获得 Pennsylvania 特许后，Friends 的问题不再只是“如何在迫害中保持忠实”，也变成“如果有机会治理，一个强调良知与平等的传统会怎样设计公共生活？”这段历史既包含宗教宽容的实验，也包含殖民扩张必须被重新审视的复杂性。</p><div class="timeline-tag">liberty · governance · colony</div></div></div>
 <div class="time-item"><time>1700s</time><span class="timeline-node"></span><div class="timeline-card"><h3>Quietism、保存与内在纪律</h3><p>外在扩张减弱，静默、谨慎、plainness 与共同体边界受到更多重视。Brinton 不愿简单把这一时期视作“衰退”；他更关注形式变化是否仍保存原始目的。这一争论至今仍影响我们怎样评价制度化与灵性活力。</p><div class="timeline-tag">consolidation</div></div></div>
+<div class="time-item"><time>1720–1772</time><span class="timeline-node"></span><div class="timeline-card"><h3>John Woolman：当 inward leading 变成生活伦理</h3><p>Woolman 的反奴隶制见证不是一次“立场表态”，而是长期旅行、劝说、消费选择与自我检验的过程。他把一个重要问题留给后来的 Friends：一份 leading 如何经过时间与共同体检验，最终改变生活方式与公共见证？</p><div class="timeline-tag">leading → witness</div></div></div>
 <div class="time-item"><time>1800s</time><span class="timeline-node"></span><div class="timeline-card"><h3>分裂、福音派与多种 Quaker 形态</h3><p>十九世纪 Friends 内部发生重大分歧，福音派、理性主义、传统主义等力量重新排列。不同地区逐渐发展出 programmed / pastoral 与 unprogrammed 等明显不同的敬拜与组织形态。</p><div class="timeline-tag">plural traditions</div></div></div>
 <div class="time-item"><time>1900–1930s</time><span class="timeline-node"></span><div class="timeline-card"><h3>现代重新解释：历史、教育与社会见证</h3><p>现代 Friends 开始系统重读自身传统。Rufus Jones 等人推动神秘主义研究；Pendle Hill 于 1930 年成立，成为学习、静修与实验性 Quaker life 的重要场域。Meeting 不再只被解释为宗派礼仪，也被重新思考为教育、共同体与社会行动的来源。</p><div class="timeline-tag">retrieval & experiment</div></div></div>
 <div class="time-item"><time>1950s</time><span class="timeline-node"></span><div class="timeline-card"><h3>Brinton：Quakerism as method / group mysticism</h3><p>Howard Brinton 用“method”而不是固定教义体系来理解 Quakerism，并以“group mysticism”说明它既是 inward experience，也是社会性、共同体性的宗教实践。这一框架对今天理解 Meeting 仍极有解释力。</p><div class="timeline-tag">method, not mere form</div></div></div>
@@ -578,6 +668,11 @@ pages['glossary.html']=page_shell('glossary.html','Quaker Meeting 术语表','�
 # --- research ---
 research_body = '''
 <section class="research-intro"><div><span class="kicker">SOURCE-BASED · NOT QUOTE-MINING</span><h2>本站怎样做研究？</h2><p>不是先有一个“现代灵性”的结论，再去贵格会文献里找漂亮句子。我们尽量把概念放回历史、实践与作者自己的问题意识中：一个词在什么时候出现？解决了什么问题？后来如何变化？今天又有哪些不同解释？</p></div></section>
+<section class="content-section visual-method"><div class="section-head"><span>VISUAL SOURCES</span><h2>图像也要像文本一样被校对</h2><p>研究型网站不能把历史图片当“气氛素材”。我们会问：图像什么时候制作？是同时代记录、后世艺术想象，还是现代建筑照片？谁拥有版权？它能支持什么判断，又不能支持什么判断？</p></div>
+''' + exhibit_pair(
+  exhibit_figure('assets/curated/george-fox.jpg','SOURCE TYPE · PORTRAIT','George Fox：一张带着限定词的肖像','Commons 将这幅 1677 年图像标为“Supposed portrait”。这意味着它具有同时代价值，却仍不应被写成“这就是 Fox 的确定长相”。','Egbert van Heemskerk（归属）',VISUAL_SOURCES['fox'],'Public domain','compact'),
+  exhibit_figure('assets/curated/margaret-fell.jpg','SOURCE TYPE · LATER IMPRESSION','Margaret Fell：后世如何想象一位早期 Friend','这幅形象来自后世蚀刻。它适合研究 Margaret Fell 在后世记忆中的视觉形象，却不能被当作十七世纪现场肖像。','Robert Spence engraving',VISUAL_SOURCES['fell'],'Public domain','compact')
+) + '''<div class="curator-note"><span>PROVENANCE</span><p>因此，本站图说会把“作者 / 年代 / 授权 / 不确定性”尽可能留在图片旁边，而不是把来源藏到页面最底部。<a href="visual-credits.html">查看全站图像与史料说明 →</a></p></div></section>
 <section class="content-section"><div class="section-head"><span>PRIMARY LIBRARY</span><h2>第一版核心文献</h2></div><div class="book-grid">
 <article><span>历史 / 方法</span><h3>Howard H. Brinton<br/><em>Friends for 300 Years</em></h3><p>本站最重要的骨架来源。尤其是 The Meeting for Worship、Vocal Ministry、Reaching Decisions、The Meeting Community。</p><small>1952；后有 Pendle Hill 版</small></article>
 <article><span>实践 / 当代入门</span><h3>Jim Pym<br/><em>Listening to the Light</em></h3><p>把 Quaker meeting、日常实践、testimonies、business method 和生活整合起来，适合大众入口。</p><small>1999</small></article>
@@ -597,6 +692,23 @@ research_body = '''
 <section class="content-section"><div class="research-note"><h2>一个重要提醒</h2><p>“贵格会”不是单一、静态、完全一致的传统。不同 Yearly Meetings、programmed / unprogrammed、evangelical / conservative / liberal 等分支，在基督论、圣经、牧师制度、敬拜形式和社会议题上可以有很大差异。本站当前版本以<strong>unprogrammed Meeting、Pendle Hill 传统与相关现代作者</strong>为主要研究入口，并会持续标注这一视角的边界。</p></div></section>
 '''
 pages['research.html']=page_shell('research.html','Quaker Meeting 研究室','原典、思想史、实践谱系与研究方法。这里不仅给“结论”，也尽量让你知道结论从哪里来、有哪些不同解释。',research_body,label='RESEARCH')
+
+# --- visual credits / provenance ---
+visual_credits_body = f'''
+<section class="credits-intro"><div><span class="kicker">PROVENANCE · LICENSE · UNCERTAINTY</span><h2>{smart_heading('每一张历史图片，都应该知道自己从哪里来')}</h2><p>本站把图片分成三类：历史图像、现代地点/建筑照片、解释性图解。历史图像会尽量说明它是否同时代、是否属于后世艺术家印象；现代照片则保留作者与授权。图像帮助理解，但不替代原典。</p></div></section>
+<section class="content-section"><div class="credits-grid">
+{exhibit_figure('assets/curated/george-fox.jpg','PORTRAIT · 1677','George Fox（被认为是同时代肖像）','Wikimedia Commons 以 “Supposed portrait of George Fox, 1677” 收录。本站保留这个限定语，不把归属不确定性抹掉。','Egbert van Heemskerk（归属）',VISUAL_SOURCES['fox'],'Public domain','credit')}
+{exhibit_figure('assets/curated/margaret-fell.jpg','LATER IMPRESSION','Margaret Fell','Robert Spence 的蚀刻细节，属于后世艺术形象，不是十七世纪写生肖像。','Robert Spence',VISUAL_SOURCES['fell'],'Public domain','credit')}
+{exhibit_figure('assets/curated/william-penn.jpg','PORTRAIT · 1695','William Penn','Francis Place 1695 年粉笔肖像；来源页称其为已知唯一一幅在 Penn 生前写生的肖像。','Francis Place',VISUAL_SOURCES['penn'],'Public domain','credit')}
+{exhibit_figure('assets/curated/john-woolman.jpg','PORTRAIT / MEMORY SKETCH','John Woolman','来源页认为原作很可能与 Woolman 的同时代友人 Robert Smith III 有关，同时指出图像存在后来的记忆性元素。','Probably Robert Smith III',VISUAL_SOURCES['woolman'],'Public domain in U.S.','credit')}
+{exhibit_figure('assets/curated/swarthmoor-hall.jpg','PLACE · 2005','Swarthmoor Hall','Cumbria 的 Swarthmoor Hall，与 Margaret Fell 及早期 Friends 网络密切相关。','Marion Dutcher',VISUAL_SOURCES['swarthmoor'],'CC BY-SA 2.0','credit')}
+{exhibit_figure('assets/curated/meetinghouse-interior.jpg','FIELD PHOTO · 2021','Quaker Meetinghouse interior','现代建筑照片，用来观察 Meeting House 的座位、隔断与朴素空间语言；不作为十七世纪室内的直接复原。','Pi3.124',VISUAL_SOURCES['interior'],'CC BY-SA 4.0','credit')}
+{exhibit_figure('assets/curated/arch-street.jpg','PLACE · 2013','Arch Street Friends Meeting House','费城重要 Quaker 建筑。建于 1803–05 年，后来扩建。','Beyond My Ken',VISUAL_SOURCES['arch'],'CC BY-SA 4.0','credit')}
+{exhibit_figure('assets/curated/free-quaker-interior.jpg','NPS DOCUMENTATION','Free Quaker Meeting House interior','美国国家公园管理局的建筑记录图像；作为美国联邦政府雇员职务作品，在美国属于公有领域。','U.S. National Park Service',VISUAL_SOURCES['free_interior'],'Public domain (U.S.)','credit')}
+</div></section>
+<section class="content-section">{callout('使用原则','<p>如果未来加入 AI 场景复原，本站会明确标记为“编辑性复原 / 非历史照片”，不让生成图像冒充档案材料。历史研究页优先使用可追溯来源的真实史料与建筑照片。</p>')}</section>
+'''
+pages['visual-credits.html']=page_shell('visual-credits.html','图像与史料说明','人物肖像、Meeting House、历史地点与建筑照片的来源、授权与史料层级。',visual_credits_body,label='VISUAL SOURCES')
 
 # --- toolkit ---
 toolkit_body = '''
@@ -635,6 +747,7 @@ h1,h2,h3,.query-card p,.four-lines p,.question-example{
 }
 .title-line{display:block;white-space:nowrap;max-width:100%}
 .term-lock{display:inline-block;white-space:nowrap;letter-spacing:-.015em}
+.exhibit-figure h3 .title-line,.portrait-card h3 .title-line,.visual-index-grid h3 .title-line{white-space:normal}
 p,li,dd{orphans:2;widows:2;overflow-wrap:anywhere}
 .section-heading-row{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
 .section-heading-row>div:first-child{min-width:0}
@@ -709,6 +822,111 @@ main>.content-section{padding-left:clamp(24px,8vw,140px);padding-right:clamp(24p
 .research-card h3{font:500 25px/1.45 var(--serif);margin:0 0 10px;max-width:22em}
 .research-card p{color:#c9d0cb;margin:8px 0;line-height:1.85}
 
+/* ---- curated visual / archive system ---- */
+.curated-opening,.history-gallery,.history-place-study,.credits-intro{
+  padding:88px clamp(24px,8vw,140px);
+}
+.curated-opening{background:#e9e2d5;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.history-gallery{background:#ebe4d7}
+.history-place-study{padding-top:0;background:#ebe4d7}
+.credits-intro{max-width:1120px}
+.credits-intro>div{max-width:860px}
+.credits-intro h2{font:500 clamp(38px,4.8vw,62px)/1.18 var(--serif);margin:16px 0}
+.credits-intro p{font-size:17px;color:var(--ink2);max-width:760px}
+
+.exhibit-figure{
+  margin:30px 0 42px;
+  background:var(--white);
+  border:1px solid var(--line);
+  overflow:hidden;
+  min-width:0;
+  box-shadow:0 20px 60px rgba(31,39,35,.06);
+}
+.exhibit-image-wrap{
+  position:relative;
+  overflow:hidden;
+  background:#dcd4c7;
+  aspect-ratio:16/9;
+}
+.exhibit-image-wrap:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(180deg,rgba(255,250,240,.05),rgba(31,39,35,.08));
+  mix-blend-mode:multiply;
+}
+.exhibit-image-wrap img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  filter:saturate(.72) contrast(.96) sepia(.08);
+  transition:transform .6s ease,filter .3s ease;
+}
+.exhibit-figure:hover .exhibit-image-wrap img{transform:scale(1.012);filter:saturate(.9) contrast(.98) sepia(.04)}
+.exhibit-figure figcaption{padding:24px 26px 26px}
+.exhibit-kicker{
+  display:block;
+  margin-bottom:8px;
+  font-size:10px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--moss);
+  font-weight:700;
+}
+.exhibit-figure h3{font:500 clamp(22px,2.4vw,30px)/1.32 var(--serif);margin:0 0 9px}
+.exhibit-figure figcaption p{margin:0;color:var(--ink2);line-height:1.78}
+.exhibit-figure figcaption small{display:block;margin-top:14px;padding-top:12px;border-top:1px solid #e2dbcf;color:#7a817d;font-size:10px;line-height:1.6}
+.exhibit-figure figcaption small a{text-decoration:underline;text-underline-offset:3px}
+.exhibit-figure.hero-exhibit .exhibit-image-wrap{aspect-ratio:2.15/1}
+.exhibit-figure.article-exhibit{margin:36px 0 52px}
+.exhibit-figure.article-exhibit .exhibit-image-wrap{aspect-ratio:1.85/1}
+.exhibit-figure.compact{margin:0}
+.exhibit-figure.compact .exhibit-image-wrap{aspect-ratio:4/3}
+.exhibit-figure.compact figcaption{padding:20px}
+.exhibit-figure.credit{margin:0;box-shadow:none}
+.exhibit-figure.credit .exhibit-image-wrap{aspect-ratio:4/3}
+.exhibit-figure.credit h3{font-size:22px}
+
+.exhibit-pair{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:34px 0 46px}
+.exhibit-annotations{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:-18px}
+.exhibit-label{display:grid;grid-template-columns:34px 1fr;gap:14px;padding:18px;background:rgba(255,253,248,.62);border-top:1px solid var(--moss)}
+.exhibit-label>span{font:500 18px var(--serif);color:var(--gold)}
+.exhibit-label b{font:500 17px var(--serif)}
+.exhibit-label p{margin:4px 0 0;font-size:12px;line-height:1.65;color:var(--ink2)}
+
+.portrait-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:34px}
+.portrait-card{background:var(--white);border:1px solid var(--line);min-width:0}
+.portrait-image{aspect-ratio:4/5;overflow:hidden;background:#d8d0c3}
+.portrait-image img{width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(.18) sepia(.16) saturate(.72);transition:.35s}
+.portrait-card:hover .portrait-image img{filter:grayscale(0) sepia(.08) saturate(.9);transform:scale(1.015)}
+.portrait-copy{padding:20px}
+.portrait-copy>span{font-size:10px;letter-spacing:.14em;color:var(--gold)}
+.portrait-copy h3{font:500 25px/1.25 var(--serif);margin:5px 0 9px}
+.portrait-copy p{font-size:13px;line-height:1.72;color:var(--ink2)}
+.portrait-copy small{display:block;border-top:1px solid #e2dbcf;padding-top:11px;margin-top:13px;font-size:9px;line-height:1.55;color:#7d847f}
+.portrait-copy small a{text-decoration:underline;text-underline-offset:2px}
+
+.curator-note{display:grid;grid-template-columns:160px minmax(0,1fr);gap:28px;align-items:start;margin:32px 0 0;padding:26px 0;border-top:1px solid var(--moss);border-bottom:1px solid var(--line)}
+.curator-note>span{font-size:10px;letter-spacing:.18em;color:var(--moss);font-weight:700}
+.curator-note p{margin:0;max-width:760px;color:var(--ink2);line-height:1.85}
+.curator-note a{text-decoration:underline;text-underline-offset:4px}
+.credits-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.visual-index{padding:92px clamp(24px,8vw,140px);background:#202925;color:var(--paper)}
+.visual-index .section-head span{color:#c7b47b}
+.visual-index .section-head h2{color:#fffaf0}
+.visual-index .section-head p{color:#c9d0cb;max-width:720px}
+.visual-index-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:34px}
+.visual-index-grid>a{display:block;background:#29332f;border:1px solid rgba(255,255,255,.12);min-width:0;transition:transform .2s ease,border-color .2s ease}
+.visual-index-grid>a:hover{transform:translateY(-3px);border-color:#a88f58}
+.visual-index-image{aspect-ratio:4/3;overflow:hidden;background:#343d39}
+.visual-index-image img{display:block;width:100%;height:100%;object-fit:cover;filter:grayscale(.18) sepia(.14) saturate(.65);transition:.35s}
+.visual-index-grid>a:hover img{filter:grayscale(0) sepia(.06) saturate(.88);transform:scale(1.015)}
+.visual-index-grid>a>span{display:block;padding:18px 20px 0;color:#c7b47b;font-size:10px;letter-spacing:.16em}
+.visual-index-grid h3{font:500 24px/1.4 var(--serif);margin:8px 20px 6px;color:#fffaf0;overflow-wrap:break-word}
+.visual-index-grid p{margin:0;padding:0 20px 22px;color:#cbd2cd;font-size:13px;line-height:1.75}
+
 .history-thesis{grid-template-columns:repeat(3,1fr);max-width:1120px;margin:0 auto;padding:0 34px 70px}
 .history-thesis article{background:#ece5d8;border-top:3px solid var(--gold)}
 .timeline-section{max-width:1180px;padding-top:20px}
@@ -775,6 +993,13 @@ main>.content-section{padding-left:clamp(24px,8vw,140px);padding-right:clamp(24p
   .four-forces{grid-template-columns:1fr 1fr}
   .comparison-lenses{padding-bottom:42px}
   .concept-figure figcaption{grid-template-columns:1fr;gap:7px}
+  .portrait-grid{grid-template-columns:1fr 1fr}
+  .credits-grid{grid-template-columns:1fr 1fr}
+  .exhibit-annotations{grid-template-columns:1fr}
+  .visual-index-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:1100px){
+  .visual-index-grid{grid-template-columns:1fr 1fr}
 }
 @media(max-width:640px){
   h1,h2,h3{text-wrap:wrap}
@@ -789,6 +1014,7 @@ main>.content-section{padding-left:clamp(24px,8vw,140px);padding-right:clamp(24p
   .section-glyph svg{width:26px;height:26px}
   .title-line{white-space:normal}
   .term-lock{white-space:nowrap;font-size:.90em}
+  .page-hero h1 .term-lock{font-size:.86em}
   .home-depth{padding-top:70px;padding-bottom:70px}
   .depth-grid,.history-thesis,.four-forces,.term-relations,.comparison-lenses,.false-friends,.research-discipline,.source-matrix,.contested-grid,.reading-trails,.boundary-grid,.practice-ladder-v2{grid-template-columns:1fr}
   .history-thesis{padding:0 24px 54px}
@@ -806,6 +1032,14 @@ main>.content-section{padding-left:clamp(24px,8vw,140px);padding-right:clamp(24p
   .concept-figure figcaption{padding:14px 6px 4px}
   .research-card{padding:24px 22px}
   .comparison-lenses{padding-left:24px;padding-right:24px}
+  .curated-opening,.history-gallery,.history-place-study,.credits-intro{padding:58px 24px}
+  .history-place-study{padding-top:0}
+  .exhibit-pair,.portrait-grid,.credits-grid{grid-template-columns:1fr}
+  .exhibit-figure.hero-exhibit .exhibit-image-wrap,.exhibit-figure.article-exhibit .exhibit-image-wrap{aspect-ratio:4/3}
+  .exhibit-figure figcaption{padding:20px}
+  .curator-note{grid-template-columns:1fr;gap:10px}
+  .visual-index{padding:62px 24px}
+  .visual-index-grid{grid-template-columns:1fr}
 }
 '''
 
@@ -888,7 +1122,7 @@ for fn, content in pages.items():
 (ROOT/'assets'/'favicon.svg').write_text('''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#1f2723"/><circle cx="32" cy="32" r="5" fill="#b49a5c"/><circle cx="32" cy="32" r="14" fill="none" stroke="#b49a5c" stroke-width="1.5"/><circle cx="32" cy="32" r="23" fill="none" stroke="#d8ddd8" stroke-width="1.5" opacity=".7"/></svg>''', encoding='utf-8')
 
 # minimal README
-readme = '''# 共同等候｜Quaker Meeting 研究与实践\n\n静态网站，无构建依赖。\n\n## 本地预览\n\n```bash\npython3 -m http.server 8000\n```\n然后访问 `http://localhost:8000/`。\n\n## 部署\n\n整个目录可直接发布到 GitHub Pages / Netlify / Cloudflare Pages。\n\n## 内容范围\n\n当前版本以 unprogrammed Quaker Meeting、Pendle Hill 相关文本、Howard Brinton、Thomas Kelly、Parker Palmer、Patricia Loring、Michael Marsh、Jim Pym 等为主要研究入口，并明确区分历史传统、现代转译与本站的实践性整理。\n\n## 主要交互\n\n- 12 分钟 Meeting 体验计时器\n- 本地反思记录（localStorage，不上传）\n- Vocal Ministry 自我辨识练习\n- Meeting for Business 决策案例\n- Clearness Committee 开放问题练习\n- 术语搜索与分类筛选\n'''
+readme = '''# 共同等候｜Quaker Meeting 研究与实践\n\n静态网站，无构建依赖。当前版本以“策展式研究网站”为方向：原典研究、历史图像、地点史料、知识图解与可实践工具并置。\n\n## 本地预览\n\n```bash\npython3 -m http.server 8000\n```\n然后访问 `http://localhost:8000/`。\n\n## 部署\n\n整个目录可直接发布到 GitHub Pages / Netlify / Cloudflare Pages。\n\n## 内容范围\n\n当前版本以 unprogrammed Quaker Meeting、Pendle Hill 相关文本、Howard Brinton、Thomas Kelly、Parker Palmer、Patricia Loring、Michael Marsh、Jim Pym 等为主要研究入口，并明确区分历史传统、现代转译与本站的实践性整理。\n\n## 图像与史料原则\n\n- 历史人物、Meeting House 与地点照片优先使用可追溯来源的真实史料或授权照片。\n- 图说尽量保留作者、年代、授权与不确定性，不把“后世艺术印象”冒充同时代肖像。\n- 解释性 SVG 用于概念结构；若未来使用 AI 场景复原，必须明确标记为“编辑性复原 / 非历史照片”。\n- 全站图像来源与许可集中记录在 `visual-credits.html`。\n\n## 主要交互\n\n- 12 分钟 Meeting 体验计时器\n- 本地反思记录（localStorage，不上传）\n- Vocal Ministry 自我辨识练习\n- Meeting for Business 决策案例\n- Clearness Committee 开放问题练习\n- 术语搜索与分类筛选\n'''
 (ROOT/'README.md').write_text(readme, encoding='utf-8')
 
 # basic link check

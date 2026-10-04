@@ -13,5 +13,6 @@
 - `history.html` — 1640s 至现代的历史与关键张力
 - `comparisons.html` — 与正念、禅修、Consensus、Coaching、Group Therapy、Circle of Trust、Bohm Dialogue 比较
 - `glossary.html` — 可搜索、可筛选的 Quaker Meeting 术语表
-- `research.html` — 研究室：核心文献、研究方法、后续专题
+- `research.html` — 研究室：核心文献、研究方法、视觉史料校对与后续专题
+- `visual-credits.html` — 图像与史料说明：人物肖像、Meeting House、历史地点的来源、许可与不确定性
 - `toolkit.html` — 实践工具箱：个人、小组、共学、议事、澄心会模板

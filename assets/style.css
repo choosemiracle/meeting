@@ -17,6 +17,7 @@ h1,h2,h3,.query-card p,.four-lines p,.question-example{
 }
 .title-line{display:block;white-space:nowrap;max-width:100%}
 .term-lock{display:inline-block;white-space:nowrap;letter-spacing:-.015em}
+.exhibit-figure h3 .title-line,.portrait-card h3 .title-line,.visual-index-grid h3 .title-line{white-space:normal}
 p,li,dd{orphans:2;widows:2;overflow-wrap:anywhere}
 .section-heading-row{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
 .section-heading-row>div:first-child{min-width:0}
@@ -91,6 +92,111 @@ main>.content-section{padding-left:clamp(24px,8vw,140px);padding-right:clamp(24p
 .research-card h3{font:500 25px/1.45 var(--serif);margin:0 0 10px;max-width:22em}
 .research-card p{color:#c9d0cb;margin:8px 0;line-height:1.85}
 
+/* ---- curated visual / archive system ---- */
+.curated-opening,.history-gallery,.history-place-study,.credits-intro{
+  padding:88px clamp(24px,8vw,140px);
+}
+.curated-opening{background:#e9e2d5;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.history-gallery{background:#ebe4d7}
+.history-place-study{padding-top:0;background:#ebe4d7}
+.credits-intro{max-width:1120px}
+.credits-intro>div{max-width:860px}
+.credits-intro h2{font:500 clamp(38px,4.8vw,62px)/1.18 var(--serif);margin:16px 0}
+.credits-intro p{font-size:17px;color:var(--ink2);max-width:760px}
+
+.exhibit-figure{
+  margin:30px 0 42px;
+  background:var(--white);
+  border:1px solid var(--line);
+  overflow:hidden;
+  min-width:0;
+  box-shadow:0 20px 60px rgba(31,39,35,.06);
+}
+.exhibit-image-wrap{
+  position:relative;
+  overflow:hidden;
+  background:#dcd4c7;
+  aspect-ratio:16/9;
+}
+.exhibit-image-wrap:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(180deg,rgba(255,250,240,.05),rgba(31,39,35,.08));
+  mix-blend-mode:multiply;
+}
+.exhibit-image-wrap img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  filter:saturate(.72) contrast(.96) sepia(.08);
+  transition:transform .6s ease,filter .3s ease;
+}
+.exhibit-figure:hover .exhibit-image-wrap img{transform:scale(1.012);filter:saturate(.9) contrast(.98) sepia(.04)}
+.exhibit-figure figcaption{padding:24px 26px 26px}
+.exhibit-kicker{
+  display:block;
+  margin-bottom:8px;
+  font-size:10px;
+  letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--moss);
+  font-weight:700;
+}
+.exhibit-figure h3{font:500 clamp(22px,2.4vw,30px)/1.32 var(--serif);margin:0 0 9px}
+.exhibit-figure figcaption p{margin:0;color:var(--ink2);line-height:1.78}
+.exhibit-figure figcaption small{display:block;margin-top:14px;padding-top:12px;border-top:1px solid #e2dbcf;color:#7a817d;font-size:10px;line-height:1.6}
+.exhibit-figure figcaption small a{text-decoration:underline;text-underline-offset:3px}
+.exhibit-figure.hero-exhibit .exhibit-image-wrap{aspect-ratio:2.15/1}
+.exhibit-figure.article-exhibit{margin:36px 0 52px}
+.exhibit-figure.article-exhibit .exhibit-image-wrap{aspect-ratio:1.85/1}
+.exhibit-figure.compact{margin:0}
+.exhibit-figure.compact .exhibit-image-wrap{aspect-ratio:4/3}
+.exhibit-figure.compact figcaption{padding:20px}
+.exhibit-figure.credit{margin:0;box-shadow:none}
+.exhibit-figure.credit .exhibit-image-wrap{aspect-ratio:4/3}
+.exhibit-figure.credit h3{font-size:22px}
+
+.exhibit-pair{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:34px 0 46px}
+.exhibit-annotations{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:-18px}
+.exhibit-label{display:grid;grid-template-columns:34px 1fr;gap:14px;padding:18px;background:rgba(255,253,248,.62);border-top:1px solid var(--moss)}
+.exhibit-label>span{font:500 18px var(--serif);color:var(--gold)}
+.exhibit-label b{font:500 17px var(--serif)}
+.exhibit-label p{margin:4px 0 0;font-size:12px;line-height:1.65;color:var(--ink2)}
+
+.portrait-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:34px}
+.portrait-card{background:var(--white);border:1px solid var(--line);min-width:0}
+.portrait-image{aspect-ratio:4/5;overflow:hidden;background:#d8d0c3}
+.portrait-image img{width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(.18) sepia(.16) saturate(.72);transition:.35s}
+.portrait-card:hover .portrait-image img{filter:grayscale(0) sepia(.08) saturate(.9);transform:scale(1.015)}
+.portrait-copy{padding:20px}
+.portrait-copy>span{font-size:10px;letter-spacing:.14em;color:var(--gold)}
+.portrait-copy h3{font:500 25px/1.25 var(--serif);margin:5px 0 9px}
+.portrait-copy p{font-size:13px;line-height:1.72;color:var(--ink2)}
+.portrait-copy small{display:block;border-top:1px solid #e2dbcf;padding-top:11px;margin-top:13px;font-size:9px;line-height:1.55;color:#7d847f}
+.portrait-copy small a{text-decoration:underline;text-underline-offset:2px}
+
+.curator-note{display:grid;grid-template-columns:160px minmax(0,1fr);gap:28px;align-items:start;margin:32px 0 0;padding:26px 0;border-top:1px solid var(--moss);border-bottom:1px solid var(--line)}
+.curator-note>span{font-size:10px;letter-spacing:.18em;color:var(--moss);font-weight:700}
+.curator-note p{margin:0;max-width:760px;color:var(--ink2);line-height:1.85}
+.curator-note a{text-decoration:underline;text-underline-offset:4px}
+.credits-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.visual-index{padding:92px clamp(24px,8vw,140px);background:#202925;color:var(--paper)}
+.visual-index .section-head span{color:#c7b47b}
+.visual-index .section-head h2{color:#fffaf0}
+.visual-index .section-head p{color:#c9d0cb;max-width:720px}
+.visual-index-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:34px}
+.visual-index-grid>a{display:block;background:#29332f;border:1px solid rgba(255,255,255,.12);min-width:0;transition:transform .2s ease,border-color .2s ease}
+.visual-index-grid>a:hover{transform:translateY(-3px);border-color:#a88f58}
+.visual-index-image{aspect-ratio:4/3;overflow:hidden;background:#343d39}
+.visual-index-image img{display:block;width:100%;height:100%;object-fit:cover;filter:grayscale(.18) sepia(.14) saturate(.65);transition:.35s}
+.visual-index-grid>a:hover img{filter:grayscale(0) sepia(.06) saturate(.88);transform:scale(1.015)}
+.visual-index-grid>a>span{display:block;padding:18px 20px 0;color:#c7b47b;font-size:10px;letter-spacing:.16em}
+.visual-index-grid h3{font:500 24px/1.4 var(--serif);margin:8px 20px 6px;color:#fffaf0;overflow-wrap:break-word}
+.visual-index-grid p{margin:0;padding:0 20px 22px;color:#cbd2cd;font-size:13px;line-height:1.75}
+
 .history-thesis{grid-template-columns:repeat(3,1fr);max-width:1120px;margin:0 auto;padding:0 34px 70px}
 .history-thesis article{background:#ece5d8;border-top:3px solid var(--gold)}
 .timeline-section{max-width:1180px;padding-top:20px}
@@ -157,6 +263,13 @@ main>.content-section{padding-left:clamp(24px,8vw,140px);padding-right:clamp(24p
   .four-forces{grid-template-columns:1fr 1fr}
   .comparison-lenses{padding-bottom:42px}
   .concept-figure figcaption{grid-template-columns:1fr;gap:7px}
+  .portrait-grid{grid-template-columns:1fr 1fr}
+  .credits-grid{grid-template-columns:1fr 1fr}
+  .exhibit-annotations{grid-template-columns:1fr}
+  .visual-index-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:1100px){
+  .visual-index-grid{grid-template-columns:1fr 1fr}
 }
 @media(max-width:640px){
   h1,h2,h3{text-wrap:wrap}
@@ -171,6 +284,7 @@ main>.content-section{padding-left:clamp(24px,8vw,140px);padding-right:clamp(24p
   .section-glyph svg{width:26px;height:26px}
   .title-line{white-space:normal}
   .term-lock{white-space:nowrap;font-size:.90em}
+  .page-hero h1 .term-lock{font-size:.86em}
   .home-depth{padding-top:70px;padding-bottom:70px}
   .depth-grid,.history-thesis,.four-forces,.term-relations,.comparison-lenses,.false-friends,.research-discipline,.source-matrix,.contested-grid,.reading-trails,.boundary-grid,.practice-ladder-v2{grid-template-columns:1fr}
   .history-thesis{padding:0 24px 54px}
@@ -188,4 +302,12 @@ main>.content-section{padding-left:clamp(24px,8vw,140px);padding-right:clamp(24p
   .concept-figure figcaption{padding:14px 6px 4px}
   .research-card{padding:24px 22px}
   .comparison-lenses{padding-left:24px;padding-right:24px}
+  .curated-opening,.history-gallery,.history-place-study,.credits-intro{padding:58px 24px}
+  .history-place-study{padding-top:0}
+  .exhibit-pair,.portrait-grid,.credits-grid{grid-template-columns:1fr}
+  .exhibit-figure.hero-exhibit .exhibit-image-wrap,.exhibit-figure.article-exhibit .exhibit-image-wrap{aspect-ratio:4/3}
+  .exhibit-figure figcaption{padding:20px}
+  .curator-note{grid-template-columns:1fr;gap:10px}
+  .visual-index{padding:62px 24px}
+  .visual-index-grid{grid-template-columns:1fr}
 }
