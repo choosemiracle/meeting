@@ -93,12 +93,163 @@ def query_cards(qs):
     return '<div class="query-grid">' + ''.join(f'<article class="query-card"><span>QUERY {i+1:02d}</span><p>{q}</p></article>' for i,q in enumerate(qs)) + '</div>'
 
 
+HEADING_TERMS = [
+    'Meeting for Worship', 'Meeting for Learning', 'Sense of the Meeting',
+    'Clearness Committee', 'Vocal Ministry', 'Gathered Meeting',
+    'Inner Light', 'Third Thing', 'Quaker Meeting', 'Group Mysticism',
+    'Faith and Practice', 'Advices & Queries', 'Circle of Trust',
+    'Meeting for Business', 'Meeting Community', 'Business Meeting',
+    'Quakerism', 'Meeting'
+]
+
+
+def _split_heading_piece(piece):
+    """Split a heading into readable semantic fragments, never single orphan characters."""
+    piece = piece.strip()
+    if not piece:
+        return []
+
+    # Keep important English terms together, so "Meeting for / Learning" never happens.
+    term_pat = '(' + '|'.join(re.escape(x) for x in sorted(HEADING_TERMS, key=len, reverse=True)) + ')'
+    atoms = [x for x in re.split(term_pat, piece) if x and x.strip()]
+    out = []
+
+    # These cues usually begin a natural Chinese thought-unit.
+    cues = ['为什么', '如何', '怎样', '怎么', '是否', '能否', '背后', '其实', '而是',
+            '不是', '不只是', '不等于', '意味着', '究竟', '什么时候', '从', '到']
+
+    for atom in atoms:
+        atom = atom.strip()
+        if atom in HEADING_TERMS:
+            out.append((atom, True))
+            continue
+
+        # Separate Latin words/names from Chinese text before any length-based split.
+        mixed_atoms = [x.strip() for x in re.split(r'([A-Za-z][A-Za-z0-9.&’\'-]*(?:\s+[A-Za-z][A-Za-z0-9.&’\'-]*)*)', atom) if x and x.strip()]
+        for mixed in mixed_atoms:
+            if re.fullmatch(r'[A-Za-z][A-Za-z0-9.&’\'-]*(?:\s+[A-Za-z][A-Za-z0-9.&’\'-]*)*', mixed):
+                out.append((mixed, True))
+                continue
+
+            chunks = [mixed]
+            for cue in cues:
+                next_chunks = []
+                for chunk in chunks:
+                    pos = chunk.find(cue)
+                    if pos >= 3 and len(chunk) - pos >= 3:
+                        left, right = chunk[:pos].strip(), chunk[pos:].strip()
+                        if left and left[-1] in '“‘《（(':
+                            right = left[-1] + right
+                            left = left[:-1].rstrip()
+                        next_chunks.extend([left, right])
+                    else:
+                        next_chunks.append(chunk)
+                chunks = [x for x in next_chunks if x]
+
+            # Fallback for very long Chinese fragments: prefer grammatical boundaries
+            # near the visual middle instead of breaking a final character off.
+            for chunk in chunks:
+                if len(chunk) <= 10:
+                    out.append((chunk, False))
+                    continue
+                remaining = chunk
+                while len(remaining) > 10:
+                    target = min(10, len(remaining) - 4)
+                    candidates = []
+                    for i in range(max(5, target - 3), min(len(remaining) - 3, target + 4) + 1):
+                        if remaining[i-1:i] in '的了是与和中后前上下来' or remaining[i:i+1] in '把让向为在':
+                            candidates.append(i)
+                    cut = min(candidates, key=lambda i: abs(i-target)) if candidates else target
+                    out.append((remaining[:cut].strip(), False))
+                    remaining = remaining[cut:].strip()
+                if remaining:
+                    out.append((remaining, False))
+    return out
+
+
 def smart_heading(text):
-    """Prefer semantic/punctuation break opportunities without forcing a line break."""
-    safe = html.escape(text)
-    for token in ['，', '：', '；', '？', '。', '——', '｜', ' / ', ' · ']:
-        safe = safe.replace(token, token + '<wbr>')
-    return safe
+    """Render headings as semantic, non-breaking fragments with graceful line breaks."""
+    # Split after punctuation, attaching punctuation to the preceding phrase.
+    parts = re.split(r'([，。！？；：]|——|｜| · | / )', text)
+    pieces = []
+    buf = ''
+    for part in parts:
+        if not part:
+            continue
+        if re.fullmatch(r'([，。！？；：]|——|｜| · | / )', part):
+            buf += part
+            if buf.strip():
+                pieces.append(buf.strip())
+            buf = ''
+        else:
+            if buf:
+                pieces.append(buf.strip())
+            buf = part
+    if buf.strip():
+        pieces.append(buf.strip())
+
+    frags = []
+    for piece in pieces:
+        # Preserve punctuation on the last sub-fragment.
+        m = re.match(r'^(.*?)([，。！？；：]|——|｜| · | / )$', piece)
+        core, tail = (m.group(1), m.group(2)) if m else (piece, '')
+        sub = []
+        # Keep quoted concepts as a whole: “我的感觉就是对的” should never become
+        # “我的感觉就是 / 对的”.
+        quote_parts = [x for x in re.split(r'([“‘《][^”’》]*[”’》])', core) if x]
+        for qpart in quote_parts:
+            if re.fullmatch(r'[“‘《][^”’》]*[”’》]', qpart):
+                sub.append((qpart, False))
+            else:
+                sub.extend(_split_heading_piece(qpart))
+        if sub:
+            last_text, last_term = sub[-1]
+            sub[-1] = (last_text + tail, last_term)
+            frags.extend(sub)
+
+    # Do not leave grammatical one-character fragments floating on their own.
+    # Attach prepositions/conjunctions to the following phrase and particles to
+    # the preceding phrase, so line breaks remain visually meaningful.
+    prefix_tiny = {'当', '把', '从', '到', '与', '和', '向', '为', '在', '被', '是'}
+    suffix_tiny = {'说', '时', '后', '前', '中', '的'}
+
+    def join_text(a, b):
+        a, b = a.rstrip(), b.lstrip()
+        if not a:
+            return b
+        if not b:
+            return a
+        ascii_a = bool(re.search(r'[A-Za-z0-9]$', a))
+        ascii_b = bool(re.match(r'^[A-Za-z0-9]', b))
+        cjk_a = bool(re.search(r'[\u4e00-\u9fff]$', a))
+        cjk_b = bool(re.match(r'^[\u4e00-\u9fff]', b))
+        sep = ' ' if (ascii_a and cjk_b) or (cjk_a and ascii_b) else ''
+        return a + sep + b
+
+    merged = []
+    i = 0
+    while i < len(frags):
+        frag, is_term = frags[i]
+        bare = frag.strip('，。！？；：｜/·—— ')
+        if bare in prefix_tiny and i + 1 < len(frags):
+            nxt, nxt_term = frags[i + 1]
+            merged.append((join_text(frag, nxt), is_term or nxt_term))
+            i += 2
+            continue
+        if bare in suffix_tiny and merged:
+            prev, prev_term = merged[-1]
+            merged[-1] = (join_text(prev, frag), prev_term or is_term)
+            i += 1
+            continue
+        merged.append((frag, is_term))
+        i += 1
+    frags = merged
+
+    rendered = []
+    for frag, is_term in frags:
+        cls = 'hfrag term-lock' if is_term else 'hfrag'
+        rendered.append(f'<span class="{cls}">{html.escape(frag)}</span>')
+    return '<wbr>'.join(rendered)
 
 
 def enhance_plain_headings(doc):
@@ -112,6 +263,24 @@ def enhance_plain_headings(doc):
 
 def research_note(title, body, label='研究札记'):
     return f'''<aside class="research-card"><span>{label}</span><h3>{smart_heading(title)}</h3><div>{body}</div></aside>'''
+
+
+def section_glyph(title):
+    """A lightweight visual cue so long-form pages never become a wall of text."""
+    lower = title.lower()
+    if any(k in lower for k in ['为什么', '如何', '怎样', '什么', 'query', '问题', '误解']):
+        key = 'question'
+    elif any(k in lower for k in ['学习', '第三物', '阅读', '术语', '原典', '知识']):
+        key = 'book'
+    elif any(k in lower for k in ['静默', 'waiting', 'worship', '等候']):
+        key = 'silence'
+    elif any(k in lower for k in ['共同', '群体', 'community', 'meeting', 'ministry', '合一']):
+        key = 'group'
+    elif any(k in lower for k in ['历史', '演变', '路径', '进入', '下一步', '行动']):
+        key = 'path'
+    else:
+        key = 'light'
+    return f'<div class="section-glyph" aria-hidden="true">{icon(key)}</div>'
 
 
 def epistemology_visual():
@@ -145,7 +314,10 @@ def silence_visual():
 
 def section(title, body, eyebrow=None, cls=''):
     ey=f'<div class="section-eyebrow">{eyebrow}</div>' if eyebrow else ''
-    return f'<section class="content-section {cls}">{ey}<h2>{smart_heading(title)}</h2>{body}</section>'
+    return f'''<section class="content-section {cls}">
+      <div class="section-heading-row"><div>{ey}<h2>{smart_heading(title)}</h2></div>{section_glyph(title)}</div>
+      {body}
+    </section>'''
 
 
 def page_shell(filename, title, intro, body, label='研究与实践', extra_js=''):
@@ -469,19 +641,27 @@ css = r'''
 body{overflow-x:clip}
 .site-header,.site-header>*{min-width:0}
 h1,h2,h3,.query-card p,.four-lines p,.question-example{
-  text-wrap:balance;
-  word-break:keep-all;
-  overflow-wrap:anywhere;
+  text-wrap:pretty;
+  word-break:normal;
+  overflow-wrap:normal;
   line-break:strict;
 }
+.hfrag{display:inline-block;white-space:nowrap;max-width:100%;vertical-align:baseline}
+.hfrag.term-lock{letter-spacing:-.015em}
 p,li,dd{orphans:2;widows:2;overflow-wrap:anywhere}
+.section-heading-row{display:grid;grid-template-columns:minmax(0,1fr) 68px;gap:24px;align-items:start}
+.section-heading-row>div:first-child{min-width:0}
+.section-glyph{width:62px;height:62px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;background:rgba(255,253,248,.62);margin-top:4px}
+.section-glyph svg{width:34px;height:34px;stroke:var(--moss);fill:none;stroke-width:1.35}
+.section-glyph svg circle:not([fill="none"]){fill:none}
+.section-heading-row+.concept-figure,.section-heading-row+.triad-visual,.section-heading-row+.decision-visual{margin-top:20px}
 .page-hero .hero-copy{max-width:1120px}
 .page-hero h1{max-width:none;font-size:clamp(42px,5.5vw,76px);letter-spacing:-.025em}
 .page-hero p{max-width:820px;line-height:1.9}
 .home-copy{min-width:0}
 .home-copy h1{max-width:6.2em;font-size:clamp(56px,7.4vw,104px);line-height:1.04;letter-spacing:-.035em}
-.big-question h2{max-width:15ch;line-height:1.28}
-.section-head h2,.content-section h2{max-width:21ch;line-height:1.28}
+.big-question h2{max-width:13em;line-height:1.28}
+.section-head h2,.content-section h2{max-width:20em;line-height:1.28}
 .content-section>p,.article-main .content-section>p{max-width:46rem;line-height:1.9}
 .article-main{font-size:16px}
 .article-main p{line-height:1.9}
@@ -534,7 +714,7 @@ main>.content-section{padding-left:clamp(24px,8vw,140px);padding-right:clamp(24p
 
 .research-card{margin:30px 0;padding:28px 30px;background:#202925;color:var(--paper);border-left:3px solid var(--gold)}
 .research-card>span{display:block;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#cbbd94;margin-bottom:8px}
-.research-card h3{font:500 25px/1.45 var(--serif);margin:0 0 10px;max-width:25ch}
+.research-card h3{font:500 25px/1.45 var(--serif);margin:0 0 10px;max-width:22em}
 .research-card p{color:#c9d0cb;margin:8px 0;line-height:1.85}
 
 .history-thesis{grid-template-columns:repeat(3,1fr);max-width:1120px;margin:0 auto;padding:0 34px 70px}
@@ -611,6 +791,11 @@ main>.content-section{padding-left:clamp(24px,8vw,140px);padding-right:clamp(24p
   .page-hero h1{font-size:clamp(38px,11vw,48px);max-width:none}
   .home-copy h1{font-size:clamp(48px,15vw,68px);max-width:6.2em}
   .big-question h2,.section-head h2,.content-section h2{max-width:100%}
+  .section-head h2,.content-section h2{font-size:clamp(28px,8.2vw,36px)}
+  .section-heading-row{display:flex;flex-direction:column;gap:10px}
+  .section-glyph{order:-1;width:46px;height:46px;margin:0 0 2px}
+  .section-glyph svg{width:26px;height:26px}
+  .hfrag.term-lock{font-size:.96em}
   .home-depth{padding-top:70px;padding-bottom:70px}
   .depth-grid,.history-thesis,.four-forces,.term-relations,.comparison-lenses,.false-friends,.research-discipline,.source-matrix,.contested-grid,.reading-trails,.boundary-grid,.practice-ladder-v2{grid-template-columns:1fr}
   .history-thesis{padding:0 24px 54px}
