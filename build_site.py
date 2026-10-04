@@ -102,6 +102,64 @@ HEADING_TERMS = [
     'Quakerism', 'Meeting'
 ]
 
+HEADING_LAYOUTS = {
+    '在静默中，共同聆听。': ['在静默中，', '共同聆听。'],
+    '如果一群人暂时不争着表达立场，会不会有一些东西，反而更容易被听见？':
+        ['如果一群人暂时', '不争着表达立场，', '会不会有一些东西，', '反而更容易被听见？'],
+    # Worship / practice — manually edited as Chinese editorial headlines.
+    '进入Meeting 时，具体可以怎么做？': ['进入Meeting 时，', '具体可以怎么做？'],
+    '一次尽量少指导的Meeting体验': ['一次尽量少指导的Meeting体验'],
+    '不要把 12 分钟练习误当成Meeting的缩小版': ['不要把 12 分钟练习误当成Meeting的缩小版'],
+
+    # Long-form article headings: break only at complete thought units.
+    '为什么一个宗教群体发展出一种独特的决策法？':
+        ['为什么一个宗教群体', '发展出一种独特的决策法？'],
+    'Voting、Consensus、Sense of the Meeting':
+        ['Voting、Consensus、', 'Sense of the Meeting'],
+    'Discernment：真正要分辨的，是“这个声音从哪里来”':
+        ['Discernment：真正要分辨的，', '是“这个声音从哪里来”'],
+    'Meeting 既是一场聚集，也是一个共同体':
+        ['Meeting 既是一场聚集，', '也是一个共同体'],
+    '一个 Meeting Community 需要照顾什么？':
+        ['一个 Meeting Community', '需要照顾什么？'],
+    'Community 也是对“内在声音”的外部检验':
+        ['Community 也是对“内在声音”的', '外部检验'],
+    '共同体的成熟，不看“活动很多”，而看能否承受真实':
+        ['共同体的成熟，不看“活动很多”，', '而看能否承受真实'],
+    'Gathered Meeting：当圆圈变成“一个整体”':
+        ['Gathered Meeting：', '当圆圈变成“一个整体”'],
+    'Group mysticism：既不是“集体情绪”，也不是“大家想法一样”':
+        ['Group mysticism：既不是“集体情绪”，', '也不是“大家想法一样”'],
+    'Practice：练习感受“群体”而不是只听自己':
+        ['Practice：练习感受“群体”', '而不是只听自己'],
+    '历史不是一条直线：三百多年来，Meeting 一直在被重新解释':
+        ['历史不是一条直线：', '三百多年来，', 'Meeting 一直在被重新解释'],
+    'Brinton 的“四时期”不是唯一答案，却提供了一张很有用的分析地图':
+        ['Brinton 的“四时期”不是唯一答案，', '却提供了一张很有用的分析地图'],
+    'Meeting 不只是安静下来，而是在练习“如何共同认识”':
+        ['Meeting 不只是安静下来，', '而是在练习“如何共同认识”'],
+    '如果学习也被当作 Meeting，会发生什么？':
+        ['如果学习也被当作 Meeting，', '会发生什么？'],
+    'Meeting for Learning 背后，其实是一种知识观':
+        ['Meeting for Learning 背后，', '其实是一种知识观'],
+    '一场 90 分钟共读，如何从“读书会”变成 Meeting for Learning？':
+        ['一场 90 分钟共读，', '如何从“读书会”变成 Meeting for Learning？'],
+    '怎样判断一次共学是否真的“发生了学习”？':
+        ['怎样判断一次共学', '是否真的“发生了学习”？'],
+    '为什么 Brinton 说 Quakerism 首先是一种 method？':
+        ['为什么 Brinton 说 Quakerism，', '首先是一种 method？'],
+    'Inner Light 不是“我的感觉就是对的”':
+        ['Inner Light 不是', '“我的感觉就是对的”'],
+    '六条研究纪律：避免把 Quakerism 做成“灵性语录库”':
+        ['六条研究纪律：', '避免把 Quakerism 做成“灵性语录库”'],
+    '六种最常见的“看起来像 Meeting，实际上不是”的失败方式':
+        ['六种最常见的“看起来像 Meeting，', '实际上不是”的失败方式'],
+    '最容易“看起来很像”，其实差异最大的三组':
+        ['最容易“看起来很像”，', '其实差异最大的三组'],
+    '术语不是“对照表”，而是一张传统内部的关系网':
+        ['术语不是“对照表”，', '而是一张传统内部的关系网'],
+}
+
 
 def _split_heading_piece(piece):
     """Split a heading into readable semantic fragments, never single orphan characters."""
@@ -167,89 +225,18 @@ def _split_heading_piece(piece):
     return out
 
 
+def _protect_terms(text):
+    safe = html.escape(text)
+    for term in sorted(HEADING_TERMS, key=len, reverse=True):
+        escaped = html.escape(term)
+        safe = safe.replace(escaped, f'<span class="term-lock">{escaped}</span>')
+    return safe
+
+
 def smart_heading(text):
-    """Render headings as semantic, non-breaking fragments with graceful line breaks."""
-    # Split after punctuation, attaching punctuation to the preceding phrase.
-    parts = re.split(r'([，。！？；：]|——|｜| · | / )', text)
-    pieces = []
-    buf = ''
-    for part in parts:
-        if not part:
-            continue
-        if re.fullmatch(r'([，。！？；：]|——|｜| · | / )', part):
-            buf += part
-            if buf.strip():
-                pieces.append(buf.strip())
-            buf = ''
-        else:
-            if buf:
-                pieces.append(buf.strip())
-            buf = part
-    if buf.strip():
-        pieces.append(buf.strip())
-
-    frags = []
-    for piece in pieces:
-        # Preserve punctuation on the last sub-fragment.
-        m = re.match(r'^(.*?)([，。！？；：]|——|｜| · | / )$', piece)
-        core, tail = (m.group(1), m.group(2)) if m else (piece, '')
-        sub = []
-        # Keep quoted concepts as a whole: “我的感觉就是对的” should never become
-        # “我的感觉就是 / 对的”.
-        quote_parts = [x for x in re.split(r'([“‘《][^”’》]*[”’》])', core) if x]
-        for qpart in quote_parts:
-            if re.fullmatch(r'[“‘《][^”’》]*[”’》]', qpart):
-                sub.append((qpart, False))
-            else:
-                sub.extend(_split_heading_piece(qpart))
-        if sub:
-            last_text, last_term = sub[-1]
-            sub[-1] = (last_text + tail, last_term)
-            frags.extend(sub)
-
-    # Do not leave grammatical one-character fragments floating on their own.
-    # Attach prepositions/conjunctions to the following phrase and particles to
-    # the preceding phrase, so line breaks remain visually meaningful.
-    prefix_tiny = {'当', '把', '从', '到', '与', '和', '向', '为', '在', '被', '是'}
-    suffix_tiny = {'说', '时', '后', '前', '中', '的'}
-
-    def join_text(a, b):
-        a, b = a.rstrip(), b.lstrip()
-        if not a:
-            return b
-        if not b:
-            return a
-        ascii_a = bool(re.search(r'[A-Za-z0-9]$', a))
-        ascii_b = bool(re.match(r'^[A-Za-z0-9]', b))
-        cjk_a = bool(re.search(r'[\u4e00-\u9fff]$', a))
-        cjk_b = bool(re.match(r'^[\u4e00-\u9fff]', b))
-        sep = ' ' if (ascii_a and cjk_b) or (cjk_a and ascii_b) else ''
-        return a + sep + b
-
-    merged = []
-    i = 0
-    while i < len(frags):
-        frag, is_term = frags[i]
-        bare = frag.strip('，。！？；：｜/·—— ')
-        if bare in prefix_tiny and i + 1 < len(frags):
-            nxt, nxt_term = frags[i + 1]
-            merged.append((join_text(frag, nxt), is_term or nxt_term))
-            i += 2
-            continue
-        if bare in suffix_tiny and merged:
-            prev, prev_term = merged[-1]
-            merged[-1] = (join_text(prev, frag), prev_term or is_term)
-            i += 1
-            continue
-        merged.append((frag, is_term))
-        i += 1
-    frags = merged
-
-    rendered = []
-    for frag, is_term in frags:
-        cls = 'hfrag term-lock' if is_term else 'hfrag'
-        rendered.append(f'<span class="{cls}">{html.escape(frag)}</span>')
-    return '<wbr>'.join(rendered)
+    """Editorial heading layout: whole thought-units, never machine-chopped fragments."""
+    lines = HEADING_LAYOUTS.get(text, [text])
+    return ''.join(f'<span class="title-line">{_protect_terms(line)}</span>' for line in lines)
 
 
 def enhance_plain_headings(doc):
@@ -393,7 +380,7 @@ worship_body = f'''
 {silence_visual()}
 {callout('重要区别','<p><strong>静默是外在条件；waiting 是内在姿态；worship 是关系与方向。</strong></p>','dark')}
 {section('“等候”为什么不是一种注意力技巧？','''<p>如果只从心理训练看，waiting 很容易被理解成“延迟反应”或“保持开放”。这些描述有帮助，却还没有触到传统语境的全部。对早期 Friends 而言，等候之所以有方向，是因为他们相信 Divine Presence 并非缺席；人不是在制造启示，而是在学习停止遮蔽、停止抢先。</p><p>这也是为什么 Brinton 会说，Quaker worship 把“God reveals himself directly”这一信念推到实践层面：如果启示并非只属于过去，那么 worship 的基本动作就不是不断填充语言，而是 reverent waiting 与 listening。</p>'''+research_note('历史语言与当代语言之间，需要保持张力','''<p>今天一些 liberal Friends 会更多使用 Truth、Light、Life、Love 或 inward guidance；另一些 Friends 仍明确以 Christ、Scripture 与 Holy Spirit 为中心。把所有这些语言强行统一，会失去传统内部真实存在的差异。本站会尽量标注语境，而不是把某一支当成全部。</p>'''), '03 · THEOLOGICAL DIRECTION')}
-{section('进入 Meeting 时，具体可以怎么做？','''<div class="practice-steps"><article><b>先允许自己还没有安静</b><p>注意身体接触椅子、脚底、呼吸和房间里的声音。不要把“马上进入状态”变成新任务。</p></article><article><b>不追赶每一个念头</b><p>你可以知道它在，却不必完成它。计划、回忆、情绪都可以经过。</p></article><article><b>从“我要做什么”转向“有什么值得被听见”</b><p>不是逼自己找答案，而是让问题在空间里待一会儿。</p></article><article><b>同时听房间</b><p>Meeting 不是私人练习。感受其他人的存在，不必想象他们在做什么。</p></article><article><b>有人说话后，不立即回应</b><p>让话语重新落回静默。它可能不是讨论的开端，而是共同聆听的一部分。</p></article></div>''','03 · HOW TO ENTER')}
+{section('进入Meeting 时，具体可以怎么做？','''<div class="practice-steps"><article><b>先允许自己还没有安静</b><p>注意身体接触椅子、脚底、呼吸和房间里的声音。不要把“马上进入状态”变成新任务。</p></article><article><b>不追赶每一个念头</b><p>你可以知道它在，却不必完成它。计划、回忆、情绪都可以经过。</p></article><article><b>从“我要做什么”转向“有什么值得被听见”</b><p>不是逼自己找答案，而是让问题在空间里待一会儿。</p></article><article><b>同时听房间</b><p>Meeting 不是私人练习。感受其他人的存在，不必想象他们在做什么。</p></article><article><b>有人说话后，不立即回应</b><p>让话语重新落回静默。它可能不是讨论的开端，而是共同聆听的一部分。</p></article></div>''','03 · HOW TO ENTER')}
 {section('杂念怎么办？','''<p>最容易把初学者带偏的问题，就是：“怎样才能没有杂念？” Meeting 并不要求达到某种纯净意识状态。一个更实用的观察方式是：</p><div class="ladder"><div><span>念头出现</span><p>我注意到了。</p></div><div><span>自动跟随</span><p>我已经在心里写完三封邮件。</p></div><div><span>重新回来</span><p>不责备，重新感到身体、房间、等待。</p></div><div><span>渐渐变深</span><p>某些念头退到背景，某些问题反而显出重量。</p></div></div>''','04 · DISTRACTION')}
 {section('什么时候结束？','''<p>正式 Meeting 的结束方式因群体而异，常见做法是 designated Friends 握手，其他人随之握手，表示 worship 已结束。本站的练习采用轻微提示音，只是数字环境中的替代。</p><p>更重要的是：结束不意味着把静默留在房间。Thomas Kelly 的一个核心关切，正是让内在注意逐渐进入日常行动，使“内在圣所”成为工作日也可返回的参照。</p>''','05 · RETURN')}
 {section('从 inward life 到 workaday life','''<p>Thomas Kelly 反复强调，内在生命若只发生在固定的安静时段，仍然是不完整的。他所描述的是一种“同时生活在两层”的能力：表层继续工作、说话、做决定；更深一层保持对 Light 的注意。</p><p>这使 Meeting 的价值不在于把人从生活中抽离，而在于训练一种能够回到市场、办公室、家庭与公共事务中的注意方式。外在见证不是附加的“公益活动”，而是 inward attention 结出的果实。</p>'''+research_note('一个可观察的检验','''<p>一次 Meeting 是否“有效”，不只看当场是否平静、感动或深刻。更值得问的是：离开以后，我是否更诚实？更能承担关系？更少被自我防卫驱动？更愿意做一件代价真实、但更忠实的事？</p>'''), '06 · EVERYDAY LIGHT')}
@@ -404,11 +391,11 @@ pages['worship.html'] = page_shell('worship.html','静默，不是什么都不�
 
 # --- practice ---
 practice_body = f'''
-<section class="practice-intro"><div><span class="kicker">12 MINUTES · BEGINNER PRACTICE</span><h2>一次尽量少指导的 Meeting 体验</h2><p>这不是正式 Meeting for Worship 的替代品，而是一段帮助初学者理解“共同等候”内部质感的数字练习。最好把手机调静音，坐直但不僵硬，允许自己不进入任何特殊状态。</p></div><div class="practice-rules"><span>不追求放松</span><span>不强迫清空</span><span>不解释体验</span><span>不急着得答案</span></div></section>
+<section class="practice-intro"><div><span class="kicker">12 MINUTES · BEGINNER PRACTICE</span><h2>一次尽量少指导的Meeting体验</h2><p>这不是正式 Meeting for Worship 的替代品，而是一段帮助初学者理解“共同等候”内部质感的数字练习。最好把手机调静音，坐直但不僵硬，允许自己不进入任何特殊状态。</p></div><div class="practice-rules"><span>不追求放松</span><span>不强迫清空</span><span>不解释体验</span><span>不急着得答案</span></div></section>
 <section class="timer-shell"><div class="timer-top"><div><span id="stageIndex">准备</span><h2 id="stageTitle">坐下来，让自己到达这里。</h2><p id="stagePrompt">注意身体、房间和此刻的状态。不需要马上安静。</p></div><div class="timer-circle"><svg viewBox="0 0 120 120"><circle class="timer-bg" cx="60" cy="60" r="52"/><circle id="timerProgress" class="timer-progress" cx="60" cy="60" r="52"/></svg><strong id="timeDisplay">12:00</strong></div></div><div class="timer-controls"><button class="btn primary" id="startTimer">开始</button><button class="btn ghost" id="pauseTimer">暂停</button><button class="btn ghost" id="resetTimer">重置</button></div><div class="stage-track" id="stageTrack"></div></section>
 <section class="after-practice"><div class="section-head"><span>AFTER</span><h2>结束后，不急着评价“做得好不好”</h2><p>只记录一点事实。记录会保存在当前浏览器中，不会上传。</p></div><div class="reflection-grid"><label>刚才什么最明显？<textarea id="r1" placeholder="例如：很躁、听到空调、某个问题一直回来……"></textarea></label><label>有没有什么变得稍微清楚？<textarea id="r2" placeholder="不必是答案，也可以只是一个感觉或方向。"></textarea></label><label>我现在想带走什么？<textarea id="r3" placeholder="一个问题、一句提醒、一件准备去做或暂时不做的事。"></textarea></label></div><div class="reflection-actions"><button class="btn primary" id="saveReflection">保存到本机</button><button class="btn ghost" id="clearReflection">清空</button><span id="saveStatus"></span></div></section>
 <section class="content-section"><div class="section-head"><span>NEXT</span><h2>这 12 分钟里，你其实在练习什么？</h2></div><div class="skill-grid"><article>{icon('silence')}<h3>Settling</h3><p>从外部刺激与内部惯性中慢慢收回注意。</p></article><article>{icon('light')}<h3>Waiting</h3><p>不预设答案，却保持可被触动的状态。</p></article><article>{icon('group')}<h3>Corporate attention</h3><p>即使不说话，也把自己理解为群体的一部分。</p></article><article>{icon('question')}<h3>Discernment</h3><p>分辨“很多声音”里，哪些值得继续等待和检验。</p></article></div>{callout('下一步','<p>真正的 Meeting 需要人与人同处。数字练习只能帮你熟悉一些内在动作。下一步最好是参加真实 Meeting，或与 3–8 位伙伴举行一次 30–45 分钟的简化实践。</p>')}</section>
-<section class="content-section"><div class="section-head"><span>FROM SOLO TO CORPORATE</span><h2>不要把 12 分钟练习误当成 Meeting 的缩小版</h2><p>个人练习只能帮助你熟悉 settling 与 waiting。真正独特的部分，要等到“别人也在场”以后才开始出现。</p></div><div class="practice-ladder-v2"><article><span>01 · SOLO</span><h3>12 分钟个人练习</h3><p>认识自己的自动反应：急于找答案、追念头、追求特殊状态。</p></article><article><span>02 · SMALL GROUP</span><h3>30–45 分钟共同静默</h3><p>开始练习 corporate attention：别人存在，却不需要被我分析、照顾或回应。</p></article><article><span>03 · MINISTRY</span><h3>学习“说与不说”</h3><p>让 insight 经历等待；区分“我想表达”与“这个 Meeting 需要听见”。</p></article><article><span>04 · DISCERNMENT</span><h3>把真实议题带进群体</h3><p>当群体具有足够信任与纪律，再进入 clearness、business 与共同辨识。</p></article></div></section>
+<section class="content-section"><div class="section-head"><span>FROM SOLO TO CORPORATE</span><h2>不要把 12 分钟练习误当成Meeting的缩小版</h2><p>个人练习只能帮助你熟悉 settling 与 waiting。真正独特的部分，要等到“别人也在场”以后才开始出现。</p></div><div class="practice-ladder-v2"><article><span>01 · SOLO</span><h3>12 分钟个人练习</h3><p>认识自己的自动反应：急于找答案、追念头、追求特殊状态。</p></article><article><span>02 · SMALL GROUP</span><h3>30–45 分钟共同静默</h3><p>开始练习 corporate attention：别人存在，却不需要被我分析、照顾或回应。</p></article><article><span>03 · MINISTRY</span><h3>学习“说与不说”</h3><p>让 insight 经历等待；区分“我想表达”与“这个 Meeting 需要听见”。</p></article><article><span>04 · DISCERNMENT</span><h3>把真实议题带进群体</h3><p>当群体具有足够信任与纪律，再进入 clearness、business 与共同辨识。</p></article></div></section>
 '''
 pages['practice.html'] = page_shell('practice.html','开始实践','少一点引导，留多一点空间。用 12 分钟亲自体验 settling、waiting 与 listening，而不是把 Meeting 只理解成概念。',practice_body,label='PRACTICE')
 
@@ -632,7 +619,7 @@ pages['toolkit.html']=page_shell('toolkit.html','实践工具箱','从个人等�
 css = r'''
 :root{--paper:#f2eee5;--paper2:#e8e1d4;--ink:#1f2723;--ink2:#3f4b45;--moss:#5d6d60;--sage:#8c9a8b;--gold:#b49a5c;--line:#cfc6b7;--white:#fffdf8;--shadow:0 16px 48px rgba(31,39,35,.08);--serif:ui-serif,"Songti SC","STSong","Noto Serif CJK SC",serif;--sans:ui-sans-serif,system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.78;letter-spacing:.01em}a{color:inherit;text-decoration:none}img,svg{max-width:100%}button,input,textarea{font:inherit}.skip-link{position:absolute;left:-999px;top:8px}.skip-link:focus{left:8px;background:#fff;padding:8px;z-index:99}.site-header{position:sticky;top:0;z-index:30;display:flex;align-items:center;justify-content:space-between;padding:14px clamp(20px,4vw,64px);background:rgba(242,238,229,.92);backdrop-filter:blur(16px);border-bottom:1px solid rgba(31,39,35,.08)}.brand{display:flex;align-items:center;gap:11px}.brand b{display:block;font-family:var(--serif);font-size:18px}.brand small{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--moss)}.brand-mark{width:34px;height:34px;border:1px solid var(--moss);border-radius:50%;position:relative}.brand-mark i{position:absolute;border:1px solid var(--gold);border-radius:50%;left:50%;top:50%;transform:translate(-50%,-50%)}.brand-mark i:nth-child(1){width:6px;height:6px;background:var(--gold)}.brand-mark i:nth-child(2){width:16px;height:16px}.brand-mark i:nth-child(3){width:26px;height:26px;opacity:.45}.main-nav{display:flex;gap:18px;font-size:13px}.main-nav a{padding:8px 0;color:#4d5852;border-bottom:1px solid transparent}.main-nav a:hover,.main-nav a.active{color:var(--ink);border-color:var(--gold)}.nav-toggle{display:none;background:none;border:0;font-size:24px}.page-hero{padding:72px clamp(22px,8vw,140px) 44px;border-bottom:1px solid var(--line)}.page-hero .hero-copy{max-width:940px}.kicker,.section-eyebrow,.section-head>span,.big-question>span{font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--moss);font-weight:700}.page-hero h1{font:500 clamp(42px,6vw,82px)/1.08 var(--serif);margin:12px 0 20px}.page-hero p{font-size:18px;max-width:760px;color:var(--ink2)}.hero-line{width:74px;height:1px;background:var(--gold);margin-top:30px}.home-hero{min-height:76vh;display:grid;grid-template-columns:1.05fr .95fr;align-items:center;padding:80px clamp(24px,7vw,120px);background:var(--ink);color:var(--paper)}.home-copy h1{font:500 clamp(60px,8vw,110px)/.96 var(--serif);margin:18px 0 30px;letter-spacing:-.04em}.home-copy>p{max-width:650px;color:#d8d9d1;font-size:18px}.home-hero .kicker{color:#c4b991}.cta-row{display:flex;gap:12px;flex-wrap:wrap;margin:34px 0}.btn{display:inline-flex;justify-content:center;align-items:center;border:1px solid var(--ink);padding:12px 18px;border-radius:999px;cursor:pointer;transition:.2s;background:transparent}.btn.primary{background:var(--ink);color:var(--white)}.home-hero .btn.primary{background:var(--paper);color:var(--ink);border-color:var(--paper)}.btn.ghost{border-color:var(--line)}.home-hero .btn.ghost{color:var(--paper);border-color:#657069}.btn:hover{transform:translateY(-1px);box-shadow:0 8px 20px rgba(0,0,0,.08)}.btn.inverted{background:var(--paper);color:var(--ink);border:0}.hero-note{margin-top:40px;display:flex;gap:12px;max-width:650px;color:#aeb7b0;font-size:13px}.hero-note span{width:34px;height:1px;background:var(--gold);margin-top:11px;flex:none}.circle-visual{text-align:center}.circle-visual svg{max-height:510px;overflow:visible}.circle-visual .seat circle{fill:#d8ddd8}.circle-visual .seat path{fill:none;stroke:#aab5ad;stroke-width:1.4;stroke-linecap:round}.circle-visual .center-dot{fill:var(--gold)}.circle-visual .halo{stroke:#c9ab61;stroke-width:.45;transform-origin:50px 50px;animation:pulse 6s ease-in-out infinite}.circle-visual .h2{animation-delay:1s}.circle-visual .h3{animation-delay:2s;opacity:.45}.circle-visual p{font:14px var(--serif);color:#9da7a0;margin-top:-20px}@keyframes pulse{0%,100%{opacity:.18;transform:scale(.92)}50%{opacity:.65;transform:scale(1.07)}}.home-intro{display:grid;grid-template-columns:1.05fr .95fr;gap:8vw;padding:110px clamp(24px,8vw,140px)}.big-question h2{font:500 clamp(34px,4.6vw,68px)/1.3 var(--serif);margin:16px 0}.intro-copy{font-size:17px;color:var(--ink2);padding-top:34px}.home-map{padding:100px clamp(24px,8vw,140px);background:#e6e0d4}.section-head{max-width:850px;margin-bottom:42px}.section-head h2,.content-section h2{font:500 clamp(30px,4vw,52px)/1.2 var(--serif);margin:10px 0 12px}.section-head p{color:var(--ink2)}.layer-diagram{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:60px;max-width:980px;margin:30px auto}.layer-diagram svg{max-height:560px}.layer{fill:none;stroke:var(--moss);stroke-width:.7;opacity:.55}.l1{stroke:var(--gold);stroke-width:1.5}.core{fill:var(--gold)}.layer-legend{display:grid;gap:12px}.layer-legend>div{display:flex;align-items:center;gap:18px;padding:12px 0;border-bottom:1px solid rgba(31,39,35,.14)}.layer-legend b{color:var(--gold);font-weight:500}.layer-legend span{display:flex;flex-direction:column}.layer-legend strong{font-family:var(--serif);font-size:20px}.layer-legend small{color:var(--moss)}.map-links{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:50px}.map-links a{padding:18px;border-top:1px solid var(--ink)}.map-links b{display:block;color:var(--gold);font-weight:500}.map-links span{font-family:var(--serif);font-size:18px}.map-links small{display:block;font-family:var(--sans);font-size:11px;color:var(--moss);margin-top:6px}.meeting-family{padding:100px clamp(24px,8vw,140px)}.family-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.family-grid a{min-height:260px;padding:24px;background:var(--white);border:1px solid var(--line);display:flex;flex-direction:column}.family-grid a span{color:var(--gold)}.family-grid h3{font:500 24px/1.2 var(--serif);margin-top:auto}.family-grid p{color:var(--ink2);font-size:14px}.practice-banner{margin:30px clamp(24px,6vw,100px) 100px;padding:54px 60px;background:var(--ink);color:var(--paper);display:flex;align-items:flex-end;justify-content:space-between;gap:40px}.practice-banner span{color:#bcb69f;font-size:12px;letter-spacing:.15em}.practice-banner h2{font:500 clamp(32px,4vw,54px)/1.2 var(--serif);margin:8px 0}.practice-banner p{color:#bfc7c1}.reading-path{padding:0 clamp(24px,8vw,140px) 120px}.path-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}.path-grid article{background:var(--white);padding:28px 34px;border:1px solid var(--line)}.path-grid article>span{color:var(--moss);font-weight:700;font-size:12px;letter-spacing:.13em}.path-grid ol{padding-left:24px}.path-grid li{padding:8px 0;border-bottom:1px solid #e5dfd5}.path-grid a:hover{color:var(--moss)}.article-grid{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:80px;max-width:1240px;margin:0 auto;padding:30px 34px 120px}.article-main{min-width:0}.content-section{padding:54px 0;border-bottom:1px solid var(--line)}.content-section>p{font-size:17px;max-width:850px;color:var(--ink2)}.section-eyebrow{margin-bottom:8px}.callout{padding:26px 30px;margin:35px 0;background:#e4ddcf;border-left:3px solid var(--gold)}.callout.dark{background:var(--ink);color:var(--paper)}.callout strong{font:500 21px var(--serif)}.callout p{margin:8px 0}.sources{position:sticky;top:100px;align-self:start;margin-top:54px;padding:24px;background:var(--white);border:1px solid var(--line)}.source-head{display:flex;gap:12px;align-items:center;border-bottom:1px solid var(--line);padding-bottom:16px}.source-head svg{width:34px;stroke:var(--moss);fill:none}.source-head span{font-size:11px;color:var(--moss);display:block}.source-head strong{font:500 18px var(--serif)}.sources ul{list-style:none;padding:0;margin:18px 0}.sources li{padding:12px 0;border-bottom:1px dashed var(--line)}.sources li b,.sources li span{display:block}.sources li b{font:500 15px var(--serif)}.sources li span{font-size:12px;color:var(--ink2);margin-top:5px}.text-link{font-size:13px;color:var(--moss)}.compare-mini,.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.compare-mini>div,.role-grid article{padding:24px;background:var(--white);border:1px solid var(--line)}.compare-mini b,.role-grid b{font:500 22px var(--serif)}.definition-list dl{display:grid;grid-template-columns:140px 1fr;margin:0}.definition-list dt,.definition-list dd{padding:15px 0;border-bottom:1px solid var(--line)}.definition-list dt{font-weight:700;color:var(--moss)}.definition-list dd{margin:0}.myth-grid,.signal-grid,.care-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.myth-grid article,.signal-grid article,.care-grid article{padding:22px;background:var(--white);border:1px solid var(--line)}.myth-grid b,.signal-grid b{font:500 18px var(--serif)}.myth-grid p,.signal-grid p,.care-grid p{font-size:14px;color:var(--ink2)}.process-row{display:flex;align-items:center;flex-wrap:wrap;gap:8px}.process-row span{padding:9px 13px;border:1px solid var(--line);border-radius:999px;background:var(--white)}.process-row i{color:var(--gold)}.fineprint{font-size:12px!important;color:#68726c!important}.query-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:24px}.query-card{min-height:180px;padding:22px;background:var(--ink);color:var(--paper)}.query-card span{font-size:10px;letter-spacing:.16em;color:#b9b49f}.query-card p{font:500 20px/1.55 var(--serif)}.three-stage{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.three-stage article{padding:22px;border-top:2px solid var(--gold);background:var(--white)}.three-stage span{font-size:11px;color:var(--gold)}.three-stage h3{font:500 28px var(--serif);margin:8px 0}.practice-steps{display:grid;gap:10px}.practice-steps article{padding:19px 22px;background:var(--white);border-left:2px solid var(--moss)}.practice-steps b{font:500 19px var(--serif)}.practice-steps p{margin:5px 0;color:var(--ink2)}.ladder{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--line)}.ladder>div{padding:18px;border-right:1px solid var(--line)}.ladder>div:last-child{border:0}.ladder span{font-weight:700}.ladder p{font-size:13px;color:var(--ink2)}.cta-inline{display:flex;gap:12px;flex-wrap:wrap;margin-top:30px}.practice-intro,.after-practice,.timer-shell{max-width:1120px;margin:0 auto;padding:50px 34px}.practice-intro{display:grid;grid-template-columns:1.3fr .7fr;gap:50px}.practice-intro h2,.after-practice h2{font:500 clamp(34px,4vw,54px)/1.2 var(--serif)}.practice-rules{display:flex;flex-wrap:wrap;align-content:center;gap:8px}.practice-rules span{padding:8px 12px;border:1px solid var(--line);border-radius:999px;background:var(--white);font-size:13px}.timer-shell{background:var(--ink);color:var(--paper);margin-top:20px;box-shadow:var(--shadow)}.timer-top{display:grid;grid-template-columns:1fr 240px;align-items:center;gap:40px}.timer-top h2{font:500 clamp(30px,4vw,54px)/1.2 var(--serif);margin:10px 0}.timer-top p{color:#bdc6c0}.timer-circle{position:relative;width:220px;height:220px}.timer-circle svg{transform:rotate(-90deg)}.timer-bg,.timer-progress{fill:none;stroke-width:5}.timer-bg{stroke:#3b4641}.timer-progress{stroke:var(--gold);stroke-linecap:round;stroke-dasharray:327;stroke-dashoffset:0}.timer-circle strong{position:absolute;inset:0;display:grid;place-items:center;font:500 42px var(--serif)}.timer-controls{display:flex;gap:10px;margin:24px 0}.timer-shell .btn.primary{background:var(--paper);color:var(--ink);border-color:var(--paper)}.timer-shell .btn.ghost{color:var(--paper);border-color:#5d6862}.stage-track{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.stage-track span{height:4px;background:#46514c}.stage-track span.active{background:var(--gold)}.reflection-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.reflection-grid label{font-size:13px;font-weight:700}.reflection-grid textarea{width:100%;min-height:150px;margin-top:8px;padding:14px;border:1px solid var(--line);background:var(--white);resize:vertical}.reflection-actions{display:flex;align-items:center;gap:12px;margin-top:18px}.skill-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.skill-grid article{padding:20px;border:1px solid var(--line);background:var(--white)}.skill-grid svg{width:38px;height:38px;stroke:var(--moss);fill:none;stroke-width:1.4}.skill-grid h3{font:500 21px var(--serif)}.skill-grid p{font-size:13px;color:var(--ink2)}.ministry-flow{display:flex;flex-direction:column;max-width:520px;margin:20px auto}.ministry-flow span,.ministry-flow strong{padding:13px 18px;border:1px solid var(--line);background:var(--white);text-align:center}.ministry-flow i{text-align:center;color:var(--gold)}.discern-box{display:grid;gap:10px;background:var(--white);padding:24px;border:1px solid var(--line)}.discern-box label{display:flex;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}.discern-box .btn{justify-self:start}.result-note{font:500 18px var(--serif);color:var(--moss)}.signal-grid{grid-template-columns:repeat(3,1fr)}.practice-card{padding:26px;background:var(--white);border:1px solid var(--line)}.practice-card>span{font-size:12px;color:var(--moss);font-weight:700}.practice-card li{margin:8px 0}.decision-visual{margin:30px 0;padding:28px;background:var(--ink);color:var(--paper)}.decision-track{display:flex;gap:8px;flex-wrap:wrap;align-items:center}.decision-track span,.decision-track strong{padding:8px 11px;border:1px solid #637068;border-radius:999px;font-size:12px}.decision-track i{color:var(--gold)}.decision-visual p{font-size:13px;color:#b9c1bc}.compare-table{border:1px solid var(--line);background:var(--white)}.compare-table .row{display:grid;grid-template-columns:.7fr 1.2fr 1fr 1.2fr}.compare-table .row>*{padding:14px;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}.compare-table .row>*:last-child{border-right:0}.compare-table .head{background:#ddd5c7;font-size:12px;font-weight:700}.compare-table .accent{background:#ece6d8}.role-grid .accent{border-top:3px solid var(--gold)}.case-lab,.question-lab{padding:26px;background:var(--white);border:1px solid var(--line)}.case-options,.question-actions{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}.case-options button,.question-actions button,.filter-row button,.tool-grid button{border:1px solid var(--line);background:var(--paper);padding:10px 12px;cursor:pointer}.case-result,.question-feedback{padding:16px;background:#eee8dc;border-left:3px solid var(--gold);min-height:76px}.agenda{border-top:1px solid var(--ink)}.agenda>div{display:grid;grid-template-columns:90px 1fr;gap:20px;padding:13px 0;border-bottom:1px solid var(--line)}.agenda b{color:var(--gold)}.clearness-flow{display:grid;grid-template-columns:1fr 1fr;gap:10px}.clearness-flow article{padding:18px;background:var(--white);border:1px solid var(--line)}.clearness-flow b{font:500 18px var(--serif)}.clearness-flow p{font-size:13px;color:var(--ink2)}.question-example{font:500 26px/1.55 var(--serif);padding:20px;background:#f5f1e8}.rewrite-list{display:grid;gap:12px}.rewrite-list article{padding:20px;background:var(--white);border:1px solid var(--line)}.rewrite-list small{color:var(--moss)}.rewrite-list b{display:block;color:var(--moss)}.triad-visual{margin:30px 0}.triad-visual svg circle{fill:var(--white);stroke:var(--moss);stroke-width:1.5}.triad-visual svg .third{fill:#e6ddc9;stroke:var(--gold)}.triad-line{fill:none;stroke:#a7aea9;stroke-width:1}.triad-visual text{text-anchor:middle;font:500 23px var(--serif);fill:var(--ink)}.triad-visual .sub{font:12px var(--sans);fill:var(--moss)}.triad-visual .center-label{font:12px var(--sans);fill:var(--gold)}.org-map{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.org-map div{padding:16px 18px;border:1px solid var(--line);background:var(--white)}.org-map small{display:block;color:var(--moss)}.org-map i{color:var(--gold)}.history-lead,.comparison-intro,.research-intro,.toolkit-top,.glossary-top{max-width:1100px;margin:0 auto;padding:60px 34px}.history-lead h2,.comparison-intro h2,.research-intro h2,.toolkit-top h2,.glossary-top h2{font:500 clamp(38px,5vw,66px)/1.18 var(--serif);margin:12px 0}.timeline-section{max-width:1120px;margin:0 auto;padding:20px 34px 110px}.timeline{border-left:1px solid var(--moss);margin-left:100px}.time-item{display:grid;grid-template-columns:110px 1fr;gap:30px;margin-left:-110px;padding:0 0 42px}.time-item time{color:var(--gold);font:500 18px var(--serif);text-align:right;padding-top:7px}.time-item>div{position:relative;padding-left:30px}.time-item>div:before{content:"";position:absolute;width:9px;height:9px;border-radius:50%;background:var(--gold);left:-5px;top:12px}.time-item h3{font:500 28px var(--serif);margin:0}.time-item p{color:var(--ink2)}.tension-grid,.scenario-grid,.book-grid,.roadmap-list,.tool-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.tension-grid article,.scenario-grid article,.book-grid article,.roadmap-list article,.tool-grid article{padding:22px;background:var(--white);border:1px solid var(--line)}.tension-grid b,.roadmap-list b{font:500 19px var(--serif)}.comparison-intro,.research-intro,.toolkit-top{max-width:100%;padding-left:clamp(24px,8vw,140px);padding-right:clamp(24px,8vw,140px)}.matrix-wrap{overflow:auto}.matrix{width:100%;border-collapse:collapse;min-width:980px;background:var(--white);font-size:13px}.matrix th,.matrix td{padding:14px;border:1px solid var(--line);vertical-align:top}.matrix thead th{background:#ddd5c7;text-align:left}.matrix tbody th{font-family:var(--serif);font-size:15px}.scenario-grid article span{font-size:11px;color:var(--moss)}.scenario-grid h3{font:500 20px var(--serif)}.glossary-top{display:grid;grid-template-columns:1fr 340px;gap:70px;align-items:end}.search-box{display:grid;gap:8px;font-size:12px;color:var(--moss)}.search-box input{padding:14px 16px;border:1px solid var(--line);background:var(--white)}.filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}.filter-row button.active{background:var(--ink);color:var(--paper)}.glossary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.glossary-card{padding:22px;background:var(--white);border:1px solid var(--line)}.glossary-card>span{font-size:10px;color:var(--moss)}.glossary-card h3{font:500 22px var(--serif);margin:8px 0 2px}.glossary-card h4{margin:0;color:var(--moss)}.glossary-card p{font-size:13px;color:var(--ink2)}.book-grid article>span{font-size:10px;color:var(--moss);letter-spacing:.1em}.book-grid h3{font:500 22px/1.35 var(--serif)}.book-grid p{font-size:13px;color:var(--ink2)}.book-grid small{color:var(--moss)}.method-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.method-grid b{min-height:120px;display:flex;align-items:flex-end;padding:18px;background:var(--ink);color:var(--paper);font:500 17px/1.5 var(--serif)}.research-note{padding:40px;background:var(--ink);color:var(--paper)}.research-note h2{margin-top:0}.tool-grid article>span{font-size:11px;color:var(--moss)}.tool-grid h3{font:500 23px var(--serif)}.tool-grid li{margin:7px 0}.tool-grid button{margin-top:8px}.four-lines{display:grid;grid-template-columns:1fr 1fr;gap:10px}.four-lines p{margin:0;padding:28px;background:var(--white);border:1px solid var(--line);font:500 24px/1.45 var(--serif)}.site-footer{background:#19201d;color:#d8ddd8;padding:50px clamp(24px,6vw,100px);display:grid;grid-template-columns:1.3fr .7fr;gap:40px}.site-footer b{font-family:var(--serif);font-size:20px}.site-footer p{color:#9eaaa3;font-size:13px}.footer-links{display:flex;flex-direction:column;gap:8px}.footer-links a{color:#c9d0cb}.footer-note{grid-column:1/-1;border-top:1px solid #364039;padding-top:20px}
-@media(max-width:980px){.main-nav{display:none;position:absolute;left:0;right:0;top:64px;background:var(--paper);padding:20px 24px;flex-wrap:wrap;border-bottom:1px solid var(--line)}.main-nav.open{display:flex}.nav-toggle{display:block}.home-hero,.home-intro,.layer-diagram,.practice-intro,.glossary-top{grid-template-columns:1fr}.home-hero{padding-top:60px}.circle-visual svg{max-height:400px}.map-links,.family-grid{grid-template-columns:1fr 1fr}.article-grid{grid-template-columns:1fr;gap:0}.sources{position:relative;top:auto}.tension-grid,.scenario-grid,.book-grid,.roadmap-list,.tool-grid,.glossary-grid{grid-template-columns:1fr 1fr}.method-grid{grid-template-columns:1fr 1fr}.query-grid,.signal-grid,.skill-grid{grid-template-columns:1fr 1fr}.timer-top{grid-template-columns:1fr}.timer-circle{width:190px;height:190px}.reflection-grid{grid-template-columns:1fr}.site-footer{grid-template-columns:1fr}}
+@media(max-width:1100px){.main-nav{display:none;position:absolute;left:0;right:0;top:64px;background:var(--paper);padding:20px 24px;flex-wrap:wrap;border-bottom:1px solid var(--line)}.main-nav.open{display:flex}.nav-toggle{display:block}.home-hero,.home-intro,.layer-diagram,.practice-intro,.glossary-top{grid-template-columns:1fr}.home-hero{padding-top:60px}.circle-visual svg{max-height:400px}.map-links,.family-grid{grid-template-columns:1fr 1fr}.article-grid{grid-template-columns:1fr;gap:0}.sources{position:relative;top:auto}.tension-grid,.scenario-grid,.book-grid,.roadmap-list,.tool-grid,.glossary-grid{grid-template-columns:1fr 1fr}.method-grid{grid-template-columns:1fr 1fr}.query-grid,.signal-grid,.skill-grid{grid-template-columns:1fr 1fr}.timer-top{grid-template-columns:1fr}.timer-circle{width:190px;height:190px}.reflection-grid{grid-template-columns:1fr}.site-footer{grid-template-columns:1fr}}
 @media(max-width:640px){.page-hero{padding-top:48px}.home-hero{grid-template-columns:1fr}.home-copy h1{font-size:58px}.map-links,.family-grid,.path-grid,.myth-grid,.care-grid,.compare-mini,.role-grid,.three-stage,.clearness-flow,.query-grid,.signal-grid,.skill-grid,.tension-grid,.scenario-grid,.book-grid,.roadmap-list,.tool-grid,.glossary-grid,.four-lines{grid-template-columns:1fr}.layer-legend{margin-top:-20px}.practice-banner{padding:34px;display:block}.practice-banner .btn{margin-top:20px}.ladder{grid-template-columns:1fr}.ladder>div{border-right:0;border-bottom:1px solid var(--line)}.compare-table .row{grid-template-columns:1fr}.compare-table .head{display:none}.compare-table .row>*{border-right:0}.stage-track{grid-template-columns:repeat(5,1fr)}.time-item{grid-template-columns:70px 1fr;margin-left:-80px}.timeline{margin-left:80px}.agenda>div{grid-template-columns:70px 1fr}.method-grid{grid-template-columns:1fr}.site-footer{padding:40px 24px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}.halo{animation:none!important}.btn{transition:none}}
 @media print{.site-header,.site-footer,.nav-toggle,.btn,.case-options,.question-actions,.filter-row{display:none!important}body{background:#fff}.content-section{break-inside:avoid}.page-hero{padding-top:20px}}
@@ -646,27 +633,32 @@ h1,h2,h3,.query-card p,.four-lines p,.question-example{
   overflow-wrap:normal;
   line-break:strict;
 }
-.hfrag{display:inline-block;white-space:nowrap;max-width:100%;vertical-align:baseline}
-.hfrag.term-lock{letter-spacing:-.015em}
+.title-line{display:block;white-space:nowrap;max-width:100%}
+.term-lock{display:inline-block;white-space:nowrap;letter-spacing:-.015em}
 p,li,dd{orphans:2;widows:2;overflow-wrap:anywhere}
-.section-heading-row{display:grid;grid-template-columns:minmax(0,1fr) 68px;gap:24px;align-items:start}
+.section-heading-row{display:flex;flex-direction:column;gap:10px;align-items:flex-start}
 .section-heading-row>div:first-child{min-width:0}
-.section-glyph{width:62px;height:62px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;background:rgba(255,253,248,.62);margin-top:4px}
-.section-glyph svg{width:34px;height:34px;stroke:var(--moss);fill:none;stroke-width:1.35}
+.section-glyph{order:-1;width:48px;height:48px;border:1px solid var(--line);border-radius:50%;display:grid;place-items:center;background:rgba(255,253,248,.62);margin:0 0 2px}
+.section-glyph svg{width:27px;height:27px;stroke:var(--moss);fill:none;stroke-width:1.35}
 .section-glyph svg circle:not([fill="none"]){fill:none}
 .section-heading-row+.concept-figure,.section-heading-row+.triad-visual,.section-heading-row+.decision-visual{margin-top:20px}
 .page-hero .hero-copy{max-width:1120px}
-.page-hero h1{max-width:none;font-size:clamp(42px,5.5vw,76px);letter-spacing:-.025em}
+.page-hero h1{max-width:none;font-size:clamp(40px,4.7vw,68px);letter-spacing:-.025em;line-height:1.12}
 .page-hero p{max-width:820px;line-height:1.9}
 .home-copy{min-width:0}
 .home-copy h1{max-width:6.2em;font-size:clamp(56px,7.4vw,104px);line-height:1.04;letter-spacing:-.035em}
 .big-question h2{max-width:13em;line-height:1.28}
-.section-head h2,.content-section h2{max-width:20em;line-height:1.28}
+.section-head h2,.content-section h2{max-width:none;line-height:1.32;font-size:clamp(31px,3.15vw,42px)}
 .content-section>p,.article-main .content-section>p{max-width:46rem;line-height:1.9}
 .article-main{font-size:16px}
 .article-main p{line-height:1.9}
 main>.content-section{padding-left:clamp(24px,8vw,140px);padding-right:clamp(24px,8vw,140px)}
 .article-main>.content-section{padding-left:0;padding-right:0}
+.practice-intro{display:block}
+.practice-intro>div:first-child{max-width:880px}
+.practice-intro h2{font-size:clamp(34px,3.55vw,48px);line-height:1.22;margin:14px 0 18px}
+.practice-intro .practice-rules{margin-top:28px}
+.practice-intro .practice-rules span{margin-bottom:4px}
 
 .home-depth{padding:100px clamp(24px,8vw,140px);background:var(--white);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .home-depth>.section-head{margin-bottom:28px}
@@ -795,7 +787,8 @@ main>.content-section{padding-left:clamp(24px,8vw,140px);padding-right:clamp(24p
   .section-heading-row{display:flex;flex-direction:column;gap:10px}
   .section-glyph{order:-1;width:46px;height:46px;margin:0 0 2px}
   .section-glyph svg{width:26px;height:26px}
-  .hfrag.term-lock{font-size:.96em}
+  .title-line{white-space:normal}
+  .term-lock{white-space:nowrap;font-size:.90em}
   .home-depth{padding-top:70px;padding-bottom:70px}
   .depth-grid,.history-thesis,.four-forces,.term-relations,.comparison-lenses,.false-friends,.research-discipline,.source-matrix,.contested-grid,.reading-trails,.boundary-grid,.practice-ladder-v2{grid-template-columns:1fr}
   .history-thesis{padding:0 24px 54px}
