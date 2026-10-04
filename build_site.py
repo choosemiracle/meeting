@@ -5,7 +5,7 @@ ROOT = Path(__file__).resolve().parent
 
 SITE_NAME = '共同等候｜贵格会聚会研究与实践'
 TAGLINE = '研究贵格会聚会（Meeting）如何通过静默、共同聆听与群体明辨，让尚未被任何个人完全拥有的真实，有机会出现。'
-ASSET_VERSION = '20261004-ux6'
+ASSET_VERSION = '20261004-ux7'
 
 NAV_PRIMARY = [
     ('index.html','首页'),
@@ -25,6 +25,7 @@ NAV_MORE = [
     ('community.html','共同体'),
     ('comparisons.html','方法比较'),
     ('traditions.html','会聚传统'),
+    ('china.html','中国语境'),
     ('glossary.html','术语'),
     ('toolkit.html','工具箱'),
 ]
@@ -43,7 +44,8 @@ PAGE_CONTINUE = {
     'community.html': [('history.html','理解传统如何形成'), ('comparisons.html','与其他方法比较')],
     'history.html': [('comparisons.html','比较相近方法'), ('traditions.html','放进更大的会聚传统')],
     'comparisons.html': [('traditions.html','横向看世界会聚传统'), ('toolkit.html','选择合适实践')],
-    'traditions.html': [('research.html','回到来源与研究方法'), ('toolkit.html','把洞见转成实践')],
+    'traditions.html': [('china.html','进入中国语境'), ('research.html','回到来源与研究方法')],
+    'china.html': [('toolkit.html','把本土化原则变成实践'), ('practice.html','先做一次静默练习')],
     'glossary.html': [('research.html','查阅原典与研究方法'), ('meeting.html','回到核心概念')],
     'research.html': [('visual-credits.html','查看图像与史料说明'), ('toolkit.html','把研究转成实践')],
     'toolkit.html': [('practice.html','开始一次练习'), ('meeting.html','回到聚会全貌')],
@@ -1116,7 +1118,7 @@ index_body = f'''
 <a href="learning.html"><span>04</span><h3>Meeting for Learning</h3><p>让人、人和“第三物”真正相遇，把学习从信息摄取变成共同探寻。</p></a>
 </div></section>
 <section class="practice-banner"><div><span>不要只读。</span><h2>Meeting 最终只能通过 Meeting 来理解。</h2><p>先做一次 12 分钟练习。没有指导语轰炸，也没有“放松成功”的要求。</p></div><a class="btn inverted" href="practice.html">进入实践 →</a></section>
-<section class="reading-path"><div class="section-head"><span>TWO PATHS</span><h2>你可以这样进入</h2></div><div class="path-grid"><article><span>第一次接触</span><ol><li><a href="meeting.html">Meeting 到底是什么？</a></li><li><a href="worship.html">静默不是空白</a></li><li><a href="practice.html">12 分钟体验</a></li><li><a href="ministry.html">什么时候该说话？</a></li><li><a href="business.html">为什么不投票？</a></li></ol></article><article><span>想刨根究底</span><ol><li><a href="history.html">从 Seekers 到现代</a></li><li><a href="gathered.html">Gathered Meeting</a></li><li><a href="research.html">原典与研究书目</a></li><li><a href="comparisons.html">与其他方法比较</a></li><li><a href="traditions.html">世界会聚传统与 AI 时代</a></li><li><a href="glossary.html">建立术语坐标</a></li></ol></article></div></section>
+<section class="reading-path"><div class="section-head"><span>TWO PATHS</span><h2>你可以这样进入</h2></div><div class="path-grid"><article><span>第一次接触</span><ol><li><a href="meeting.html">Meeting 到底是什么？</a></li><li><a href="worship.html">静默不是空白</a></li><li><a href="practice.html">12 分钟体验</a></li><li><a href="ministry.html">什么时候该说话？</a></li><li><a href="business.html">为什么不投票？</a></li></ol></article><article><span>想刨根究底</span><ol><li><a href="history.html">从 Seekers 到现代</a></li><li><a href="gathered.html">Gathered Meeting</a></li><li><a href="research.html">原典与研究书目</a></li><li><a href="comparisons.html">与其他方法比较</a></li><li><a href="traditions.html">世界会聚传统与 AI 时代</a></li><li><a href="china.html">在中国：文化整合与当代实践</a></li><li><a href="glossary.html">建立术语坐标</a></li></ol></article></div></section>
 '''
 
 pages = {}
@@ -1472,6 +1474,132 @@ pages['traditions.html'] = page_shell(
     '从贵格会聚会、苏菲记念、禅宗坐禅、犹太同伴研习、吠檀多（Vedanta）真理共聚、锡克圣众到东正教静修：横向比较古往今来的会聚传统，并追问 AI 时代人类必须继续亲自承担什么。',
     traditions_body,
     label='会聚传统（GATHERING TRADITIONS）'
+)
+
+# --- China context / cultural integration ---
+china_body = f'''
+<section class="china-intro">
+  <div class="china-intro-copy">
+    <span class="kicker">中国语境（CHINA CONTEXT）</span>
+    <h2 class="semantic-title"><span>不是把 Meeting “中国化”，</span><span>而是让传统彼此相遇。</span></h2>
+    <p>如果只是把“静默”等同于禅，把“内在之光”等同于良知或佛性，把“合一”等同于和为贵，表面上很亲切，实际上会同时误读两边。更有生命力的做法，是先问：<strong>中国文化里，哪些长期实践也在训练人放慢、反省、倾听差异、共同求真，并把认识落实到生活？</strong></p>
+    <div class="china-principle"><b>本页的整合原则</b><p>找<strong>结构上的共鸣</strong>，保留<strong>思想上的差异</strong>，最后才进入<strong>当代实践的再设计</strong>。</p></div>
+  </div>
+  <div class="china-bridge-visual" aria-label="贵格会传统与中国文化的对话示意图">
+    <div class="china-side china-side-left"><span>贵格会</span><b>Meeting</b><small>等候 · 群体明辨 · 见证</small></div>
+    <div class="china-bridge-center"><span>共同问题</span><strong>怎样共同<br/>靠近真实？</strong><small>注意 · 关系 · 辨识 · 行动</small></div>
+    <div class="china-side china-side-right"><span>中国传统</span><b>修身与会聚</b><small>慎独 · 心斋 · 和而不同 · 会讲</small></div>
+  </div>
+</section>
+
+<section class="content-section">
+  <div class="section-head"><span>六条文化桥梁（SIX BRIDGES）</span><h2>{smart_heading('真正值得连接的，不是名词，而是修习结构')}</h2><p>以下六条线索并不是说“贵格会早就在中国出现过”，而是帮助中国读者从自己熟悉的思想资源出发，理解 Meeting 中那些不容易被现代“会议文化”看见的部分。</p></div>
+  <div class="china-bridge-grid">
+    <article><div class="tradition-icon">{icon('light')}</div><span>儒家 · 《中庸》</span><h3>慎独</h3><p>“慎独”把道德真实放在无人看见、无人监督之处。它能帮助理解 Meeting 为什么如此看重<strong>内外一致与诚信</strong>：真正的辨识不是表态正确，而是先对自己诚实。</p><b>共鸣：内在真实 · Integrity</b><em>差异：慎独首先是个人修身；Meeting 还要求个人经验进入群体检验。</em></article>
+    <article><div class="tradition-icon">{icon('silence')}</div><span>道家 · 《庄子》</span><h3>心斋</h3><p>《庄子》以“虚而待物”描述一种不急于用已有成见占满心灵的状态。这与贵格会的“等候”在姿态上有明显共鸣：<strong>先腾出空间，再看什么会出现。</strong></p><b>共鸣：虚 · 等候 · 非强求</b><em>差异：心斋的哲学语境并不等于基督教贵格会的神学与祷告经验。</em></article>
+    <article><div class="tradition-icon">{icon('group')}</div><span>儒家 · 《论语》</span><h3>和而不同</h3><p>“和而不同”非常适合帮助中国群体理解：关系没有破裂，不等于意见必须一致。真正的“和”，反而需要差异仍然能够存在。</p><b>共鸣：Unity ≠ Uniformity</b><em>差异：贵格会的合一（Unity）不是一般意义的和谐，而是共同明辨后形成的可承担方向。</em></article>
+    <article><div class="tradition-icon">{icon('book')}</div><span>书院传统</span><h3>会讲</h3><p>从朱张会讲到鹅湖之会，书院传统里存在一种跨门户、围绕问题与经典切磋的公共学习形式。它与共学会（Meeting for Learning）都把<strong>共同探究</strong>放在单向讲授之前。</p><b>共鸣：共同求学 · 第三物</b><em>差异：Meeting for Learning 会更有意识地加入静默、经验与“第三物”的关系结构。</em></article>
+    <article><div class="tradition-icon">{icon('path')}</div><span>阳明心学</span><h3>知行合一</h3><p>如果辨识只停在“我想明白了”，它还没有完成。知行合一提醒我们：真正的认识必须进入日用伦常与具体行动，这与贵格会从内在引领走向<strong>生活见证</strong>高度呼应。</p><b>共鸣：认识 → 行动 → 生活</b><em>差异：Leading、Testimony 与“良知”并非同一套概念系统。</em></article>
+    <article><div class="tradition-icon">{icon('group')}</div><span>礼 · 空间 · 器物｜本站转译</span><h3>让形式承载关系</h3><p>座次、茶水、门槛、开场与收束都会悄悄告诉参与者“谁重要、谁可以说、什么时候该停”。中国文化对礼与空间的敏感，可以转化为 Meeting 的<strong>场域设计能力</strong>。</p><b>共鸣：结构塑造行为</b><em>差异：本土化设计应减少身份等级的暗示，而不是把传统尊卑秩序带回圆圈。</em></article>
+  </div>
+</section>
+
+<section class="content-section">
+  <div class="section-head"><span>不要强行等同（FALSE EQUIVALENCE）</span><h2>{smart_heading('越是看起来相像的词，越需要保留边界')}</h2></div>
+  <div class="china-not-equal">
+    <article><b>内在之光 ≠ 佛性 / 良知</b><p>这些概念都可能触及“人里面有可被信任的深层资源”，但历史、神学和修行结构不同。中文表达可以互相照明，不能互相替代。</p></article>
+    <article><b>静默敬拜 ≠ 禅坐 / 静坐</b><p>都可能安静，但贵格会静默敬拜的单位是一个正在共同等候的群体，不只是许多个正在做个人修习的人。</p></article>
+    <article><b>合一 ≠ 一团和气</b><p>真正的合一有时会让分歧更清楚，而不是更快消失。若“为了和气”不敢说出关键差异，反而离共同明辨更远。</p></article>
+    <article><b>书记 ≠ 主持人 / 领导</b><p>书记（Clerk）不是替大家下结论的人，而是照看过程、倾听群体并尝试写出已经形成的共同辨识。</p></article>
+    <article><b>受感分享 ≠ 轮流发言</b><p>不是每个人都必须说，也不是“每人两分钟”。沉默本身可能是完整参与；说话需要经过内在辨识。</p></article>
+    <article><b>澄心会 ≠ 劝导 / 心理咨询</b><p>澄心会通过开放问题与静默帮助焦点人自己听清，不替对方做决定，也不承担心理治疗与危机干预功能。</p></article>
+  </div>
+</section>
+
+<section class="china-tension-section">
+  <div class="section-head"><span>文化张力（CULTURAL TENSIONS）</span><h2>{smart_heading('落到中国群体里，真正困难的往往不是“不会静默”')}</h2><p>更难的是我们已经非常熟练的关系习惯：尊长、面子、求和、给建议、追效率，以及默认记录一切的数字生活。好的本土化不是批评这些习惯，而是为不同需要重新设计容器。</p></div>
+  <div class="china-tension-grid">
+    <article><span>01 · 尊长 / 职位</span><h3>有权威的人一开口，其他人就很难再自由表达</h3><p><strong>设计回应：</strong>发起人、老师、管理者尽量最后发言；书记与主持角色轮换；重大议题先静默或先书写，再进入口头交流。</p></article>
+    <article><span>02 · 面子 / 体面</span><h3>“别让关系难看”容易压过真实</h3><p><strong>设计回应：</strong>只说自己的经验，不解释别人；明确保密；禁止会后追问“你刚才为什么那样说”。</p></article>
+    <article><span>03 · 和为贵</span><h3>和谐有时被误用成“不要有不同意见”</h3><p><strong>设计回应：</strong>把“和而不同”写进规则；书记必须主动询问是否仍有重要保留；允许“尚未清晰”成为合法结果。</p></article>
+    <article><span>04 · 建议冲动</span><h3>很多群体容易从倾听滑向替别人解决问题</h3><p><strong>设计回应：</strong>澄心会与深度聆听场景采用“只提开放问题、不建议”；想给建议时先问对方是否需要。</p></article>
+    <article><span>05 · 效率压力</span><h3>静默常被体验成“浪费时间”</h3><p><strong>设计回应：</strong>先用 3–5 分钟可预期的短静默；用清晰钟声和时间标记建立安全感，再逐渐延长。</p></article>
+    <article><span>06 · 数字默认</span><h3>录音、转写、AI 总结正在变成会议的默认动作</h3><p><strong>设计回应：</strong>深度会聚默认不录音；如需 AI 或转写，必须事先说明用途、保存期限与谁可访问，并保留一段完全无机器的时间。</p></article>
+  </div>
+</section>
+
+<section class="content-section">
+  <div class="section-head"><span>当代中国的八个场景（USE CASES）</span><h2>{smart_heading('Meeting 不必先进入宗教场所，也可以从真实生活的问题开始')}</h2><p>以下不是把所有问题都交给 Meeting，而是指出那些“仅靠信息、辩论和投票不够”的场景。</p></div>
+  <div class="china-use-grid">
+    <article><span>城市社区</span><h3>邻里议题与共同生活</h3><p>适合：公共空间、共享规则、共同项目等价值性议题。<br/><b>可用：简化议事会 + 共同明辨。</b></p></article>
+    <article><span>成人学习 / 书院</span><h3>经典不只读懂，还要照见经验</h3><p>围绕一段文本、诗歌、案例或影像，加入静默、二人对谈与全体回应。<br/><b>可用：共学会。</b></p></article>
+    <article><span>学校与教师团队</span><h3>从“教学技术”回到教育使命</h3><p>适合处理“我们究竟想保护什么样的学习”这类不能只靠绩效数据回答的问题。<br/><b>可用：共学会 + 澄心式提问。</b></p></article>
+    <article><span>组织与企业</span><h3>使命、价值冲突与重大方向</h3><p>不是替代所有管理决策，而是用于高价值、高不确定、需要长期承担的议题。<br/><b>可用：议事会。</b></p></article>
+    <article><span>家庭与代际</span><h3>重要选择前，先让彼此真正出现</h3><p>尤其适合成年家庭成员面对照护、迁居、教育、职业选择等重大变化。<br/><b>可用：短静默 + 轮流聆听。</b></p></article>
+    <article><span>人生转折</span><h3>职业、关系、去留与使命选择</h3><p>当事人不是缺建议，而是需要把自己的声音从众多期待里分辨出来。<br/><b>可用：澄心会。</b></p></article>
+    <article><span>公益 / 志愿者</span><h3>让价值与行动重新接上</h3><p>帮助群体在疲惫、分歧或使命漂移时重新辨认“我们为何还在这里”。<br/><b>可用：静默等候 + 议事会。</b></p></article>
+    <article><span>线上 / AI 混合群体</span><h3>在高连接中保留真正的临在</h3><p>显性约定静默、离屏、隐私与 AI 边界，让工具服务会聚，而不是占据中心。<br/><b>可用：线上共学会 / 共同明辨。</b></p></article>
+  </div>
+</section>
+
+<section class="china-prototype">
+  <div class="section-head"><span>一场可以直接试的版本（75 MINUTES）</span><h2>{smart_heading('中国语境的 75 分钟会聚实验')}</h2><p>这是一个受 Meeting for Learning 与贵格会聆听原则启发的<strong>世俗共学版本</strong>，不是 Meeting for Worship。第三物可以是一首诗、一段经典、一幅画、一个真实案例，或一小段纪录片。</p></div>
+  <div class="china-protocol">
+    <article><b>00–05</b><div><span>入场</span><h3>茶、水、手机收起</h3><p>说明保密、非评判、可沉默、不强迫分享。</p></div></article>
+    <article><b>05–10</b><div><span>安顿</span><h3>共同静默 5 分钟</h3><p>不播引导语，只邀请大家感受身体、呼吸与此刻。</p></div></article>
+    <article><b>10–20</b><div><span>第三物</span><h3>一起读 / 看一个对象</h3><p>例如《庄子》一段、鲁迅一页、Mary Oliver 一首诗或一个现实案例。</p></div></article>
+    <article><b>20–32</b><div><span>二人</span><h3>一人说，一人只听</h3><p>每人 5 分钟，中间留一分钟静默；不追问、不点评。</p></div></article>
+    <article><b>32–52</b><div><span>圆圈</span><h3>只说此刻真正重要的</h3><p>不用轮流；每次发言后留一点空白，让话落地。</p></div></article>
+    <article><b>52–60</b><div><span>再静默</span><h3>我们遗漏了什么？</h3><p>从“我怎么看”转向“这个群体正在看见什么”。</p></div></article>
+    <article><b>60–70</b><div><span>明辨</span><h3>形成一句共同认识</h3><p>不追求漂亮共识；可以写成“我们已经看清……”或“我们仍未看清……”。</p></div></article>
+    <article><b>70–75</b><div><span>返回生活</span><h3>一件愿意承担的小行动</h3><p>不做宏大承诺，只说下一步具体、可验证的行动。</p></div></article>
+  </div>
+</section>
+
+<section class="content-section">
+  <div class="section-head"><span>本土化原则（LOCALIZATION）</span><h2>{smart_heading('真正的“中国版本”，应该越来越少依赖带领者')}</h2></div>
+  <div class="china-local-grid">
+    <article><b>01</b><h3>译功能，不只译名词</h3><p>“Clerk”为什么不是主持人？“Unity”为什么不是共识？先把实践功能说清，再决定中文。</p></article>
+    <article><b>02</b><h3>保留共同中心</h3><p>根据场景如实命名共同中心，可以使用“真实、良知、神圣、上帝”等不同语言，但不要把它们当作同义词，更不能把中心退化成“大家舒服就好”。</p></article>
+    <article><b>03</b><h3>结构保护弱声音</h3><p>让职位高的人晚说，让慢的人有时间，让“不知道”与“不认同”都能留下来。</p></article>
+    <article><b>04</b><h3>静默要被命名</h3><p>不要突然“大家安静一下”。说明为什么静默、多久、如何结束，陌生参与者才有安全感。</p></article>
+    <article><b>05</b><h3>第三物连接文化经验</h3><p>诗词、山水、书信、电影、现实案例都可以成为共同中心，避免一上来就直接谈自我暴露。</p></article>
+    <article><b>06</b><h3>不强迫表达</h3><p>“可以不说”必须是真的。安静参与不能被解释成不投入、不开放或不合群。</p></article>
+    <article><b>07</b><h3>隐私比记录更重要</h3><p>深度对话默认不录音；AI、转写和云端存储都要单独征得同意。</p></article>
+    <article><b>08</b><h3>最后回到行动</h3><p>中国文化的知行传统提醒我们：一次会聚是否有生命，要看它是否改变了关系与生活。</p></article>
+  </div>
+</section>
+
+<section class="china-digital-note">
+  <div><span>2026 · DIGITAL CHINA</span><h2>为什么今天尤其需要“无算法的共同时间”？</h2></div>
+  <p>中国互联网络信息中心 2026 年报告显示，生成式人工智能已经进入数亿人的问答、文本处理、工作总结和会议纪要等日常场景。工具越能替我们迅速组织语言，越值得刻意保留一些<strong>不被转写、不被推荐、不被立即总结</strong>的共同时间——让尚未成形的感受、少数意见和沉默也有位置。</p>
+</section>
+
+<section class="content-section tradition-sources">
+  <div class="section-head"><span>中国文化研究线索（SOURCE TRAIL）</span><h2>从原典与当代资料继续往下查</h2><p>这些来源用于理解中国文化自身的语境，而不是为了给贵格会寻找“东方祖先”。</p></div>
+  <div class="source-link-grid">
+    <a href="https://ctext.org/text.pl?if=en&node=416604&remap=gb&show=parallel" target="_blank" rel="noopener"><b>慎独 · 《中庸》</b><span>中国哲学书电子化计划（CTP）</span></a>
+    <a href="https://ctext.org/zhuangzi/man-in-the-world-associated-with" target="_blank" rel="noopener"><b>心斋 · 《庄子·人间世》</b><span>中国哲学书电子化计划（CTP）</span></a>
+    <a href="https://ctext.org/text.pl?if=en&node=416808&show=parallel" target="_blank" rel="noopener"><b>和而不同 · 《论语》</b><span>中国哲学书电子化计划（CTP）</span></a>
+    <a href="https://www.chinesethought.cn/shuyu_show.aspx?shuyu_id=3530" target="_blank" rel="noopener"><b>知行合一</b><span>中华思想文化术语传播工程</span></a>
+    <a href="https://www.xyc.tsinghua.edu.cn/info/1061/3916.htm" target="_blank" rel="noopener"><b>会讲传统的当代延续</b><span>清华大学新雅书院</span></a>
+    <a href="https://www.cnnic.cn/n4/2026/0930/c326-11690.html" target="_blank" rel="noopener"><b>生成式人工智能应用发展报告（2026）</b><span>中国互联网络信息中心（CNNIC）</span></a>
+  </div>
+</section>
+
+<section class="content-section">''' + query_cards([
+  '在我的群体里，最容易压住真实表达的是职位、面子、和气、效率，还是“给建议”的冲动？',
+  '如果不用任何宗教术语，我怎样仍然保留 Meeting 的“共同中心”，而不是把它变成普通分享会？',
+  '哪一种中国文化资源最适合成为我们下一次会聚的第三物：一段经典、一首诗、一幅画、一封信，还是一个现实案例？'
+]) + '''</section>
+'''
+
+pages['china.html'] = page_shell(
+    'china.html',
+    '在中国，Meeting 可以长成什么样？',
+    '让贵格会 Meeting 与慎独、心斋、和而不同、书院会讲、知行合一等中国文化传统认真对话，并发展出适合当代中国社区、教育、组织、家庭与线上空间的实践方法。',
+    china_body,
+    label='中国语境（CHINA CONTEXT）'
 )
 
 # --- glossary ---
@@ -2128,6 +2256,233 @@ main>.content-section{padding-left:clamp(24px,8vw,140px);padding-right:clamp(24p
 .source-link-grid b{font:500 17px/1.4 var(--serif)}
 .source-link-grid span{font-size:11px;color:var(--moss);text-align:right}
 
+/* ---- China context / cultural integration ---- */
+.china-intro{
+  display:grid;
+  grid-template-columns:minmax(0,1.06fr) minmax(420px,.94fr);
+  gap:clamp(44px,7vw,100px);
+  align-items:center;
+  padding:88px clamp(24px,8vw,140px) 96px;
+  background:
+    linear-gradient(90deg,rgba(180,154,92,.05) 1px,transparent 1px) 0 0/52px 52px,
+    linear-gradient(rgba(180,154,92,.05) 1px,transparent 1px) 0 0/52px 52px,
+    #eee8dc;
+  border-bottom:1px solid var(--line);
+}
+.china-intro-copy{max-width:760px}
+.china-intro h2{font:500 clamp(40px,4.6vw,64px)/1.18 var(--serif);margin:16px 0 24px}
+.china-intro-copy>p{font-size:17px;line-height:1.92;color:var(--ink2)}
+.china-principle{
+  margin-top:28px;
+  display:grid;
+  grid-template-columns:128px 1fr;
+  gap:18px;
+  padding-top:20px;
+  border-top:1px solid var(--ink);
+}
+.china-principle b{font-size:11px;letter-spacing:.08em;color:var(--moss)}
+.china-principle p{margin:0;font-size:14px;line-height:1.8;color:var(--ink2)}
+
+.china-bridge-visual{
+  position:relative;
+  min-height:470px;
+  display:grid;
+  grid-template-columns:1fr .95fr 1fr;
+  align-items:center;
+  gap:0;
+}
+.china-bridge-visual:before,
+.china-bridge-visual:after{
+  content:"";
+  position:absolute;
+  top:50%;
+  width:28%;
+  height:1px;
+  background:linear-gradient(90deg,var(--moss),var(--gold));
+  opacity:.55;
+}
+.china-bridge-visual:before{left:18%}
+.china-bridge-visual:after{right:18%;transform:scaleX(-1)}
+.china-side,.china-bridge-center{
+  position:relative;
+  z-index:2;
+  text-align:center;
+}
+.china-side{
+  padding:28px 18px;
+  border:1px solid var(--line);
+  background:rgba(255,253,248,.92);
+}
+.china-side span,.china-bridge-center span{
+  display:block;
+  color:var(--moss);
+  font-size:10px;
+  letter-spacing:.12em;
+}
+.china-side b{
+  display:block;
+  margin:8px 0 6px;
+  font:500 26px/1.25 var(--serif);
+}
+.china-side small{display:block;color:var(--ink2);font-size:10px;line-height:1.5}
+.china-bridge-center{
+  aspect-ratio:1;
+  border-radius:50%;
+  display:grid;
+  place-content:center;
+  padding:22px;
+  background:var(--ink);
+  color:var(--paper);
+  box-shadow:0 18px 46px rgba(31,39,35,.13);
+}
+.china-bridge-center strong{font:500 24px/1.35 var(--serif);margin:8px 0}
+.china-bridge-center small{color:#b9c1bc;font-size:10px;line-height:1.45}
+
+.china-bridge-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+}
+.china-bridge-grid article{
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+  padding:26px;
+  border:1px solid var(--line);
+  background:var(--white);
+}
+.china-bridge-grid article>span{font-size:11px;color:var(--moss);letter-spacing:.05em}
+.china-bridge-grid h3{font:500 30px/1.25 var(--serif);margin:10px 0}
+.china-bridge-grid p{font-size:14px;line-height:1.84;color:var(--ink2)}
+.china-bridge-grid article>b{
+  display:block;
+  margin-top:auto;
+  padding-top:16px;
+  border-top:1px solid var(--line);
+  color:#756338;
+  font-size:12px;
+}
+.china-bridge-grid article>em{
+  display:block;
+  margin-top:10px;
+  color:var(--moss);
+  font-size:11px;
+  line-height:1.65;
+  font-style:normal;
+}
+
+.china-not-equal{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+}
+.china-not-equal article{
+  padding:24px;
+  background:#e7dfd0;
+  border-top:3px solid var(--gold);
+}
+.china-not-equal b{font:500 21px/1.35 var(--serif)}
+.china-not-equal p{margin:10px 0 0;color:var(--ink2);font-size:14px;line-height:1.8}
+
+.china-tension-section{
+  padding:88px clamp(24px,8vw,140px);
+  background:var(--ink);
+  color:var(--paper);
+}
+.china-tension-section .section-head>span{color:#cbbd94}
+.china-tension-section .section-head p{color:#b8c0bb}
+.china-tension-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:1px;
+  background:#435049;
+  border:1px solid #435049;
+}
+.china-tension-grid article{
+  padding:26px;
+  background:#202925;
+}
+.china-tension-grid article>span{color:#cbbd94;font-size:10px;letter-spacing:.08em}
+.china-tension-grid h3{font:500 22px/1.4 var(--serif);margin:10px 0}
+.china-tension-grid p{margin:0;color:#c5ccc7;font-size:14px;line-height:1.8}
+.china-tension-grid strong{color:var(--paper)}
+
+.china-use-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:12px;
+}
+.china-use-grid article{
+  min-width:0;
+  padding:24px;
+  border:1px solid var(--line);
+  background:var(--white);
+}
+.china-use-grid article>span{font-size:10px;color:var(--moss);letter-spacing:.08em}
+.china-use-grid h3{font:500 21px/1.4 var(--serif);margin:10px 0}
+.china-use-grid p{font-size:13px;line-height:1.78;color:var(--ink2)}
+.china-use-grid b{color:#756338}
+
+.china-prototype{
+  padding:88px clamp(24px,8vw,140px);
+  background:#e8e0d3;
+  border-top:1px solid var(--line);
+  border-bottom:1px solid var(--line);
+}
+.china-protocol{
+  position:relative;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0 48px;
+}
+.china-protocol:before{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:0;bottom:0;
+  width:1px;
+  background:#bfb4a0;
+}
+.china-protocol article{
+  display:grid;
+  grid-template-columns:72px 1fr;
+  gap:18px;
+  padding:22px 0;
+  border-bottom:1px solid rgba(31,39,35,.12);
+}
+.china-protocol article:nth-child(odd){padding-right:28px}
+.china-protocol article:nth-child(even){padding-left:28px}
+.china-protocol article>b{color:var(--gold);font:600 12px var(--sans);padding-top:7px}
+.china-protocol span{font-size:10px;color:var(--moss);letter-spacing:.1em}
+.china-protocol h3{font:500 21px/1.35 var(--serif);margin:4px 0}
+.china-protocol p{margin:0;font-size:13px;line-height:1.75;color:var(--ink2)}
+
+.china-local-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:10px;
+}
+.china-local-grid article{
+  padding:22px;
+  border:1px solid var(--line);
+  background:var(--white);
+}
+.china-local-grid article>b{font-size:10px;color:var(--gold);letter-spacing:.12em}
+.china-local-grid h3{font:500 20px/1.4 var(--serif);margin:8px 0}
+.china-local-grid p{margin:0;color:var(--ink2);font-size:13px;line-height:1.78}
+
+.china-digital-note{
+  display:grid;
+  grid-template-columns:.85fr 1.15fr;
+  gap:60px;
+  align-items:start;
+  padding:70px clamp(24px,8vw,140px);
+  background:#dcd5c7;
+}
+.china-digital-note span{font-size:10px;color:var(--moss);letter-spacing:.12em}
+.china-digital-note h2{font:500 clamp(32px,4vw,50px)/1.22 var(--serif);margin:10px 0}
+.china-digital-note p{margin:4px 0 0;font-size:16px;line-height:1.9;color:var(--ink2)}
+
 .family-grid a,.myth-grid article,.signal-grid article,.care-grid article,.book-grid article,.roadmap-list article,.tool-grid article,.glossary-card,.query-card,.scenario-grid article{
   transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;
 }
@@ -2147,13 +2502,18 @@ main>.content-section{padding-left:clamp(24px,8vw,140px);padding-right:clamp(24p
   .credits-grid{grid-template-columns:1fr 1fr}
   .exhibit-annotations{grid-template-columns:1fr}
   .visual-index-grid{grid-template-columns:1fr 1fr}
-  .traditions-intro,.ai-era{grid-template-columns:minmax(0,1fr)}
-  .traditions-intro>* ,.ai-era>*{min-width:0}
+  .traditions-intro,.ai-era,.china-intro{grid-template-columns:minmax(0,1fr)}
+  .traditions-intro>* ,.ai-era>* ,.china-intro>*{min-width:0}
   .tradition-orbit{max-width:480px}
   .tradition-cards{grid-template-columns:1fr 1fr}
   .tradition-cards article:first-child{grid-column:1/-1;grid-template-columns:52px 1fr 1.25fr}
-  .shared-grammar,.human-core-grid,.future-protocol{grid-template-columns:1fr 1fr}
+  .shared-grammar,.human-core-grid,.future-protocol,.china-bridge-grid,.china-not-equal,.china-tension-grid,.china-use-grid,.china-local-grid{grid-template-columns:1fr 1fr}
   .ai-boundary-grid{grid-template-columns:1fr}
+  .china-bridge-visual{max-width:720px;width:100%;margin:0 auto;min-height:400px}
+  .china-protocol{grid-template-columns:1fr;gap:0}
+  .china-protocol:before{left:0}
+  .china-protocol article,.china-protocol article:nth-child(odd),.china-protocol article:nth-child(even){padding:20px 0 20px 24px}
+  .china-digital-note{grid-template-columns:1fr;gap:24px}
   .source-link-grid{grid-template-columns:1fr 1fr}
 }
 @media(max-width:1100px){
@@ -2200,11 +2560,17 @@ main>.content-section{padding-left:clamp(24px,8vw,140px);padding-right:clamp(24p
   .curator-note{grid-template-columns:1fr;gap:10px}
   .visual-index{padding:62px 24px}
   .visual-index-grid{grid-template-columns:1fr}
-  .traditions-intro{padding:58px 22px 68px;gap:42px}
-  .traditions-intro h2{font-size:clamp(31px,9vw,38px)}
+  .traditions-intro,.china-intro{padding:58px 22px 68px;gap:42px}
+  .traditions-intro h2,.china-intro h2{font-size:clamp(31px,9vw,38px)}
   .semantic-title span{display:block;white-space:nowrap}
-  .traditions-intro h2.semantic-title,.ai-era h2.semantic-title{font-size:clamp(30px,8vw,34px)}
+  .traditions-intro h2.semantic-title,.ai-era h2.semantic-title,.china-intro h2.semantic-title{font-size:clamp(28px,7.6vw,33px)}
   .content-section h2.semantic-title{font-size:clamp(27px,7.2vw,31px)}
+  .china-principle{grid-template-columns:1fr;gap:8px}
+  .china-bridge-visual{display:grid;grid-template-columns:1fr;min-height:0;gap:0;width:100%}
+  .china-bridge-visual:before,.china-bridge-visual:after{display:none}
+  .china-side{width:100%;padding:22px 16px}
+  .china-bridge-center{width:158px;aspect-ratio:1;margin:-1px auto;padding:18px}
+  .china-bridge-center strong{font-size:20px}
   .tradition-orbit{width:min(100%,360px);max-width:100%}
   .tradition-orbit>span{min-width:86px;padding:8px 9px;font-size:13px}
   .tradition-orbit>span:nth-of-type(2){left:80%}
@@ -2213,7 +2579,7 @@ main>.content-section{padding-left:clamp(24px,8vw,140px);padding-right:clamp(24p
   .tradition-orbit>span:nth-of-type(7){left:20%}
   .orbit-center{width:96px;height:96px}
   .orbit-center b{font-size:17px}
-  .tradition-cards,.shared-grammar,.human-core-grid,.future-protocol,.do-not-collapse,.source-link-grid{grid-template-columns:1fr}
+  .tradition-cards,.shared-grammar,.human-core-grid,.future-protocol,.do-not-collapse,.china-bridge-grid,.china-not-equal,.china-tension-grid,.china-use-grid,.china-local-grid,.source-link-grid{grid-template-columns:1fr}
   .tradition-cards article{min-height:0}
   .tradition-cards article:first-child{grid-column:auto;display:flex;min-height:0}
   .tradition-cards article:first-child .tradition-icon{margin-bottom:18px}
@@ -2222,6 +2588,11 @@ main>.content-section{padding-left:clamp(24px,8vw,140px);padding-right:clamp(24p
   .ai-ring-outer{width:min(100%,360px);max-width:100%}
   .ai-ring>span{font-size:14px}
   .ai-ring-center strong{font-size:16px}
+  .china-tension-section,.china-prototype{padding:64px 22px}
+  .china-digital-note{padding:54px 22px;grid-template-columns:1fr;gap:18px}
+  .china-digital-note h2{font-size:clamp(29px,8vw,34px)}
+  .china-protocol article{grid-template-columns:58px 1fr;gap:12px}
+  .china-bridge-grid article,.china-not-equal article,.china-tension-grid article,.china-use-grid article,.china-local-grid article{padding:22px}
   .source-link-grid a{align-items:flex-start;flex-direction:column;gap:4px}
   .source-link-grid span{text-align:left}
   .bilingual-process{display:grid;grid-template-columns:1fr;gap:6px;max-width:100%}
@@ -2834,6 +3205,9 @@ broken=[]
 for p in ROOT.glob('*.html'):
     txt=p.read_text(encoding='utf-8')
     for m in re.finditer(r'href="([^"]+\.html)(?:#[^"]*)?"',txt):
-        if m.group(1) not in files:
-            broken.append((p.name,m.group(1)))
+        href = m.group(1)
+        if href.startswith(('http://','https://')):
+            continue
+        if href not in files:
+            broken.append((p.name,href))
 print(f'Wrote {len(pages)} pages. Broken links: {broken}')
