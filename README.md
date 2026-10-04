@@ -15,7 +15,7 @@ python3 -m http.server 8000
 
 ## 内容范围
 
-第一版以 unprogrammed Quaker Meeting、Pendle Hill 相关文本、Howard Brinton、Thomas Kelly、Parker Palmer、Patricia Loring、Jim Pym 等为主要研究入口。
+当前版本以 unprogrammed Quaker Meeting、Pendle Hill 相关文本、Howard Brinton、Thomas Kelly、Parker Palmer、Patricia Loring、Michael Marsh、Jim Pym 等为主要研究入口，并明确区分历史传统、现代转译与本站的实践性整理。
 
 ## 主要交互
 
