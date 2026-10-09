@@ -5,7 +5,7 @@ ROOT = Path(__file__).resolve().parent
 
 SITE_NAME = '共同等候｜贵格会聚会研究与实践'
 TAGLINE = '研究贵格会聚会（Meeting）如何通过静默、共同聆听与群体明辨，让尚未被任何个人完全拥有的真实，有机会出现。'
-ASSET_VERSION = '20261004-ux8'
+ASSET_VERSION = '20261009-life1'
 
 NAV_PRIMARY = [
     ('index.html','首页'),
@@ -23,6 +23,7 @@ NAV_MORE = [
     ('clearness.html','澄心会'),
     ('learning.html','共学'),
     ('community.html','共同体'),
+    ('life.html','贵格会士的一生'),
     ('comparisons.html','方法比较'),
     ('traditions.html','会聚传统'),
     ('china.html','中国语境'),
@@ -41,7 +42,8 @@ PAGE_CONTINUE = {
     'business.html': [('clearness.html','理解澄心会'), ('community.html','看见共同体维度')],
     'clearness.html': [('learning.html','进入共学会'), ('toolkit.html','查看实践模板')],
     'learning.html': [('community.html','从共学走向共同体'), ('history.html','回到历史脉络')],
-    'community.html': [('history.html','理解传统如何形成'), ('comparisons.html','与其他方法比较')],
+    'community.html': [('life.html','跟随一位会友的生命旅程'), ('history.html','理解传统如何形成')],
+    'life.html': [('community.html','回到共同体的完整结构'), ('clearness.html','深入理解个人与社区的辨识')],
     'history.html': [('comparisons.html','比较相近方法'), ('traditions.html','放进更大的会聚传统')],
     'comparisons.html': [('traditions.html','横向看世界会聚传统'), ('toolkit.html','选择合适实践')],
     'traditions.html': [('china.html','进入中国语境'), ('research.html','回到来源与研究方法')],
@@ -1122,6 +1124,7 @@ index_body = f'''
 '''
 
 pages = {}
+index_body += '''<section class="practice-banner"><div><span>生命与共同体</span><h2>贵格会士的一生</h2><p>从出生到告别，跟随生命故事认识社区角色、责任交接与实际支持。</p></div><a class="btn" href="life.html">进入生命旅程 →</a></section>'''
 pages['index.html'] = page_shell('index.html','共同等候',TAGLINE,index_body,label='QUAKER MEETING LAB')
 
 # --- Meeting overview ---
@@ -1704,6 +1707,9 @@ toolkit_body = '''
 <section class="content-section">''' + query_cards(['我现在设计的是“更多活动”，还是“更好的相遇条件”？','这个结构是否给静默留下了真正的时间，而不是象征性停顿？','我有没有把自己当成最知道答案的人？']) + '''</section>
 '''
 pages['toolkit.html']=page_shell('toolkit.html','实践工具箱','从个人等待、三五人简化 Meeting，到共学、议事与澄心会：把概念变成可以实际尝试的结构。',toolkit_body,label='TOOLKIT')
+
+from life_content import build_life, LIFE_CSS
+pages['life.html'] = build_life(section, page_shell)
 
 # --- assets ---
 css = r'''
@@ -3180,6 +3186,8 @@ js = r'''
   }
 })();
 '''
+
+css += LIFE_CSS
 
 (ROOT/'assets').mkdir(exist_ok=True)
 (ROOT/'assets'/'style.css').write_text(css, encoding='utf-8')
